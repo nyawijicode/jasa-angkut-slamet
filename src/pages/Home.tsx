@@ -594,12 +594,10 @@ export default function Home() {
 
   const [step, setStep] = useState(1);
   const [furthest, setFurthest] = useState(1);
-  const [step1Attempted, setStep1Attempted] = useState(false);
 
   const panelRef = useRef<HTMLElement | null>(null);
 
   const today = useMemo(todayISO, []);
-  const phoneValid = phone.trim() === "" || isValidPhone(phone);
   const nameError = false;
   const phoneError = phone.trim().length > 0 && !isValidPhone(phone);
   const waChatUrl = `https://wa.me/${BUSINESS.whatsapp}`;
@@ -806,11 +804,8 @@ export default function Home() {
 
   function validateStep1() {
     if (phone.trim() === "" || isValidPhone(phone)) {
-      setStep1Attempted(false);
       return true;
     }
-
-    setStep1Attempted(true);
 
     window.setTimeout(() => {
       document.getElementById("customer-phone")?.focus();
