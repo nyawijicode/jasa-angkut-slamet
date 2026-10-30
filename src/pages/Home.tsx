@@ -599,9 +599,9 @@ export default function Home() {
   const panelRef = useRef<HTMLElement | null>(null);
 
   const today = useMemo(todayISO, []);
-  const phoneValid = isValidPhone(phone);
-  const nameError = step1Attempted && !name.trim();
-  const phoneError = (phone.trim().length > 0 || step1Attempted) && !phoneValid;
+  const phoneValid = phone.trim() === "" || isValidPhone(phone);
+  const nameError = false;
+  const phoneError = phone.trim().length > 0 && !isValidPhone(phone);
   const waChatUrl = `https://wa.me/${BUSINESS.whatsapp}`;
 
   function appendQuickNote(snippet: string) {
@@ -615,8 +615,8 @@ export default function Home() {
   const steps = [
     { label: "Titik muat", done: Boolean(load) },
     { label: "Titik bongkar", done: Boolean(unload) },
-    { label: "Nama", done: Boolean(name.trim()) },
-    { label: "Nomor HP", done: phoneValid },
+    { label: "Nama", done: true },
+    { label: "Nomor HP", done: true },
     { label: "Layanan", done: true },
   ];
   const missing = steps.filter((step) => !step.done).map((step) => step.label);
@@ -631,7 +631,7 @@ export default function Home() {
 
   const quote = useMemo(() => {
     if (!load || !unload) return null;
-    if (!name.trim() || !phoneValid) return null;
+    if (phone.trim() !== "" && !isValidPhone(phone)) return null;
     const distances =
       service === "luar-kota"
         ? {
@@ -663,7 +663,7 @@ export default function Home() {
     } catch {
       return null;
     }
-  }, [load, unload, name, phoneValid, service, helper, loadFloor, unloadFloor]);
+  }, [load, unload, name, phone, service, helper, loadFloor, unloadFloor]);
 
   const waUrl = useMemo(() => {
     if (!quote || !load || !unload) return null;
@@ -805,12 +805,17 @@ export default function Home() {
   }
 
   function validateStep1() {
-    if (name.trim() && phoneValid) return true;
+    if (phone.trim() === "" || isValidPhone(phone)) {
+      setStep1Attempted(false);
+      return true;
+    }
+
     setStep1Attempted(true);
-    const target = !name.trim() ? "customer-name" : "customer-phone";
+
     window.setTimeout(() => {
-      document.getElementById(target)?.focus();
+      document.getElementById("customer-phone")?.focus();
     }, 0);
+
     return false;
   }
 
