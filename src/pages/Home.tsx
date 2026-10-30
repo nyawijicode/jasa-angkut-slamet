@@ -770,7 +770,7 @@ export default function Home() {
     {
       key: "none",
       title: "Bongkar muat sendiri",
-      description: "Barang diserahkan di depan truk.",
+      description: "Barang diserahkan di depan armada.",
       price: BUSINESS.pricing.helper.none,
       icon: IconBox,
     },
