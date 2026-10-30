@@ -723,7 +723,7 @@ export default function Home() {
   function useMyLocation() {
     if (!navigator.geolocation) {
       alert(
-        "Peramban ini belum mendukung deteksi lokasi. Silakan cari alamat atau ketuk peta.",
+        "Peramban ini belum mendukung deteksi lokasi. silahkan cari alamat atau ketuk peta.",
       );
       return;
     }
@@ -1086,6 +1086,11 @@ export default function Home() {
                     <p className={`route-address${load ? "" : " is-empty"}`}>
                       {load ? load.address : "Belum dipilih (klik peta)"}
                     </p>
+                    <hr></hr>
+                    <span className="route-address">
+                      Catatan: Jika alamat di atas kurang sesuai, silahkan
+                      isi/ubah alamat detail patokan Anda di WhatsaApp
+                    </span>
                   </div>
                   {load && (
                     <button
@@ -1114,6 +1119,11 @@ export default function Home() {
                     <p className={`route-address${unload ? "" : " is-empty"}`}>
                       {unload ? unload.address : "Belum dipilih (klik peta)"}
                     </p>
+                    <hr></hr>
+                    <span className="route-address">
+                      Catatan: Jika alamat di atas kurang sesuai, silahkan
+                      isi/ubah alamat detail patokan Anda di WhatsaApp
+                    </span>
                   </div>
                   {unload && (
                     <button
