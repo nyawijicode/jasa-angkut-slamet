@@ -1,0 +1,15 @@
+{
+  "name": "Jasa Angkut Slamet",
+  "short_name": "Angkut Slamet",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5F0",
+  "theme_color": "#1F4D3A",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

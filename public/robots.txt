@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jasaangkutslamet.com/sitemap.xml
