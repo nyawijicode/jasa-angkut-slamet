@@ -9,23 +9,24 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 ## 🌟 Fitur Utama
 
 - **🗺️ Peta Interaktif & Penentuan Rute**:
-  - Penandaan titik muat (jemput) dan titik bongkar (tujuan) langsung di peta interaktif (Leaflet / OpenStreetMap).
+  - Penandaan banyak titik muat (jemput) dan bongkar (tujuan) langsung di peta interaktif (Leaflet / OpenStreetMap), dengan label **M1, M2, B1, B2**, dan seterusnya.
+  - Default 1 titik muat dan 1 titik bongkar; titik tambahan bisa ditambah atau dihapus kapan saja.
   - Pencarian alamat cepat menggunakan layanan geocoding OpenStreetMap Nominatim.
   - Tombol deteksi lokasi otomatis (*Geolocation*).
-  - Garis rute visual antara titik muat dan bongkar.
-  - Pilihan cepat beralih antara titik muat dan bongkar dengan tampilan status aktif yang jelas.
+  - Rute mobil mengikuti jalan sebenarnya (profil *driving* OSRM), bukan garis lurus, dan otomatis menyesuaikan urutan seluruh titik.
+  - Pilihan titik aktif yang jelas, lengkap dengan penanda di peta.
 
 - **📊 Kalkulator Ongkos Otomatis & Transparan**:
-  - Perhitungan jarak kilometer otomatis (*dalam kota* langsung antar titik, *luar kota* mencakup rute dari garasi).
+  - Perhitungan jarak kilometer otomatis mengikuti rute jalan (*dalam kota* antar semua titik, *luar kota* termasuk perjalanan dari dan kembali ke garasi).
   - Pilihan layanan: **Dalam Kota** dan **Luar Kota**.
   - Pilihan bantuan tenaga bongkar muat: *Bongkar sendiri (Gratis)*, *Sopir ikut bongkar muat*, atau *Sopir + Kenek*.
-  - Biaya tambahan tangga / lantai bertingkat di lokasi muat dan bongkar (lantai 1 s/d 20).
+  - Biaya tambahan tangga / lantai bertingkat dihitung untuk setiap titik muat dan bongkar (lantai 1 s/d 20).
   - Rincian biaya transparan yang dapat dilihat langsung oleh pelanggan.
 
 - **📋 Form Pemesanan Bertahap (Multi-Step Wizard)**:
   1. **Langkah 1 (Data Pemesan)**: Nama lengkap, nomor WhatsApp yang tervalidasi, serta pemilihan jadwal angkut (tanggal dan selektor jam & menit yang responsif dengan pengelompokan waktu Pagi, Siang, Sore, Malam).
   2. **Langkah 2 (Layanan)**: Pilihan jangkauan wilayah (Dalam Kota vs Luar Kota).
-  3. **Langkah 3 (Bantuan & Lantai)**: Pilihan bantuan tenaga angkut dan pengaturan lantai muat & bongkar.
+  3. **Langkah 3 (Bantuan & Lantai)**: Pilihan bantuan tenaga angkut dan pengaturan lantai untuk masing-masing titik muat dan bongkar.
   4. **Langkah 4 (Catatan Tambahan)**: Keterangan khusus seputar muatan beserta saran catatan cepat (misal: *butuh terpal*, *gang sempit*, *barang pecah belah*).
   5. **Langkah 5 (Ringkasan Estimasi)**: Tinjauan lengkap data pemesan, rute, rincian biaya estimasi, peringatan jika rute peta belum dipilih, dan tombol konfirmasi pesanan.
 

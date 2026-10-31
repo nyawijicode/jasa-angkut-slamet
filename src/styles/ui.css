@@ -495,6 +495,32 @@
   color: #d95d15;
 }
 
+.map-target {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: 10px;
+  background: var(--gray-100);
+  color: var(--forest);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.map-target.is-unload {
+  border-color: #fedf89;
+  background: #fef9f5;
+  color: #b54708;
+}
+
+.map-card-title strong {
+  color: var(--forest);
+  font-weight: 700;
+}
+
 .map-canvas {
   position: relative;
   height: clamp(330px, 48svh, 450px);
@@ -668,10 +694,55 @@
   color: var(--forest);
 }
 
+.route-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
 .route-summary {
   padding: 12px 16px 14px;
   border-top: 1px solid var(--gray-200);
   background: var(--surface);
+}
+
+.route-groups {
+  display: grid;
+  gap: 14px;
+}
+
+.route-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px 4px;
+}
+
+.route-group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--gray-600);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.route-add {
+  flex: none;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--forest);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.route-add:hover {
+  background: var(--brand-25);
 }
 
 .route-list {
@@ -684,9 +755,9 @@
 .route-list::before {
   content: "";
   position: absolute;
-  top: 15px;
-  bottom: 15px;
-  left: 4px;
+  top: 14px;
+  bottom: 14px;
+  left: 12px;
   border-left: 1px dashed var(--gray-300);
 }
 
@@ -775,6 +846,40 @@
 .route-address.is-empty {
   color: var(--gray-500);
   font-style: italic;
+}
+
+.route-floor {
+  display: block;
+  margin-top: 3px;
+  color: var(--gray-500);
+  font-size: 0.71875rem;
+  line-height: 1.4;
+}
+
+.route-active-badge {
+  flex: none;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--forest);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.route-point.is-active.is-unload .route-active-badge {
+  background: #fef0e6;
+  color: #b54708;
+}
+
+.route-footnote {
+  margin: 12px 0 0;
+  color: var(--gray-500);
+  font-size: 0.71875rem;
+  line-height: 1.45;
 }
 
 .route-clear {

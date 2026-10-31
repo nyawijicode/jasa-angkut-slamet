@@ -45,6 +45,21 @@ describe('pricing', () => {
     expect(billableKm('dalam-kota', { loadToUnload: 10 })).toBe(10);
   });
 
+  it('sums floor fees for every stop', () => {
+    const q = calculateQuote({
+      service: 'dalam-kota',
+      distances: { loadToUnload: 10 },
+      helper: 'none',
+      loadFloor: 1,
+      unloadFloor: 1,
+      loadFloors: [1, 2],
+      unloadFloors: [1, 3],
+    });
+    expect(q.loadFloor).toBe(20000);
+    expect(q.unloadFloor).toBe(30000);
+    expect(q.total).toBe(180000);
+  });
+
   it('throws on invalid floor', () => {
     expect(() => floorFee(0)).toThrow();
     expect(() => floorFee(1.5)).toThrow();

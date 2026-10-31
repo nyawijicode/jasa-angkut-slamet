@@ -2,20 +2,22 @@ import { BUSINESS } from '../config/business';
 import type { Quote } from './pricing';
 import { formatSchedule } from './schedule';
 
+export interface WaStop {
+  label: string;
+  address: string;
+  lat: number;
+  lng: number;
+  floor: number;
+}
+
 export interface WaPayload {
   name: string;
   phone: string;
   pickupDate?: string;
   pickupTime?: string;
   serviceLabel: string;
-  loadAddress: string;
-  loadLat: number;
-  loadLng: number;
-  loadFloor: number;
-  unloadAddress: string;
-  unloadLat: number;
-  unloadLng: number;
-  unloadFloor: number;
+  loads: WaStop[];
+  unloads: WaStop[];
   helperLabel: string;
   distanceKm: number;
   note?: string;
@@ -33,19 +35,20 @@ export function buildWhatsAppMessage(p: WaPayload): string {
   if (schedule) {
     lines.push(`Jadwal angkut: ${schedule}`);
   }
-  lines.push(
-    '',
-    `*Layanan:* ${p.serviceLabel}`,
-    `*Titik Muat:* ${p.loadAddress}`,
-    `Peta: https://www.google.com/maps?q=${p.loadLat},${p.loadLng}`,
-    `Lantai: ${p.loadFloor}`,
-    `*Titik Bongkar:* ${p.unloadAddress}`,
-    `Peta: https://www.google.com/maps?q=${p.unloadLat},${p.unloadLng}`,
-    `Lantai: ${p.unloadFloor}`,
-    '',
-    `*Bantuan:* ${p.helperLabel}`,
-    `*Jarak:* ${p.distanceKm} km`,
-  );
+
+  const appendStops = (title: string, stops: WaStop[]) => {
+    lines.push('', `*${title}:*`);
+    stops.forEach((stop) => {
+      lines.push(`${stop.label}: ${stop.address}`);
+      lines.push(`Peta: https://www.google.com/maps?q=${stop.lat},${stop.lng}`);
+      lines.push(`Lantai: ${stop.floor}`);
+    });
+  };
+
+  lines.push('', `*Layanan:* ${p.serviceLabel}`);
+  appendStops('Titik Muat', p.loads);
+  appendStops('Titik Bongkar', p.unloads);
+  lines.push('', `*Bantuan:* ${p.helperLabel}`, `*Jarak:* ${p.distanceKm} km`);
   if (p.note && p.note.trim()) {
     lines.push(`*Catatan:* ${p.note.trim()}`);
   }

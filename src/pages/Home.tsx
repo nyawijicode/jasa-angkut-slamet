@@ -10,25 +10,44 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { BUSINESS } from "../config/business";
-import { calculateQuote } from "../domain/pricing";
+import { calculateQuote, floorFee } from "../domain/pricing";
 import { isValidPhone } from "../domain/phone";
 import { formatPickupTime, formatSchedule } from "../domain/schedule";
-import { buildWhatsAppUrl } from "../domain/whatsapp";
+import { buildWhatsAppUrl, type WaStop } from "../domain/whatsapp";
 import type { Helper, Service } from "../domain/types";
 import { searchAddress, type GeocodeResult } from "../services/geocoding";
 import { fetchRoute, type RouteResult } from "../services/routing";
 
-type Point = { lat: number; lng: number; address: string };
+type StopKind = "load" | "unload";
+
+type Stop = {
+  id: string;
+  kind: StopKind;
+  lat: number | null;
+  lng: number | null;
+  address: string;
+};
 
 type LatLng = { lat: number; lng: number };
 
-type RouteLegs = {
-  loadToUnload: RouteResult | null;
-  garageToLoad: RouteResult | null;
-  unloadToGarage: RouteResult | null;
+type RoutePlan = {
+  main: RouteResult[];
+  garageToFirst: RouteResult | null;
+  lastToGarage: RouteResult | null;
 };
 
 type RouteStatus = "idle" | "loading" | "ready" | "error";
+
+const STOP_KIND_LABEL: Record<StopKind, string> = {
+  load: "muat",
+  unload: "bongkar",
+};
+
+function stopLabel(stop: Stop, stops: Stop[]): string {
+  const sameKind = stops.filter((item) => item.kind === stop.kind);
+  const index = sameKind.findIndex((item) => item.id === stop.id);
+  return `${stop.kind === "load" ? "M" : "B"}${index + 1}`;
+}
 
 function straightLineKm(a: LatLng, b: LatLng): number {
   const kmPerDegree = 111.32;
@@ -397,11 +416,12 @@ function IconArrowRight({ size = 18, className }: IconProps) {
   );
 }
 
-function makeIcon(color: string, label: string) {
+function makeIcon(color: string, label: string, active = false) {
   return L.divIcon({
     className: "",
-    html: `<div style="position:relative;width:36px;height:44px">
+    html: `<div style="position:relative;width:36px;height:44px;${active ? "transform:scale(1.12);transform-origin:50% 100%;" : ""}">
       <svg width="36" height="44" viewBox="0 0 36 44" xmlns="http://www.w3.org/2000/svg">
+        ${active ? `<circle cx="18" cy="14" r="14.5" fill="none" stroke="${color}" stroke-width="2" opacity="0.35"/>` : ""}
         <path d="M18 0C10.268 0 4 6.268 4 14c0 10.5 14 30 14 30s14-19.5 14-30C32 6.268 25.732 0 18 0z" fill="${color}" stroke="#fff" stroke-width="2"/>
       </svg>
       <div style="position:absolute;top:8px;left:0;width:36px;text-align:center;font-weight:700;color:#fff;font-family:Inter,sans-serif;font-size:14px">${label}</div>
@@ -411,8 +431,6 @@ function makeIcon(color: string, label: string) {
   });
 }
 
-const iconLoad = makeIcon("#1F4D3A", "M");
-const iconUnload = makeIcon("#E07A2E", "B");
 const iconGarage = L.divIcon({
   className: "",
   html: `<div style="width:14px;height:14px;border-radius:50%;background:#6B7178;border:2px solid #fff;box-shadow:0 1px 4px rgba(16,24,40,.24)"></div>`,
@@ -433,31 +451,34 @@ function ClickHandler({
   return null;
 }
 
-function Recenter({ lat, lng }: { lat: number; lng: number }) {
+function FitRoute({
+  positions,
+  signal,
+}: {
+  positions: Array<[number, number]>;
+  signal: number;
+}) {
   const map = useMap();
-  useEffect(() => {
-    map.setView([lat, lng], Math.max(map.getZoom(), 15), { animate: true });
-  }, [lat, lng, map]);
-  return null;
-}
+  const positionsRef = useRef(positions);
+  positionsRef.current = positions;
 
-function FitRoute({ positions }: { positions: Array<[number, number]> }) {
-  const map = useMap();
   useEffect(() => {
-    if (positions.length < 2) return;
-    map.fitBounds(L.latLngBounds(positions), {
+    if (signal <= 0 || positionsRef.current.length < 2) return;
+    map.fitBounds(L.latLngBounds(positionsRef.current), {
       padding: [36, 36],
       maxZoom: 16,
     });
-  }, [positions, map]);
+  }, [signal, map]);
   return null;
 }
 
 function MapSearchControl({
   active,
+  activeLabel,
   onSelect,
 }: {
-  active: "load" | "unload";
+  active: StopKind;
+  activeLabel: string;
   onSelect: (lat: number, lng: number, addr: string) => void;
 }) {
   const map = useMap();
@@ -511,8 +532,8 @@ function MapSearchControl({
             }
             if (event.key === "Escape") setResults([]);
           }}
-          placeholder={`Cari alamat ${active === "load" ? "muat" : "bongkar"}...`}
-          aria-label={`Cari alamat titik ${active === "load" ? "muat" : "bongkar"}`}
+          placeholder={`Cari alamat titik ${activeLabel} (${STOP_KIND_LABEL[active]})...`}
+          aria-label={`Cari alamat titik ${activeLabel} (${STOP_KIND_LABEL[active]})`}
           aria-expanded={results.length > 0}
         />
         {loading && (
@@ -610,23 +631,26 @@ const QUICK_NOTES = [
 ];
 
 export default function Home() {
-  const [active, setActive] = useState<"load" | "unload">("load");
-  const [load, setLoad] = useState<Point | null>(null);
-  const [unload, setUnload] = useState<Point | null>(null);
+  const nextStopId = useRef(3);
+  const [stops, setStops] = useState<Stop[]>(() => [
+    { id: "stop-1", kind: "load", lat: null, lng: null, address: "" },
+    { id: "stop-2", kind: "unload", lat: null, lng: null, address: "" },
+  ]);
+  const [activeId, setActiveId] = useState("stop-1");
+  const [floors, setFloors] = useState<Record<string, number>>({});
+  const [fitTick, setFitTick] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
   const [service, setService] = useState<Service>("dalam-kota");
   const [helper, setHelper] = useState<Helper>("none");
-  const [loadFloor, setLoadFloor] = useState(1);
-  const [unloadFloor, setUnloadFloor] = useState(1);
   const [note, setNote] = useState("");
 
   const [step, setStep] = useState(1);
   const [furthest, setFurthest] = useState(1);
 
-  const [legs, setLegs] = useState<RouteLegs | null>(null);
+  const [plan, setPlan] = useState<RoutePlan | null>(null);
   const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
 
   const panelRef = useRef<HTMLElement | null>(null);
@@ -636,34 +660,97 @@ export default function Home() {
   const phoneError = phone.trim().length > 0 && !isValidPhone(phone);
   const waChatUrl = `https://wa.me/${BUSINESS.whatsapp}`;
 
+  const loadStops = useMemo(
+    () => stops.filter((stop) => stop.kind === "load"),
+    [stops],
+  );
+  const unloadStops = useMemo(
+    () => stops.filter((stop) => stop.kind === "unload"),
+    [stops],
+  );
+  const orderedStops = useMemo(
+    () => [...loadStops, ...unloadStops],
+    [loadStops, unloadStops],
+  );
+  const activeStop = stops.find((stop) => stop.id === activeId) ?? stops[0];
+  const floorOf = (id: string) => floors[id] ?? 1;
+  const allStopsSet =
+    loadStops.length > 0 &&
+    unloadStops.length > 0 &&
+    stops.every((stop) => stop.lat !== null && stop.lng !== null);
+
+  const routePoints = useMemo(
+    () =>
+      orderedStops
+        .filter((stop) => stop.lat !== null && stop.lng !== null)
+        .map((stop) => ({ lat: stop.lat as number, lng: stop.lng as number })),
+    [orderedStops],
+  );
+  const routeKey = routePoints.map((point) => `${point.lat},${point.lng}`).join("|");
+
+  const loadIconKey = loadStops.map((stop) => stop.id).join(",");
+  const unloadIconKey = unloadStops.map((stop) => stop.id).join(",");
+  const stopIcons = useMemo(() => {
+    const icons: Record<string, L.DivIcon> = {};
+    loadStops.forEach((stop, index) => {
+      icons[stop.id] = makeIcon(
+        "#1F4D3A",
+        `M${index + 1}`,
+        stop.id === activeId,
+      );
+    });
+    unloadStops.forEach((stop, index) => {
+      icons[stop.id] = makeIcon(
+        "#E07A2E",
+        `B${index + 1}`,
+        stop.id === activeId,
+      );
+    });
+    return icons;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadIconKey, unloadIconKey, activeId]);
+
   useEffect(() => {
-    if (!load || !unload) {
-      setLegs(null);
+    if (!allStopsSet || routePoints.length < 2) {
+      setPlan(null);
       setRouteStatus("idle");
       return;
     }
 
     const controller = new AbortController();
     const roundTrip = service === "luar-kota";
-    setLegs(null);
+    setPlan(null);
     setRouteStatus("loading");
 
+    const mainPairs = routePoints
+      .slice(0, -1)
+      .map((point, index) => [point, routePoints[index + 1]] as const);
+    const first = routePoints[0];
+    const last = routePoints[routePoints.length - 1];
+
     Promise.all([
-      fetchRoute(load, unload, controller.signal),
-      roundTrip
-        ? fetchRoute(BUSINESS.garage, load, controller.signal)
-        : Promise.resolve(null),
-      roundTrip
-        ? fetchRoute(unload, BUSINESS.garage, controller.signal)
-        : Promise.resolve(null),
-    ]).then(([loadToUnload, garageToLoad, unloadToGarage]) => {
+      ...mainPairs.map(([from, to]) =>
+        fetchRoute(from, to, controller.signal),
+      ),
+      roundTrip ? fetchRoute(BUSINESS.garage, first, controller.signal) : null,
+      roundTrip ? fetchRoute(last, BUSINESS.garage, controller.signal) : null,
+    ]).then((results) => {
       if (controller.signal.aborted) return;
-      setLegs({ loadToUnload, garageToLoad, unloadToGarage });
-      setRouteStatus(loadToUnload ? "ready" : "error");
+      const main = results.slice(0, mainPairs.length) as Array<RouteResult | null>;
+      const garageToFirst = results[mainPairs.length] ?? null;
+      const lastToGarage = results[mainPairs.length + 1] ?? null;
+      const mainOk = main.length > 0 && main.every(Boolean);
+      const garageOk = !roundTrip || (Boolean(garageToFirst) && Boolean(lastToGarage));
+      setPlan({
+        main: main.filter((leg): leg is RouteResult => Boolean(leg)),
+        garageToFirst,
+        lastToGarage,
+      });
+      setRouteStatus(mainOk && garageOk ? "ready" : "error");
     });
 
     return () => controller.abort();
-  }, [load, unload, service]);
+  }, [routeKey, service, allStopsSet]);
 
   function appendQuickNote(snippet: string) {
     setNote((prev) => {
@@ -674,8 +761,18 @@ export default function Home() {
   }
 
   const steps = [
-    { label: "Titik muat", done: Boolean(load) },
-    { label: "Titik bongkar", done: Boolean(unload) },
+    {
+      label: "Titik muat",
+      done:
+        loadStops.length > 0 &&
+        loadStops.every((stop) => stop.lat !== null),
+    },
+    {
+      label: "Titik bongkar",
+      done:
+        unloadStops.length > 0 &&
+        unloadStops.every((stop) => stop.lat !== null),
+    },
     { label: "Nama", done: true },
     { label: "Nomor HP", done: true },
     { label: "Layanan", done: true },
@@ -690,60 +787,90 @@ export default function Home() {
     "Estimasi",
   ];
 
+  const straightDistances = useMemo(() => {
+    if (!allStopsSet || routePoints.length < 2) return null;
+    let mainKm = 0;
+    for (let index = 0; index < routePoints.length - 1; index++) {
+      mainKm += straightLineKm(routePoints[index], routePoints[index + 1]);
+    }
+    if (service === "luar-kota") {
+      return {
+        garageToLoad: straightLineKm(BUSINESS.garage, routePoints[0]),
+        loadToUnload: mainKm,
+        unloadToGarage: straightLineKm(
+          routePoints[routePoints.length - 1],
+          BUSINESS.garage,
+        ),
+      };
+    }
+    return { loadToUnload: mainKm };
+  }, [allStopsSet, routePoints, service]);
+
+  const routeDistances = useMemo(() => {
+    if (routeStatus !== "ready" || !plan) return straightDistances;
+    const mainKm = plan.main.reduce((total, leg) => total + leg.distanceKm, 0);
+    if (service === "luar-kota") {
+      return {
+        garageToLoad: plan.garageToFirst?.distanceKm ?? 0,
+        loadToUnload: mainKm,
+        unloadToGarage: plan.lastToGarage?.distanceKm ?? 0,
+      };
+    }
+    return { loadToUnload: mainKm };
+  }, [plan, routeStatus, service, straightDistances]);
+
   const quote = useMemo(() => {
-    if (!load || !unload) return null;
+    if (!allStopsSet || !routeDistances) return null;
     if (phone.trim() !== "" && !isValidPhone(phone)) return null;
 
-    const straight = {
-      garageToLoad: straightLineKm(BUSINESS.garage, load),
-      loadToUnload: straightLineKm(load, unload),
-      unloadToGarage: straightLineKm(unload, BUSINESS.garage),
-    };
+    const loadFloorList = loadStops.map((stop) => floors[stop.id] ?? 1);
+    const unloadFloorList = unloadStops.map((stop) => floors[stop.id] ?? 1);
 
-    const distances =
-      service === "luar-kota"
-        ? {
-            garageToLoad: legs?.garageToLoad?.distanceKm ?? straight.garageToLoad,
-            loadToUnload: legs?.loadToUnload?.distanceKm ?? straight.loadToUnload,
-            unloadToGarage:
-              legs?.unloadToGarage?.distanceKm ?? straight.unloadToGarage,
-          }
-        : {
-            loadToUnload: legs?.loadToUnload?.distanceKm ?? straight.loadToUnload,
-          };
     try {
       return calculateQuote({
         service,
-        distances,
+        distances: routeDistances,
         helper,
-        loadFloor,
-        unloadFloor,
+        loadFloor: loadFloorList[0] ?? 1,
+        unloadFloor: unloadFloorList[0] ?? 1,
+        loadFloors: loadFloorList,
+        unloadFloors: unloadFloorList,
       });
     } catch {
       return null;
     }
-  }, [load, unload, phone, service, helper, loadFloor, unloadFloor, legs]);
+  }, [
+    allStopsSet,
+    routeDistances,
+    phone,
+    service,
+    helper,
+    floors,
+    loadStops,
+    unloadStops,
+  ]);
 
   const waUrl = useMemo(() => {
-    if (!quote || !load || !unload) return null;
+    if (!quote || !allStopsSet) return null;
+
+    const toWaStop = (stop: Stop, index: number): WaStop => ({
+      label: `${stop.kind === "load" ? "M" : "B"}${index + 1}`,
+      address:
+        stop.address ||
+        `Titik di peta (${(stop.lat as number).toFixed(4)}, ${(stop.lng as number).toFixed(4)})`,
+      lat: stop.lat as number,
+      lng: stop.lng as number,
+      floor: floors[stop.id] ?? 1,
+    });
+
     return buildWhatsAppUrl({
       name: name.trim(),
       phone: phone.trim(),
       pickupDate,
       pickupTime,
       serviceLabel: service === "dalam-kota" ? "Dalam Kota" : "Luar Kota",
-      loadAddress:
-        load.address ||
-        `Titik di peta (${load.lat.toFixed(4)}, ${load.lng.toFixed(4)})`,
-      loadLat: load.lat,
-      loadLng: load.lng,
-      loadFloor,
-      unloadAddress:
-        unload.address ||
-        `Titik di peta (${unload.lat.toFixed(4)}, ${unload.lng.toFixed(4)})`,
-      unloadLat: unload.lat,
-      unloadLng: unload.lng,
-      unloadFloor,
+      loads: loadStops.map(toWaStop),
+      unloads: unloadStops.map(toWaStop),
       helperLabel:
         helper === "none"
           ? "Tanpa bantuan"
@@ -756,64 +883,152 @@ export default function Home() {
     });
   }, [
     quote,
-    load,
-    unload,
+    allStopsSet,
+    loadStops,
+    unloadStops,
     name,
     phone,
     pickupDate,
     pickupTime,
     service,
     helper,
-    loadFloor,
-    unloadFloor,
+    floors,
     note,
   ]);
 
-  const routeLine = useMemo<Array<[number, number]>>(() => {
-    const routed = legs?.loadToUnload?.coordinates;
-    if (routed && routed.length > 1) return routed;
-    if (routeStatus === "error" && load && unload) {
+  const mainRouteLine = useMemo<Array<[number, number]>>(() => {
+    if (routeStatus !== "ready" || !plan) return [];
+    return plan.main.flatMap((leg) => leg.coordinates);
+  }, [plan, routeStatus]);
+
+  const fallbackLine = useMemo<Array<[number, number]>>(() => {
+    if (!allStopsSet || routePoints.length < 2) return [];
+    const points = routePoints.map(
+      (point) => [point.lat, point.lng] as [number, number],
+    );
+    if (service === "luar-kota") {
       return [
-        [load.lat, load.lng],
-        [unload.lat, unload.lng],
+        [BUSINESS.garage.lat, BUSINESS.garage.lng],
+        ...points,
+        [BUSINESS.garage.lat, BUSINESS.garage.lng],
       ];
     }
-    return [];
-  }, [legs, routeStatus, load, unload]);
+    return points;
+  }, [allStopsSet, routePoints, service]);
 
-  const garageToLoadLine = useMemo<Array<[number, number]>>(
+  const routeLine = useMemo<Array<[number, number]>>(() => {
+    if (routeStatus === "ready") return mainRouteLine;
+    if (routeStatus === "error") return fallbackLine;
+    return [];
+  }, [routeStatus, mainRouteLine, fallbackLine]);
+
+  const garageToFirstLine = useMemo<Array<[number, number]>>(
     () =>
-      service === "luar-kota" && legs?.garageToLoad?.coordinates.length
-        ? legs.garageToLoad.coordinates
+      routeStatus === "ready" && service === "luar-kota"
+        ? (plan?.garageToFirst?.coordinates ?? [])
         : [],
-    [service, legs],
+    [routeStatus, service, plan],
   );
 
-  const unloadToGarageLine = useMemo<Array<[number, number]>>(
+  const lastToGarageLine = useMemo<Array<[number, number]>>(
     () =>
-      service === "luar-kota" && legs?.unloadToGarage?.coordinates.length
-        ? legs.unloadToGarage.coordinates
+      routeStatus === "ready" && service === "luar-kota"
+        ? (plan?.lastToGarage?.coordinates ?? [])
         : [],
-    [service, legs],
+    [routeStatus, service, plan],
   );
 
   const fitPositions = useMemo<Array<[number, number]>>(
-    () => [
-      ...garageToLoadLine,
-      ...routeLine,
-      ...unloadToGarageLine,
-    ],
-    [garageToLoadLine, routeLine, unloadToGarageLine],
+    () => [...garageToFirstLine, ...routeLine, ...lastToGarageLine],
+    [garageToFirstLine, routeLine, lastToGarageLine],
   );
 
-  function pick(lat: number, lng: number) {
-    const addr = `Titik di peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-    if (active === "load") {
-      setLoad({ lat, lng, address: addr });
-      setActive("unload");
-    } else {
-      setUnload({ lat, lng, address: addr });
+  const routeSummary = useMemo(() => {
+    if (routeStatus !== "ready" || !plan) return null;
+    const legs = [
+      ...(plan.garageToFirst ? [plan.garageToFirst] : []),
+      ...plan.main,
+      ...(plan.lastToGarage ? [plan.lastToGarage] : []),
+    ];
+    return {
+      km: legs.reduce((total, leg) => total + leg.distanceKm, 0),
+      minutes: legs.reduce((total, leg) => total + leg.durationMin, 0),
+    };
+  }, [plan, routeStatus]);
+
+  // Auto-advance only for the default M1/B1 flow, and only forward. With extra
+  // stops the active point stays put so repeated map clicks land on the same
+  // point instead of cycling between stops.
+  function autoNextAfter(id: string): Stop | undefined {
+    if (stops.length > 2) return undefined;
+    const index = orderedStops.findIndex((stop) => stop.id === id);
+    return orderedStops.slice(index + 1).find((stop) => stop.lat === null);
+  }
+
+  function updateStopPoint(
+    id: string,
+    lat: number,
+    lng: number,
+    address: string,
+  ) {
+    setStops((prev) =>
+      prev.map((stop) =>
+        stop.id === id ? { ...stop, lat, lng, address } : stop,
+      ),
+    );
+  }
+
+  function addStop(kind: StopKind) {
+    const stop: Stop = {
+      id: `stop-${nextStopId.current++}`,
+      kind,
+      lat: null,
+      lng: null,
+      address: "",
+    };
+    setStops((prev) => {
+      if (kind === "unload") return [...prev, stop];
+      const lastLoad = prev.map((item) => item.kind).lastIndexOf("load");
+      return [...prev.slice(0, lastLoad + 1), stop, ...prev.slice(lastLoad + 1)];
+    });
+    setActiveId(stop.id);
+  }
+
+  function removeStop(id: string) {
+    const target = stops.find((stop) => stop.id === id);
+    if (!target) return;
+
+    const sameKind = stops.filter((stop) => stop.kind === target.kind);
+    if (sameKind.length <= 1) {
+      setStops((prev) =>
+        prev.map((stop) =>
+          stop.id === id
+            ? { ...stop, lat: null, lng: null, address: "" }
+            : stop,
+        ),
+      );
+      setActiveId(id);
+      return;
     }
+
+    const fallback = sameKind.find((stop) => stop.id !== id);
+    setStops((prev) => prev.filter((stop) => stop.id !== id));
+    if (activeId === id && fallback) setActiveId(fallback.id);
+  }
+
+  function changeFloor(id: string, next: number) {
+    setFloors((prev) => ({
+      ...prev,
+      [id]: Math.min(20, Math.max(1, next)),
+    }));
+  }
+
+  function pick(lat: number, lng: number) {
+    if (!activeStop) return;
+    const address = `Titik di peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+    const next = autoNextAfter(activeStop.id);
+    updateStopPoint(activeStop.id, lat, lng, address);
+    if (next) setActiveId(next.id);
   }
 
   function useMyLocation() {
@@ -823,20 +1038,15 @@ export default function Home() {
       );
       return;
     }
+    const stop = activeStop;
+    if (!stop) return;
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        const point = {
-          lat: latitude,
-          lng: longitude,
-          address: `Lokasi saat ini (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`,
-        };
-        if (active === "load") {
-          setLoad(point);
-          setActive("unload");
-        } else {
-          setUnload(point);
-        }
+        const address = `Lokasi saat ini (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
+        const next = autoNextAfter(stop.id);
+        updateStopPoint(stop.id, latitude, longitude, address);
+        if (next) setActiveId(next.id);
       },
       () => {
         alert(
@@ -848,12 +1058,10 @@ export default function Home() {
   }
 
   function selectPoint(lat: number, lng: number, address: string) {
-    if (active === "load") {
-      setLoad({ lat, lng, address });
-      setActive("unload");
-    } else {
-      setUnload({ lat, lng, address });
-    }
+    if (!activeStop) return;
+    const next = autoNextAfter(activeStop.id);
+    updateStopPoint(activeStop.id, lat, lng, address);
+    if (next) setActiveId(next.id);
   }
 
   const helperOptions: Array<{
@@ -935,8 +1143,11 @@ export default function Home() {
     scrollToPanel();
   }
 
-  function showRoute(mode: "load" | "unload") {
-    setActive(mode);
+  function showRoute(mode: StopKind) {
+    const target =
+      stops.find((stop) => stop.kind === mode && stop.lat === null) ??
+      stops.find((stop) => stop.kind === mode);
+    if (target) setActiveId(target.id);
     document
       .getElementById("peta")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -996,9 +1207,9 @@ export default function Home() {
                 <span>langsung kirim ke WhatsApp.</span>
               </h1>
               <p className="hero-lead">
-                Tandai titik muat dan bongkar di peta. Estimasi harga muncul
-                otomatis, lengkap dengan rincian yang bisa langsung dikirim ke
-                Jasa Angkut Slamet.
+                Tandai satu atau beberapa titik muat dan bongkar di peta.
+                Estimasi harga muncul otomatis, lengkap dengan rincian yang
+                bisa langsung dikirim ke Jasa Angkut Slamet.
               </p>
               <ul className="hero-points">
                 <li className="hero-point">
@@ -1050,33 +1261,23 @@ export default function Home() {
             <div className="map-card-head">
               <div className="map-card-title">
                 <h2>Rute angkutan</h2>
-                <p>Klik peta atau cari alamat untuk menandai titik.</p>
+                <p>
+                  Klik peta atau cari alamat untuk menandai{" "}
+                  <strong>
+                    {activeStop ? stopLabel(activeStop, stops) : "titik"}
+                  </strong>
+                  . Pilih kartu titik di bawah untuk menandai titik lain.
+                </p>
               </div>
               <div
-                className="segmented"
-                role="group"
-                aria-label="Pilih titik yang ditandai"
+                className={`map-target${activeStop?.kind === "unload" ? " is-unload" : ""}`}
+                aria-live="polite"
               >
-                <button
-                  type="button"
-                  className={`segment is-load${active === "load" ? " is-active" : ""}`}
-                  onClick={() => setActive("load")}
-                  aria-pressed={active === "load"}
-                >
-                  <span className="segment-dot load" />
-                  Muat
-                  {load && <IconCheck size={13} className="segment-check" />}
-                </button>
-                <button
-                  type="button"
-                  className={`segment is-unload${active === "unload" ? " is-active" : ""}`}
-                  onClick={() => setActive("unload")}
-                  aria-pressed={active === "unload"}
-                >
-                  <span className="segment-dot unload" />
-                  Bongkar
-                  {unload && <IconCheck size={13} className="segment-check" />}
-                </button>
+                <span
+                  className={`segment-dot ${activeStop?.kind ?? "load"}`}
+                  aria-hidden="true"
+                />
+                Menandai {activeStop ? stopLabel(activeStop, stops) : "—"}
               </div>
             </div>
 
@@ -1098,56 +1299,47 @@ export default function Home() {
                   position={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
                   icon={iconGarage}
                 />
-                {load && (
-                  <Marker
-                    position={[load.lat, load.lng]}
-                    icon={iconLoad}
-                    draggable
-                    eventHandlers={{
-                      dragend: (event) => {
-                        const marker = event.target.getLatLng();
-                        setLoad({
-                          lat: marker.lat,
-                          lng: marker.lng,
-                          address: `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
-                        });
-                      },
-                    }}
-                  />
+                {stops.map((stop) =>
+                  stop.lat !== null && stop.lng !== null ? (
+                    <Marker
+                      key={stop.id}
+                      position={[stop.lat, stop.lng]}
+                      icon={
+                        stopIcons[stop.id] ??
+                        makeIcon(
+                          stop.kind === "load" ? "#1F4D3A" : "#E07A2E",
+                          stop.kind === "load" ? "M" : "B",
+                          stop.id === activeId,
+                        )
+                      }
+                      draggable
+                      eventHandlers={{
+                        click: () => setActiveId(stop.id),
+                        dragend: (event) => {
+                          const marker = event.target.getLatLng();
+                          updateStopPoint(
+                            stop.id,
+                            marker.lat,
+                            marker.lng,
+                            `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
+                          );
+                        },
+                      }}
+                    />
+                  ) : null,
                 )}
-                {unload && (
-                  <Marker
-                    position={[unload.lat, unload.lng]}
-                    icon={iconUnload}
-                    draggable
-                    eventHandlers={{
-                      dragend: (event) => {
-                        const marker = event.target.getLatLng();
-                        setUnload({
-                          lat: marker.lat,
-                          lng: marker.lng,
-                          address: `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
-                        });
-                      },
-                    }}
-                  />
-                )}
-                <Recenter
-                  lat={(load || unload)?.lat || BUSINESS.garage.lat}
-                  lng={(load || unload)?.lng || BUSINESS.garage.lng}
-                />
-                {garageToLoadLine.length > 1 && (
+                {garageToFirstLine.length > 1 && (
                   <Polyline
-                    positions={garageToLoadLine}
+                    positions={garageToFirstLine}
                     color="#6B7178"
                     weight={3}
                     opacity={0.65}
                     dashArray="6 7"
                   />
                 )}
-                {unloadToGarageLine.length > 1 && (
+                {lastToGarageLine.length > 1 && (
                   <Polyline
-                    positions={unloadToGarageLine}
+                    positions={lastToGarageLine}
                     color="#6B7178"
                     weight={3}
                     opacity={0.65}
@@ -1169,10 +1361,12 @@ export default function Home() {
                     />
                   </>
                 )}
-                {fitPositions.length > 1 && (
-                  <FitRoute positions={fitPositions} />
-                )}
-                <MapSearchControl active={active} onSelect={selectPoint} />
+                <FitRoute positions={fitPositions} signal={fitTick} />
+                <MapSearchControl
+                  active={activeStop?.kind ?? "load"}
+                  activeLabel={activeStop ? stopLabel(activeStop, stops) : "M1"}
+                  onSelect={selectPoint}
+                />
               </MapContainer>
               <button
                 type="button"
@@ -1185,75 +1379,113 @@ export default function Home() {
             </div>
 
             <div className="route-summary">
-              <div className="route-list">
-                <div
-                  className={`route-point${active === "load" ? " is-active" : ""}`}
-                  onClick={() => setActive("load")}
-                  role="button"
-                  tabIndex={0}
-                  title="Klik untuk memilih titik muat di peta"
+              <div className="route-tools">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setFitTick((tick) => tick + 1)}
+                  disabled={fitPositions.length < 2}
                 >
-                  <span className="route-dot load" aria-hidden="true" />
-                  <div className="route-point-main">
-                    <span className="route-label">Titik muat</span>
-                    <p className={`route-address${load ? "" : " is-empty"}`}>
-                      {load ? load.address : "Belum dipilih (klik peta)"}
-                    </p>
-                    <hr></hr>
-                    <span className="route-address">
-                      Catatan: Jika alamat di atas kurang sesuai, silahkan
-                      isi/ubah alamat detail patokan Anda di WhatsaApp
-                    </span>
-                  </div>
-                  {load && (
-                    <button
-                      type="button"
-                      className="route-clear"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setLoad(null);
-                        setActive("load");
-                      }}
-                    >
-                      Hapus
-                    </button>
-                  )}
-                </div>
-                <div
-                  className={`route-point is-unload${active === "unload" ? " is-active" : ""}`}
-                  onClick={() => setActive("unload")}
-                  role="button"
-                  tabIndex={0}
-                  title="Klik untuk memilih titik bongkar di peta"
-                >
-                  <span className="route-dot unload" aria-hidden="true" />
-                  <div className="route-point-main">
-                    <span className="route-label">Titik bongkar</span>
-                    <p className={`route-address${unload ? "" : " is-empty"}`}>
-                      {unload ? unload.address : "Belum dipilih (klik peta)"}
-                    </p>
-                    <hr></hr>
-                    <span className="route-address">
-                      Catatan: Jika alamat di atas kurang sesuai, silahkan
-                      isi/ubah alamat detail patokan Anda di WhatsaApp
-                    </span>
-                  </div>
-                  {unload && (
-                    <button
-                      type="button"
-                      className="route-clear"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setUnload(null);
-                        setActive("unload");
-                      }}
-                    >
-                      Hapus
-                    </button>
-                  )}
-                </div>
+                  <IconRoute size={14} />
+                  Lihat rute di peta
+                </button>
               </div>
-              {load && unload && (
+              <div className="route-groups">
+                {(
+                  [
+                    { kind: "load", items: loadStops },
+                    { kind: "unload", items: unloadStops },
+                  ] as Array<{ kind: StopKind; items: Stop[] }>
+                ).map(({ kind, items }) => (
+                  <div className={`route-group is-${kind}`} key={kind}>
+                    <div className="route-group-head">
+                      <span className="route-group-title">
+                        <span className={`segment-dot ${kind}`} aria-hidden="true" />
+                        Titik {STOP_KIND_LABEL[kind]}
+                      </span>
+                      <button
+                        type="button"
+                        className="route-add"
+                        onClick={() => addStop(kind)}
+                      >
+                        + Tambah
+                      </button>
+                    </div>
+                    <div className="route-list">
+                      {items.map((stop, index) => {
+                        const selected = activeId === stop.id;
+                        const hasPoint = stop.lat !== null && stop.lng !== null;
+                        const floor = floorOf(stop.id);
+                        const fee = floorFee(floor);
+                        const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
+                        return (
+                          <div
+                            key={stop.id}
+                            className={`route-point${kind === "unload" ? " is-unload" : ""}${selected ? " is-active" : ""}`}
+                            onClick={() => setActiveId(stop.id)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                setActiveId(stop.id);
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            aria-pressed={selected}
+                            title={`Klik untuk memilih titik ${label} di peta`}
+                          >
+                            <span
+                              className={`route-dot ${kind}`}
+                              aria-hidden="true"
+                            />
+                            <div className="route-point-main">
+                              <span className="route-label">
+                                {label} · Titik {STOP_KIND_LABEL[kind]}
+                              </span>
+                              <p
+                                className={`route-address${hasPoint ? "" : " is-empty"}`}
+                              >
+                                {hasPoint
+                                  ? stop.address
+                                  : selected
+                                    ? "Belum dipilih (klik peta untuk menandai)"
+                                    : "Belum dipilih"}
+                              </p>
+                              <span className="route-floor">
+                                Lantai {floor} ·{" "}
+                                {fee === 0
+                                  ? "Gratis"
+                                  : `+Rp${fee.toLocaleString("id-ID")}`}
+                              </span>
+                            </div>
+                            {selected && (
+                              <span className="route-active-badge">Menandai</span>
+                            )}
+                            {(hasPoint || items.length > 1) && (
+                              <button
+                                type="button"
+                                className="route-clear"
+                                aria-label={`Hapus titik ${label}`}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  removeStop(stop.id);
+                                }}
+                              >
+                                Hapus
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="route-footnote">
+                Catatan: jika alamat kurang sesuai, lengkapi/ubah patokan
+                detailnya saat mengirim pesanan di WhatsApp.
+              </p>
+              {allStopsSet && (
                 <div
                   className={`route-meta${routeStatus === "error" ? " is-warn" : ""}`}
                   aria-live="polite"
@@ -1261,20 +1493,18 @@ export default function Home() {
                   {routeStatus === "loading" && (
                     <>
                       <span className="spinner" aria-hidden="true" />
-                      <span>Menghitung rute tercepat...</span>
+                      <span>Menghitung rute mobil...</span>
                     </>
                   )}
-                  {routeStatus === "ready" && legs?.loadToUnload && (
+                  {routeStatus === "ready" && routeSummary && (
                     <>
                       <IconRoute size={14} />
                       <span>
-                        Rute jalan {legs.loadToUnload.distanceKm.toFixed(1)} km
-                        {legs.loadToUnload.durationMin >= 1
-                          ? ` · ±${Math.round(legs.loadToUnload.durationMin)} menit`
-                          : ""}
+                        Rute mobil {routeSummary.km.toFixed(1)} km · ±
+                        {Math.max(1, Math.round(routeSummary.minutes))} menit
                         {service === "luar-kota"
-                          ? " · garasi–muat–bongkar–garasi"
-                          : ""}
+                          ? " · termasuk garasi"
+                          : ` · ${stops.length} titik`}
                       </span>
                     </>
                   )}
@@ -1282,10 +1512,17 @@ export default function Home() {
                     <>
                       <IconAlert size={14} />
                       <span>
-                        Rute jalan tidak tersedia. Jarak dihitung garis lurus.
+                        Rute mobil tidak tersedia. Jarak sementara dihitung
+                        garis lurus.
                       </span>
                     </>
                   )}
+                </div>
+              )}
+              {!allStopsSet && stops.some((stop) => stop.lat !== null) && (
+                <div className="route-meta is-warn">
+                  <IconAlert size={14} />
+                  <span>Lengkapi semua titik untuk menghitung rute.</span>
                 </div>
               )}
             </div>
@@ -1713,78 +1950,55 @@ export default function Home() {
                     </div>
 
                     <div className="floor-grid">
-                      <div className="floor-card">
-                        <div className="floor-title">Lantai tempat muat</div>
-                        <div className="stepper">
-                          <button
-                            type="button"
-                            className="stepper-btn"
-                            aria-label="Kurangi lantai muat"
-                            onClick={() =>
-                              setLoadFloor(Math.max(1, loadFloor - 1))
-                            }
-                            disabled={loadFloor <= 1}
-                          >
-                            <IconMinus size={16} />
-                          </button>
-                          <div className="stepper-value" aria-live="polite">
-                            {loadFloor}
+                      {orderedStops.map((stop) => {
+                        const floor = floorOf(stop.id);
+                        const label = stopLabel(stop, stops);
+                        const fee = floorFee(floor);
+                        return (
+                          <div className="floor-card" key={stop.id}>
+                            <div className="floor-title">
+                              {label} · Lantai titik{" "}
+                              {STOP_KIND_LABEL[stop.kind]}
+                            </div>
+                            <div className="stepper">
+                              <button
+                                type="button"
+                                className="stepper-btn"
+                                aria-label={`Kurangi lantai ${label}`}
+                                onClick={() =>
+                                  changeFloor(stop.id, floor - 1)
+                                }
+                                disabled={floor <= 1}
+                              >
+                                <IconMinus size={16} />
+                              </button>
+                              <div className="stepper-value" aria-live="polite">
+                                {floor}
+                              </div>
+                              <button
+                                type="button"
+                                className="stepper-btn"
+                                aria-label={`Tambah lantai ${label}`}
+                                onClick={() =>
+                                  changeFloor(stop.id, floor + 1)
+                                }
+                                disabled={floor >= 20}
+                              >
+                                <IconPlus size={16} />
+                              </button>
+                            </div>
+                            <p className="floor-hint">
+                              {floor === 1
+                                ? "Lantai dasar · Gratis"
+                                : `Lantai ${floor} · +Rp${fee.toLocaleString("id-ID")}`}
+                            </p>
                           </div>
-                          <button
-                            type="button"
-                            className="stepper-btn"
-                            aria-label="Tambah lantai muat"
-                            onClick={() =>
-                              setLoadFloor(Math.min(20, loadFloor + 1))
-                            }
-                            disabled={loadFloor >= 20}
-                          >
-                            <IconPlus size={16} />
-                          </button>
-                        </div>
-                        <p className="floor-hint">
-                          {loadFloor === 1
-                            ? "Lantai dasar · Gratis"
-                            : `Lantai ${loadFloor} · +Rp${(loadFloor === 2 ? 20000 : 20000 + (loadFloor - 2) * 10000).toLocaleString("id-ID")}`}
-                        </p>
-                      </div>
-
-                      <div className="floor-card">
-                        <div className="floor-title">Lantai tempat bongkar</div>
-                        <div className="stepper">
-                          <button
-                            type="button"
-                            className="stepper-btn"
-                            aria-label="Kurangi lantai bongkar"
-                            onClick={() =>
-                              setUnloadFloor(Math.max(1, unloadFloor - 1))
-                            }
-                            disabled={unloadFloor <= 1}
-                          >
-                            <IconMinus size={16} />
-                          </button>
-                          <div className="stepper-value" aria-live="polite">
-                            {unloadFloor}
-                          </div>
-                          <button
-                            type="button"
-                            className="stepper-btn"
-                            aria-label="Tambah lantai bongkar"
-                            onClick={() =>
-                              setUnloadFloor(Math.min(20, unloadFloor + 1))
-                            }
-                            disabled={unloadFloor >= 20}
-                          >
-                            <IconPlus size={16} />
-                          </button>
-                        </div>
-                        <p className="floor-hint">
-                          {unloadFloor === 1
-                            ? "Lantai dasar · Gratis"
-                            : `Lantai ${unloadFloor} · +Rp${(unloadFloor === 2 ? 20000 : 20000 + (unloadFloor - 2) * 10000).toLocaleString("id-ID")}`}
-                        </p>
-                      </div>
+                        );
+                      })}
                     </div>
+                    <p className="floor-hint">
+                      Biaya lantai dihitung untuk setiap titik muat dan bongkar.
+                    </p>
 
                     <div className="wizard-actions">
                       <button
@@ -1890,25 +2104,29 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {(!load || !unload) && (
+                    {!allStopsSet && (
                       <div className="route-warning-banner" role="alert">
                         <IconAlert size={20} />
                         <div>
                           <p>
                             <strong>Titik rute di peta belum lengkap!</strong>
                             <br />
-                            {!load && !unload
-                              ? "Titik muat dan titik bongkar belum ditandai di peta."
-                              : !load
-                                ? "Titik muat belum ditandai di peta."
-                                : "Titik bongkar belum ditandai di peta."}{" "}
-                            Tandai di peta agar jarak &amp; ongkos otomatis
-                            dihitung.
+                            {orderedStops
+                              .filter((stop) => stop.lat === null)
+                              .map((stop) => stopLabel(stop, stops))
+                              .join(", ")}{" "}
+                            belum ditandai di peta. Tandai semua titik agar
+                            jarak &amp; ongkos otomatis dihitung.
                           </p>
                           <button
                             type="button"
                             className="btn-map-jump"
-                            onClick={() => showRoute(!load ? "load" : "unload")}
+                            onClick={() =>
+                              showRoute(
+                                orderedStops.find((stop) => stop.lat === null)
+                                  ?.kind ?? "load",
+                              )
+                            }
                           >
                             <IconMapPin
                               size={14}
@@ -1970,20 +2188,19 @@ export default function Home() {
                           </button>
                         </div>
                         <dl className="review-rows">
-                          <div className="review-row">
-                            <dt>Titik Muat</dt>
-                            <dd>
-                              {load ? load.address : "Belum dipilih di peta"}
-                            </dd>
-                          </div>
-                          <div className="review-row">
-                            <dt>Titik Bongkar</dt>
-                            <dd>
-                              {unload
-                                ? unload.address
-                                : "Belum dipilih di peta"}
-                            </dd>
-                          </div>
+                          {orderedStops.map((stop) => (
+                            <div className="review-row" key={stop.id}>
+                              <dt>
+                                {stopLabel(stop, stops)} ·{" "}
+                                {stop.kind === "load" ? "Muat" : "Bongkar"}
+                              </dt>
+                              <dd>
+                                {stop.lat !== null
+                                  ? stop.address
+                                  : "Belum dipilih di peta"}
+                              </dd>
+                            </div>
+                          ))}
                           {quote && (
                             <div className="review-row">
                               <dt>Jarak terhitung</dt>
@@ -2016,9 +2233,25 @@ export default function Home() {
                             <dd>{helperLabel}</dd>
                           </div>
                           <div className="review-row">
-                            <dt>Lantai muat / bongkar</dt>
+                            <dt>Lantai muat</dt>
                             <dd>
-                              Lantai {loadFloor} / Lantai {unloadFloor}
+                              {loadStops
+                                .map(
+                                  (stop, index) =>
+                                    `M${index + 1}: ${floorOf(stop.id)}`,
+                                )
+                                .join(" · ")}
+                            </dd>
+                          </div>
+                          <div className="review-row">
+                            <dt>Lantai bongkar</dt>
+                            <dd>
+                              {unloadStops
+                                .map(
+                                  (stop, index) =>
+                                    `B${index + 1}: ${floorOf(stop.id)}`,
+                                )
+                                .join(" · ")}
                             </dd>
                           </div>
                           {note.trim() && (
@@ -2064,7 +2297,12 @@ export default function Home() {
                             )}
                             {quote.loadFloor > 0 && (
                               <div className="quote-line">
-                                <dt>Lantai muat</dt>
+                                <dt>
+                                  Lantai muat
+                                  {loadStops.length > 1
+                                    ? ` (${loadStops.length} titik)`
+                                    : ""}
+                                </dt>
                                 <dd>
                                   Rp {quote.loadFloor.toLocaleString("id-ID")}
                                 </dd>
@@ -2072,7 +2310,12 @@ export default function Home() {
                             )}
                             {quote.unloadFloor > 0 && (
                               <div className="quote-line">
-                                <dt>Lantai bongkar</dt>
+                                <dt>
+                                  Lantai bongkar
+                                  {unloadStops.length > 1
+                                    ? ` (${unloadStops.length} titik)`
+                                    : ""}
+                                </dt>
                                 <dd>
                                   Rp {quote.unloadFloor.toLocaleString("id-ID")}
                                 </dd>

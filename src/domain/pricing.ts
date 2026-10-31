@@ -15,6 +15,8 @@ export interface QuoteInput {
   helper: Helper;
   loadFloor: number;
   unloadFloor: number;
+  loadFloors?: number[];
+  unloadFloors?: number[];
 }
 
 export interface Quote {
@@ -48,8 +50,14 @@ export function calculateQuote(i: QuoteInput): Quote {
   const km = billableKm(i.service, i.distances);
   const transport = km * perKm + setoran;
   const h = helper[i.helper];
-  const lf = floorFee(i.loadFloor);
-  const uf = floorFee(i.unloadFloor);
+  const lf =
+    i.loadFloors && i.loadFloors.length > 0
+      ? i.loadFloors.reduce((total, floor) => total + floorFee(floor), 0)
+      : floorFee(i.loadFloor);
+  const uf =
+    i.unloadFloors && i.unloadFloors.length > 0
+      ? i.unloadFloors.reduce((total, floor) => total + floorFee(floor), 0)
+      : floorFee(i.unloadFloor);
   return {
     billableKm: km,
     transport,
