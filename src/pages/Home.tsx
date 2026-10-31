@@ -16,8 +16,27 @@ import { formatPickupTime, formatSchedule } from "../domain/schedule";
 import { buildWhatsAppUrl } from "../domain/whatsapp";
 import type { Helper, Service } from "../domain/types";
 import { searchAddress, type GeocodeResult } from "../services/geocoding";
+import { fetchRoute, type RouteResult } from "../services/routing";
 
 type Point = { lat: number; lng: number; address: string };
+
+type LatLng = { lat: number; lng: number };
+
+type RouteLegs = {
+  loadToUnload: RouteResult | null;
+  garageToLoad: RouteResult | null;
+  unloadToGarage: RouteResult | null;
+};
+
+type RouteStatus = "idle" | "loading" | "ready" | "error";
+
+function straightLineKm(a: LatLng, b: LatLng): number {
+  const kmPerDegree = 111.32;
+  const midLat = (((a.lat + b.lat) / 2) * Math.PI) / 180;
+  const dLat = (a.lat - b.lat) * kmPerDegree;
+  const dLng = (a.lng - b.lng) * kmPerDegree * Math.cos(midLat);
+  return Math.hypot(dLat, dLng);
+}
 
 type IconProps = {
   size?: number;
@@ -422,6 +441,18 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+function FitRoute({ positions }: { positions: Array<[number, number]> }) {
+  const map = useMap();
+  useEffect(() => {
+    if (positions.length < 2) return;
+    map.fitBounds(L.latLngBounds(positions), {
+      padding: [36, 36],
+      maxZoom: 16,
+    });
+  }, [positions, map]);
+  return null;
+}
+
 function MapSearchControl({
   active,
   onSelect,
@@ -595,12 +626,44 @@ export default function Home() {
   const [step, setStep] = useState(1);
   const [furthest, setFurthest] = useState(1);
 
+  const [legs, setLegs] = useState<RouteLegs | null>(null);
+  const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
+
   const panelRef = useRef<HTMLElement | null>(null);
 
   const today = useMemo(todayISO, []);
   const nameError = false;
   const phoneError = phone.trim().length > 0 && !isValidPhone(phone);
   const waChatUrl = `https://wa.me/${BUSINESS.whatsapp}`;
+
+  useEffect(() => {
+    if (!load || !unload) {
+      setLegs(null);
+      setRouteStatus("idle");
+      return;
+    }
+
+    const controller = new AbortController();
+    const roundTrip = service === "luar-kota";
+    setLegs(null);
+    setRouteStatus("loading");
+
+    Promise.all([
+      fetchRoute(load, unload, controller.signal),
+      roundTrip
+        ? fetchRoute(BUSINESS.garage, load, controller.signal)
+        : Promise.resolve(null),
+      roundTrip
+        ? fetchRoute(unload, BUSINESS.garage, controller.signal)
+        : Promise.resolve(null),
+    ]).then(([loadToUnload, garageToLoad, unloadToGarage]) => {
+      if (controller.signal.aborted) return;
+      setLegs({ loadToUnload, garageToLoad, unloadToGarage });
+      setRouteStatus(loadToUnload ? "ready" : "error");
+    });
+
+    return () => controller.abort();
+  }, [load, unload, service]);
 
   function appendQuickNote(snippet: string) {
     setNote((prev) => {
@@ -630,25 +693,23 @@ export default function Home() {
   const quote = useMemo(() => {
     if (!load || !unload) return null;
     if (phone.trim() !== "" && !isValidPhone(phone)) return null;
+
+    const straight = {
+      garageToLoad: straightLineKm(BUSINESS.garage, load),
+      loadToUnload: straightLineKm(load, unload),
+      unloadToGarage: straightLineKm(unload, BUSINESS.garage),
+    };
+
     const distances =
       service === "luar-kota"
         ? {
-            garageToLoad:
-              Math.hypot(
-                load.lat - BUSINESS.garage.lat,
-                load.lng - BUSINESS.garage.lng,
-              ) * 111,
-            loadToUnload:
-              Math.hypot(load.lat - unload.lat, load.lng - unload.lng) * 111,
+            garageToLoad: legs?.garageToLoad?.distanceKm ?? straight.garageToLoad,
+            loadToUnload: legs?.loadToUnload?.distanceKm ?? straight.loadToUnload,
             unloadToGarage:
-              Math.hypot(
-                unload.lat - BUSINESS.garage.lat,
-                unload.lng - BUSINESS.garage.lng,
-              ) * 111,
+              legs?.unloadToGarage?.distanceKm ?? straight.unloadToGarage,
           }
         : {
-            loadToUnload:
-              Math.hypot(load.lat - unload.lat, load.lng - unload.lng) * 111,
+            loadToUnload: legs?.loadToUnload?.distanceKm ?? straight.loadToUnload,
           };
     try {
       return calculateQuote({
@@ -661,7 +722,7 @@ export default function Home() {
     } catch {
       return null;
     }
-  }, [load, unload, name, phone, service, helper, loadFloor, unloadFloor]);
+  }, [load, unload, phone, service, helper, loadFloor, unloadFloor, legs]);
 
   const waUrl = useMemo(() => {
     if (!quote || !load || !unload) return null;
@@ -707,6 +768,43 @@ export default function Home() {
     unloadFloor,
     note,
   ]);
+
+  const routeLine = useMemo<Array<[number, number]>>(() => {
+    const routed = legs?.loadToUnload?.coordinates;
+    if (routed && routed.length > 1) return routed;
+    if (routeStatus === "error" && load && unload) {
+      return [
+        [load.lat, load.lng],
+        [unload.lat, unload.lng],
+      ];
+    }
+    return [];
+  }, [legs, routeStatus, load, unload]);
+
+  const garageToLoadLine = useMemo<Array<[number, number]>>(
+    () =>
+      service === "luar-kota" && legs?.garageToLoad?.coordinates.length
+        ? legs.garageToLoad.coordinates
+        : [],
+    [service, legs],
+  );
+
+  const unloadToGarageLine = useMemo<Array<[number, number]>>(
+    () =>
+      service === "luar-kota" && legs?.unloadToGarage?.coordinates.length
+        ? legs.unloadToGarage.coordinates
+        : [],
+    [service, legs],
+  );
+
+  const fitPositions = useMemo<Array<[number, number]>>(
+    () => [
+      ...garageToLoadLine,
+      ...routeLine,
+      ...unloadToGarageLine,
+    ],
+    [garageToLoadLine, routeLine, unloadToGarageLine],
+  );
 
   function pick(lat: number, lng: number) {
     const addr = `Titik di peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
@@ -1038,26 +1136,41 @@ export default function Home() {
                   lat={(load || unload)?.lat || BUSINESS.garage.lat}
                   lng={(load || unload)?.lng || BUSINESS.garage.lng}
                 />
-                {load && unload && (
+                {garageToLoadLine.length > 1 && (
+                  <Polyline
+                    positions={garageToLoadLine}
+                    color="#6B7178"
+                    weight={3}
+                    opacity={0.65}
+                    dashArray="6 7"
+                  />
+                )}
+                {unloadToGarageLine.length > 1 && (
+                  <Polyline
+                    positions={unloadToGarageLine}
+                    color="#6B7178"
+                    weight={3}
+                    opacity={0.65}
+                    dashArray="6 7"
+                  />
+                )}
+                {routeLine.length > 1 && (
                   <>
                     <Polyline
-                      positions={[
-                        [load.lat, load.lng],
-                        [unload.lat, unload.lng],
-                      ]}
+                      positions={routeLine}
                       color="#FFFFFF"
                       weight={8}
                       opacity={0.9}
                     />
                     <Polyline
-                      positions={[
-                        [load.lat, load.lng],
-                        [unload.lat, unload.lng],
-                      ]}
+                      positions={routeLine}
                       color="#1F4D3A"
                       weight={4}
                     />
                   </>
+                )}
+                {fitPositions.length > 1 && (
+                  <FitRoute positions={fitPositions} />
                 )}
                 <MapSearchControl active={active} onSelect={selectPoint} />
               </MapContainer>
@@ -1140,6 +1253,41 @@ export default function Home() {
                   )}
                 </div>
               </div>
+              {load && unload && (
+                <div
+                  className={`route-meta${routeStatus === "error" ? " is-warn" : ""}`}
+                  aria-live="polite"
+                >
+                  {routeStatus === "loading" && (
+                    <>
+                      <span className="spinner" aria-hidden="true" />
+                      <span>Menghitung rute tercepat...</span>
+                    </>
+                  )}
+                  {routeStatus === "ready" && legs?.loadToUnload && (
+                    <>
+                      <IconRoute size={14} />
+                      <span>
+                        Rute jalan {legs.loadToUnload.distanceKm.toFixed(1)} km
+                        {legs.loadToUnload.durationMin >= 1
+                          ? ` · ±${Math.round(legs.loadToUnload.durationMin)} menit`
+                          : ""}
+                        {service === "luar-kota"
+                          ? " · garasi–muat–bongkar–garasi"
+                          : ""}
+                      </span>
+                    </>
+                  )}
+                  {routeStatus === "error" && (
+                    <>
+                      <IconAlert size={14} />
+                      <span>
+                        Rute jalan tidak tersedia. Jarak dihitung garis lurus.
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
