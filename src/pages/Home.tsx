@@ -842,32 +842,80 @@ export default function Home() {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeNav, setActiveNav] = useState("pesan");
+  const [activeNav, setActiveNav] = useState<string>(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      const h = window.location.hash.replace("#", "");
+      if (["pesan", "galeri", "faq", "kontak"].includes(h)) return h;
+    }
+    return "pesan";
+  });
 
   useEffect(() => {
     const sectionIds = ["pesan", "galeri", "faq", "kontak"];
-    function onScroll() {
-      const scrollPos = window.scrollY + 140;
-      let current = "";
+    let ticking = false;
+
+    function detectSection(): string {
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      // Jika scroll sudah di dasar halaman (mentok bawah) -> pasti kontak
+      if (windowHeight + scrollY >= fullHeight - 120) {
+        return "kontak";
+      }
+
+      // Deteksi berdasarkan getBoundingClientRect
+      const headerThreshold = 180;
+      let matched = "pesan";
+
       for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
-          const top = el.offsetTop;
-          if (scrollPos >= top) {
-            current = id;
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= headerThreshold) {
+            matched = id;
           }
         }
       }
-      if (current) {
-        setActiveNav(current);
-      } else {
-        setActiveNav("pesan");
+      return matched;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const current = detectSection();
+          setActiveNav((prev) => {
+            if (prev !== current) {
+              if (window.location.hash !== `#${current}`) {
+                window.history.replaceState(null, "", `#${current}`);
+              }
+              return current;
+            }
+            return prev;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    function onHashChange() {
+      const h = window.location.hash.replace("#", "");
+      if (sectionIds.includes(h)) {
+        setActiveNav(h);
       }
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("hashchange", onHashChange);
+
+    // Initial check
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("hashchange", onHashChange);
+    };
   }, []);
 
   function scrollGalleryTo(index: number) {
