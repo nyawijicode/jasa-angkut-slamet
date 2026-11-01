@@ -3018,7 +3018,7 @@ export default function Home() {
           )}
         </section>
 
-                <section className="faq-section" id="faq" aria-labelledby="faq-title">
+        <section className="faq-section" id="faq" aria-labelledby="faq-title">
           <div className="faq-card">
             <div className="faq-head">
               <span className="eyebrow">
@@ -3029,7 +3029,8 @@ export default function Home() {
                 Pertanyaan yang Sering Diajukan
               </h2>
               <p className="faq-lead">
-                Semua info penting seputar layanan angkutan barang dan pindahan Jasa Angkut Slamet.
+                Semua info penting seputar layanan angkutan barang dan pindahan
+                Jasa Angkut Slamet.
               </p>
             </div>
 
@@ -3044,7 +3045,10 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Tarif dihitung otomatis dan transparan: dasar tarif jarak <strong>Rp 8.000 / km</strong> dengan setoran armada awal <strong>Rp 50.000</strong>. Anda juga bisa menambahkan opsi bantuan tenaga bongkar muat serta tambahan lantai jika barang perlu dinaikkan/diturunkan lewat tangga.
+                    Tarif dihitung otomatis dan transparan,estimasi tarif dasar
+                    jarak <strong>Rp 8.000/km</strong>. Anda juga bisa
+                    menambahkan opsi bantuan tenaga bongkar muat serta tambahan
+                    lantai jika barang perlu dinaikkan/diturunkan lewat tangga.
                   </p>
                 </div>
               </details>
@@ -3059,7 +3063,12 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Kami melayani wilayah <strong>Demak, Semarang, Mranggen, Kebonbatur</strong>, dan sekitarnya (dalam kota). Kami juga siap melayani pengiriman <strong>Luar Kota</strong> (Jawa Tengah &amp; antar-kota lainnya) dengan sistem rute pulang-pergi terhitung dari garasi.
+                    Kami melayani wilayah{" "}
+                    <strong>Demak, Semarang, Mranggen, Kebonbatur</strong>, dan
+                    sekitarnya (dalam kota). Kami juga siap melayani pengiriman{" "}
+                    <strong>Luar Kota</strong> (Jawa Tengah &amp; antar-kota
+                    lainnya) dengan sistem rute pulang-pergi terhitung dari
+                    garasi.
                   </p>
                 </div>
               </details>
@@ -3073,13 +3082,20 @@ export default function Home() {
                   </span>
                 </summary>
                 <div className="faq-answer">
-                  <p>
-                    Sangat mudah tanpa perlu download aplikasi:
-                  </p>
+                  <p>Sangat mudah tanpa perlu download aplikasi:</p>
                   <ol className="faq-steps">
-                    <li>Tentukan titik muat dan titik bongkar di peta (bisa lebih dari satu titik).</li>
-                    <li>Pilih jenis layanan, opsi bantuan tenaga, dan lantai bangunan.</li>
-                    <li>Klik tombol <strong>Kirim pesanan ke WhatsApp</strong> untuk konfirmasi jadwal langsung dengan sopir kami.</li>
+                    <li>
+                      Tentukan titik muat dan titik bongkar di peta (bisa lebih
+                      dari satu titik).
+                    </li>
+                    <li>
+                      Pilih jenis layanan, opsi bantuan tenaga, dan lantai
+                      bangunan.
+                    </li>
+                    <li>
+                      Klik tombol <strong>Kirim pesanan ke WhatsApp</strong>{" "}
+                      untuk konfirmasi jadwal langsung dengan sopir kami.
+                    </li>
                   </ol>
                 </div>
               </details>
@@ -3093,13 +3109,20 @@ export default function Home() {
                   </span>
                 </summary>
                 <div className="faq-answer">
-                  <p>
-                    Ya, kami menyediakan 3 pilihan sesuai kebutuhan Anda:
-                  </p>
+                  <p>Ya, kami menyediakan 3 pilihan sesuai kebutuhan Anda:</p>
                   <ul>
-                    <li><strong>Bongkar muat sendiri:</strong> Gratis, barang diserahkan di depan armada.</li>
-                    <li><strong>Sopir ikut bongkar muat:</strong> Tambahan Rp 50.000 (1 tenaga bantuan).</li>
-                    <li><strong>Sopir + Kenek:</strong> Tambahan Rp 100.000 (2 tenaga bantuan untuk barang banyak/berat).</li>
+                    <li>
+                      <strong>Bongkar muat sendiri:</strong> Gratis, barang
+                      diserahkan di depan armada.
+                    </li>
+                    <li>
+                      <strong>Sopir ikut bongkar muat:</strong> Tambahan Rp
+                      50.000 (1 tenaga bantuan).
+                    </li>
+                    <li>
+                      <strong>Sopir + Kenek:</strong> Tambahan Rp 100.000 (2
+                      tenaga bantuan untuk barang banyak/berat).
+                    </li>
                   </ul>
                 </div>
               </details>
@@ -3114,7 +3137,9 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Tentu aman. Armada kami selalu dilengkapi tali pengikat kuat dan terpal penutup anti hujan/debu untuk melindungi muatan perabotan rumah, kos, motor, maupun material usaha Anda.
+                    Tentu aman. Armada kami selalu dilengkapi tali pengikat kuat
+                    dan terpal penutup anti hujan/debu untuk melindungi muatan
+                    perabotan rumah, kos, motor, maupun material usaha Anda.
                   </p>
                 </div>
               </details>
@@ -3129,7 +3154,10 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Kami melayani pengiriman setiap hari dari pukul <strong>06:00 sampai 22:00 WIB</strong>. Untuk pengiriman malam hari atau dini hari, silakan komunikasikan terlebih dahulu via WhatsApp agar jadwal armada dapat dipersiapkan.
+                    Kami melayani pengiriman setiap hari dari pukul{" "}
+                    <strong>06:00 sampai 22:00 WIB</strong>. Untuk pengiriman
+                    malam hari atau dini hari, silakan komunikasikan terlebih
+                    dahulu via WhatsApp agar jadwal armada dapat dipersiapkan.
                   </p>
                 </div>
               </details>
@@ -3151,7 +3179,7 @@ export default function Home() {
         </section>
       </main>
 
-            <footer className="site-footer" id="kontak">
+      <footer className="site-footer" id="kontak">
         <div className="container">
           <div className="footer-main">
             <div className="footer-content">
