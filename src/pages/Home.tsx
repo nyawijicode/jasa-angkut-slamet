@@ -30,6 +30,8 @@ type Stop = {
 
 type LatLng = { lat: number; lng: number };
 
+type MapPoint = LatLng & { address: string };
+
 type RoutePlan = {
   main: RouteResult[];
   garageToFirst: RouteResult | null;
@@ -325,6 +327,19 @@ function IconPlus({ size = 18, className }: IconProps) {
     <svg {...svgProps} width={size} height={size} className={className}>
       <path
         d="M12 5v14M5 12h14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconX({ size = 20, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <path
+        d="m6 6 12 12M18 6 6 18"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
@@ -639,6 +654,8 @@ export default function Home() {
   const [activeId, setActiveId] = useState("stop-1");
   const [floors, setFloors] = useState<Record<string, number>>({});
   const [fitTick, setFitTick] = useState(0);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [draft, setDraft] = useState<MapPoint | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [pickupDate, setPickupDate] = useState("");
@@ -654,6 +671,20 @@ export default function Home() {
   const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
 
   const panelRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!mapOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMapOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mapOpen]);
 
   const today = useMemo(todayISO, []);
   const nameError = false;
@@ -939,8 +970,16 @@ export default function Home() {
   );
 
   const fitPositions = useMemo<Array<[number, number]>>(
-    () => [...garageToFirstLine, ...routeLine, ...lastToGarageLine],
-    [garageToFirstLine, routeLine, lastToGarageLine],
+    () => [
+      ...garageToFirstLine,
+      ...routeLine,
+      ...lastToGarageLine,
+      ...routePoints.map(
+        (point) => [point.lat, point.lng] as [number, number],
+      ),
+      ...(draft ? [[draft.lat, draft.lng] as [number, number]] : []),
+    ],
+    [garageToFirstLine, routeLine, lastToGarageLine, routePoints, draft],
   );
 
   const routeSummary = useMemo(() => {
@@ -955,15 +994,6 @@ export default function Home() {
       minutes: legs.reduce((total, leg) => total + leg.durationMin, 0),
     };
   }, [plan, routeStatus]);
-
-  // Auto-advance only for the default M1/B1 flow, and only forward. With extra
-  // stops the active point stays put so repeated map clicks land on the same
-  // point instead of cycling between stops.
-  function autoNextAfter(id: string): Stop | undefined {
-    if (stops.length > 2) return undefined;
-    const index = orderedStops.findIndex((stop) => stop.id === id);
-    return orderedStops.slice(index + 1).find((stop) => stop.lat === null);
-  }
 
   function updateStopPoint(
     id: string,
@@ -992,6 +1022,9 @@ export default function Home() {
       return [...prev.slice(0, lastLoad + 1), stop, ...prev.slice(lastLoad + 1)];
     });
     setActiveId(stop.id);
+    setDraft(null);
+    setFitTick((tick) => tick + 1);
+    setMapOpen(true);
   }
 
   function removeStop(id: string) {
@@ -1024,11 +1057,8 @@ export default function Home() {
   }
 
   function pick(lat: number, lng: number) {
-    if (!activeStop) return;
     const address = `Titik di peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-    const next = autoNextAfter(activeStop.id);
-    updateStopPoint(activeStop.id, lat, lng, address);
-    if (next) setActiveId(next.id);
+    setDraft({ lat, lng, address });
   }
 
   function useMyLocation() {
@@ -1038,15 +1068,11 @@ export default function Home() {
       );
       return;
     }
-    const stop = activeStop;
-    if (!stop) return;
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         const address = `Lokasi saat ini (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
-        const next = autoNextAfter(stop.id);
-        updateStopPoint(stop.id, latitude, longitude, address);
-        if (next) setActiveId(next.id);
+        setDraft({ lat: latitude, lng: longitude, address });
       },
       () => {
         alert(
@@ -1058,10 +1084,13 @@ export default function Home() {
   }
 
   function selectPoint(lat: number, lng: number, address: string) {
-    if (!activeStop) return;
-    const next = autoNextAfter(activeStop.id);
-    updateStopPoint(activeStop.id, lat, lng, address);
-    if (next) setActiveId(next.id);
+    setDraft({ lat, lng, address });
+  }
+
+  function saveDraft() {
+    if (!draft || !activeStop) return;
+    updateStopPoint(activeStop.id, draft.lat, draft.lng, draft.address);
+    setMapOpen(false);
   }
 
   const helperOptions: Array<{
@@ -1143,14 +1172,26 @@ export default function Home() {
     scrollToPanel();
   }
 
+  function openMap(stopId?: string) {
+    const target = stopId
+      ? stops.find((stop) => stop.id === stopId)
+      : (activeStop ?? stops[0]);
+    if (!target) return;
+    setActiveId(target.id);
+    setDraft(
+      target.lat !== null && target.lng !== null
+        ? { lat: target.lat, lng: target.lng, address: target.address }
+        : null,
+    );
+    setFitTick((tick) => tick + 1);
+    setMapOpen(true);
+  }
+
   function showRoute(mode: StopKind) {
     const target =
       stops.find((stop) => stop.kind === mode && stop.lat === null) ??
       stops.find((stop) => stop.kind === mode);
-    if (target) setActiveId(target.id);
-    document
-      .getElementById("peta")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    openMap(target?.id);
   }
 
   return (
@@ -1257,31 +1298,176 @@ export default function Home() {
         </section>
 
         <section className="container workspace" id="pesan">
-          <div className="map-card" id="peta">
+          {mapOpen && (
+            <div
+              className="map-backdrop"
+              onClick={() => setMapOpen(false)}
+              aria-hidden="true"
+            />
+          )}
+          <div className={`map-card${mapOpen ? " is-modal" : ""}`} id="peta">
             <div className="map-card-head">
               <div className="map-card-title">
-                <h2>Rute angkutan</h2>
+                <h2>
+                  {mapOpen
+                    ? `Pilih titik ${activeStop ? stopLabel(activeStop, stops) : ""}`
+                    : "Rute angkutan"}
+                </h2>
                 <p>
-                  Klik peta atau cari alamat untuk menandai{" "}
-                  <strong>
-                    {activeStop ? stopLabel(activeStop, stops) : "titik"}
-                  </strong>
-                  . Pilih kartu titik di bawah untuk menandai titik lain.
+                  {mapOpen ? (
+                    <>
+                      Klik peta, cari alamat, atau pakai lokasi saya. Tekan{" "}
+                      <strong>Simpan titik</strong> untuk menyimpan{" "}
+                      {activeStop ? stopLabel(activeStop, stops) : "titik"}.
+                    </>
+                  ) : (
+                    "Tandai titik muat dan bongkar lewat peta. Rute mobil dan jarak dihitung otomatis."
+                  )}
                 </p>
               </div>
-              <div
-                className={`map-target${activeStop?.kind === "unload" ? " is-unload" : ""}`}
-                aria-live="polite"
-              >
-                <span
-                  className={`segment-dot ${activeStop?.kind ?? "load"}`}
-                  aria-hidden="true"
-                />
-                Menandai {activeStop ? stopLabel(activeStop, stops) : "—"}
+              <div className="map-card-head-actions">
+                {mapOpen ? (
+                  <button
+                    type="button"
+                    className="map-close"
+                    onClick={() => setMapOpen(false)}
+                    aria-label="Tutup peta"
+                    autoFocus
+                  >
+                    <IconX size={18} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => openMap()}
+                  >
+                    <IconMapPin size={15} />
+                    Buka peta
+                  </button>
+                )}
               </div>
             </div>
 
-            <div className="map-canvas">
+            {!mapOpen && (
+              <div className="map-preview">
+                {(
+                  [
+                    { kind: "load", items: loadStops },
+                    { kind: "unload", items: unloadStops },
+                  ] as Array<{ kind: StopKind; items: Stop[] }>
+                ).map(({ kind, items }) => (
+                  <div className={`map-preview-group is-${kind}`} key={kind}>
+                    <div className="map-preview-group-head">
+                      <span className="map-preview-group-title">
+                        <span
+                          className={`segment-dot ${kind}`}
+                          aria-hidden="true"
+                        />
+                        Titik {STOP_KIND_LABEL[kind]}
+                      </span>
+                      <button
+                        type="button"
+                        className="map-preview-add"
+                        onClick={() => addStop(kind)}
+                      >
+                        <IconPlus size={13} />
+                        Tambah
+                      </button>
+                    </div>
+                    <ul className="map-preview-rows">
+                      {items.map((stop, index) => {
+                        const hasPoint = stop.lat !== null && stop.lng !== null;
+                        const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
+                        const coords = hasPoint
+                          ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
+                          : "Belum ditandai";
+                        return (
+                          <li
+                            key={stop.id}
+                            className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
+                          >
+                            <div className="map-preview-main">
+                              <button
+                                type="button"
+                                className="map-preview-pick"
+                                onClick={() => openMap(stop.id)}
+                                aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
+                              >
+                                <span className={`map-preview-label is-${kind}`}>
+                                  {label}
+                                </span>
+                                <span className="map-preview-coords">
+                                  {coords}
+                                </span>
+                                <span className="map-preview-action">
+                                  {hasPoint ? "Ubah" : "Pilih"}
+                                </span>
+                              </button>
+                              {hasPoint && (
+                                <span
+                                  className="map-preview-address"
+                                  title={stop.address}
+                                >
+                                  {stop.address}
+                                </span>
+                              )}
+                            </div>
+                            {(items.length > 1 || hasPoint) && (
+                              <button
+                                type="button"
+                                className="map-preview-remove"
+                                aria-label={`Hapus titik ${label}`}
+                                onClick={() => removeStop(stop.id)}
+                              >
+                                Hapus
+                              </button>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
+                <div
+                  className={`map-preview-meta${routeStatus === "error" ? " is-warn" : ""}`}
+                  aria-live="polite"
+                >
+                  {routeStatus === "loading" && (
+                    <>
+                      <span className="spinner" aria-hidden="true" />
+                      <span>Menghitung rute mobil...</span>
+                    </>
+                  )}
+                  {routeStatus === "ready" && routeSummary && (
+                    <>
+                      <IconRoute size={14} />
+                      <span>
+                        Rute mobil {routeSummary.km.toFixed(1)} km · ±
+                        {Math.max(1, Math.round(routeSummary.minutes))} menit ·{" "}
+                        {stops.length} titik
+                      </span>
+                    </>
+                  )}
+                  {routeStatus === "error" && (
+                    <>
+                      <IconAlert size={14} />
+                      <span>Rute mobil belum tersedia.</span>
+                    </>
+                  )}
+                  {routeStatus === "idle" && !allStopsSet && (
+                    <>
+                      <IconAlert size={14} />
+                      <span>Lengkapi semua titik untuk melihat rute.</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {mapOpen && (
+              <>
+                <div className="map-canvas">
               <MapContainer
                 center={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
                 zoom={12}
@@ -1299,34 +1485,46 @@ export default function Home() {
                   position={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
                   icon={iconGarage}
                 />
-                {stops.map((stop) =>
-                  stop.lat !== null && stop.lng !== null ? (
-                    <Marker
-                      key={stop.id}
-                      position={[stop.lat, stop.lng]}
-                      icon={
-                        stopIcons[stop.id] ??
-                        makeIcon(
-                          stop.kind === "load" ? "#1F4D3A" : "#E07A2E",
-                          stop.kind === "load" ? "M" : "B",
-                          stop.id === activeId,
-                        )
-                      }
-                      draggable
-                      eventHandlers={{
-                        click: () => setActiveId(stop.id),
-                        dragend: (event) => {
-                          const marker = event.target.getLatLng();
-                          updateStopPoint(
-                            stop.id,
-                            marker.lat,
-                            marker.lng,
-                            `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
-                          );
-                        },
-                      }}
-                    />
-                  ) : null,
+                {stops
+                  .filter((stop) => stop.id !== activeStop?.id)
+                  .map((stop) =>
+                    stop.lat !== null && stop.lng !== null ? (
+                      <Marker
+                        key={stop.id}
+                        position={[stop.lat, stop.lng]}
+                        icon={
+                          stopIcons[stop.id] ??
+                          makeIcon(
+                            stop.kind === "load" ? "#1F4D3A" : "#E07A2E",
+                            stop.kind === "load" ? "M" : "B",
+                          )
+                        }
+                      />
+                    ) : null,
+                  )}
+                {activeStop && draft && (
+                  <Marker
+                    position={[draft.lat, draft.lng]}
+                    icon={
+                      stopIcons[activeStop.id] ??
+                      makeIcon(
+                        activeStop.kind === "load" ? "#1F4D3A" : "#E07A2E",
+                        activeStop.kind === "load" ? "M" : "B",
+                        true,
+                      )
+                    }
+                    draggable
+                    eventHandlers={{
+                      dragend: (event) => {
+                        const marker = event.target.getLatLng();
+                        setDraft({
+                          lat: marker.lat,
+                          lng: marker.lng,
+                          address: `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
+                        });
+                      },
+                    }}
+                  />
                 )}
                 {garageToFirstLine.length > 1 && (
                   <Polyline
@@ -1378,154 +1576,50 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="route-summary">
-              <div className="route-tools">
+            <div className="map-modal-foot">
+              <div
+                className={`map-draft${draft ? "" : " is-empty"}`}
+                aria-live="polite"
+              >
+                <span
+                  className={`segment-dot ${activeStop?.kind ?? "load"}`}
+                  aria-hidden="true"
+                />
+                <div className="map-draft-text">
+                  <span className="map-draft-label">
+                    {activeStop
+                      ? `${stopLabel(activeStop, stops)} · Titik ${STOP_KIND_LABEL[activeStop.kind]}`
+                      : "Titik"}
+                  </span>
+                  <p>
+                    {draft
+                      ? draft.address
+                      : "Belum ada titik. Klik peta, cari alamat, atau pakai lokasi saya."}
+                  </p>
+                </div>
+              </div>
+              <div className="map-modal-actions">
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => setFitTick((tick) => tick + 1)}
-                  disabled={fitPositions.length < 2}
+                  onClick={() => setMapOpen(false)}
                 >
-                  <IconRoute size={14} />
-                  Lihat rute di peta
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={saveDraft}
+                  disabled={!draft}
+                >
+                  <IconMapPin size={15} />
+                  Simpan titik
                 </button>
               </div>
-              <div className="route-groups">
-                {(
-                  [
-                    { kind: "load", items: loadStops },
-                    { kind: "unload", items: unloadStops },
-                  ] as Array<{ kind: StopKind; items: Stop[] }>
-                ).map(({ kind, items }) => (
-                  <div className={`route-group is-${kind}`} key={kind}>
-                    <div className="route-group-head">
-                      <span className="route-group-title">
-                        <span className={`segment-dot ${kind}`} aria-hidden="true" />
-                        Titik {STOP_KIND_LABEL[kind]}
-                      </span>
-                      <button
-                        type="button"
-                        className="route-add"
-                        onClick={() => addStop(kind)}
-                      >
-                        + Tambah
-                      </button>
-                    </div>
-                    <div className="route-list">
-                      {items.map((stop, index) => {
-                        const selected = activeId === stop.id;
-                        const hasPoint = stop.lat !== null && stop.lng !== null;
-                        const floor = floorOf(stop.id);
-                        const fee = floorFee(floor);
-                        const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
-                        return (
-                          <div
-                            key={stop.id}
-                            className={`route-point${kind === "unload" ? " is-unload" : ""}${selected ? " is-active" : ""}`}
-                            onClick={() => setActiveId(stop.id)}
-                            onKeyDown={(event) => {
-                              if (event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                setActiveId(stop.id);
-                              }
-                            }}
-                            role="button"
-                            tabIndex={0}
-                            aria-pressed={selected}
-                            title={`Klik untuk memilih titik ${label} di peta`}
-                          >
-                            <span
-                              className={`route-dot ${kind}`}
-                              aria-hidden="true"
-                            />
-                            <div className="route-point-main">
-                              <span className="route-label">
-                                {label} · Titik {STOP_KIND_LABEL[kind]}
-                              </span>
-                              <p
-                                className={`route-address${hasPoint ? "" : " is-empty"}`}
-                              >
-                                {hasPoint
-                                  ? stop.address
-                                  : selected
-                                    ? "Belum dipilih (klik peta untuk menandai)"
-                                    : "Belum dipilih"}
-                              </p>
-                              <span className="route-floor">
-                                Lantai {floor} ·{" "}
-                                {fee === 0
-                                  ? "Gratis"
-                                  : `+Rp${fee.toLocaleString("id-ID")}`}
-                              </span>
-                            </div>
-                            {selected && (
-                              <span className="route-active-badge">Menandai</span>
-                            )}
-                            {(hasPoint || items.length > 1) && (
-                              <button
-                                type="button"
-                                className="route-clear"
-                                aria-label={`Hapus titik ${label}`}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  removeStop(stop.id);
-                                }}
-                              >
-                                Hapus
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="route-footnote">
-                Catatan: jika alamat kurang sesuai, lengkapi/ubah patokan
-                detailnya saat mengirim pesanan di WhatsApp.
-              </p>
-              {allStopsSet && (
-                <div
-                  className={`route-meta${routeStatus === "error" ? " is-warn" : ""}`}
-                  aria-live="polite"
-                >
-                  {routeStatus === "loading" && (
-                    <>
-                      <span className="spinner" aria-hidden="true" />
-                      <span>Menghitung rute mobil...</span>
-                    </>
-                  )}
-                  {routeStatus === "ready" && routeSummary && (
-                    <>
-                      <IconRoute size={14} />
-                      <span>
-                        Rute mobil {routeSummary.km.toFixed(1)} km · ±
-                        {Math.max(1, Math.round(routeSummary.minutes))} menit
-                        {service === "luar-kota"
-                          ? " · termasuk garasi"
-                          : ` · ${stops.length} titik`}
-                      </span>
-                    </>
-                  )}
-                  {routeStatus === "error" && (
-                    <>
-                      <IconAlert size={14} />
-                      <span>
-                        Rute mobil tidak tersedia. Jarak sementara dihitung
-                        garis lurus.
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
-              {!allStopsSet && stops.some((stop) => stop.lat !== null) && (
-                <div className="route-meta is-warn">
-                  <IconAlert size={14} />
-                  <span>Lengkapi semua titik untuk menghitung rute.</span>
-                </div>
-              )}
             </div>
+
+              </>
+            )}
           </div>
 
           <section

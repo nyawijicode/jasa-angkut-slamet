@@ -9,8 +9,10 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 ## 🌟 Fitur Utama
 
 - **🗺️ Peta Interaktif & Penentuan Rute**:
-  - Penandaan banyak titik muat (jemput) dan bongkar (tujuan) langsung di peta interaktif (Leaflet / OpenStreetMap), dengan label **M1, M2, B1, B2**, dan seterusnya.
-  - Default 1 titik muat dan 1 titik bongkar; titik tambahan bisa ditambah atau dihapus kapan saja.
+  - Peta interaktif (Leaflet / OpenStreetMap) dibuka dalam modal per titik: pilih satu titik (misalnya **M1** atau **B1**), tandai di peta, lalu tekan **Simpan titik** dan modal otomatis tertutup.
+  - Penandaan banyak titik muat (jemput) dan bongkar (tujuan) langsung di peta, dengan label **M1, M2, B1, B2**, dan seterusnya.
+  - Titik bisa dipilih lewat klik peta, pencarian alamat, atau deteksi lokasi; perubahan baru tersimpan setelah **Simpan titik** ditekan, dan tombol **Batal** membuang pilihan.
+  - Default 1 titik muat dan 1 titik bongkar; titik tambahan bisa ditambah atau dihapus kapan saja dari daftar titik di halaman.
   - Pencarian alamat cepat menggunakan layanan geocoding OpenStreetMap Nominatim.
   - Tombol deteksi lokasi otomatis (*Geolocation*).
   - Rute mobil mengikuti jalan sebenarnya (profil *driving* OSRM), bukan garis lurus, dan otomatis menyesuaikan urutan seluruh titik.
