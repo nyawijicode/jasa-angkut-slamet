@@ -841,6 +841,7 @@ export default function Home() {
   const galleryModalRef = useRef<HTMLDivElement | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   function scrollGalleryTo(index: number) {
     const track = galleryTrackRef.current;
@@ -1446,6 +1447,10 @@ export default function Home() {
         step === 5 && quote ? "site-shell has-mobile-bar" : "site-shell"
       }
     >
+      <a className="skip-link" href="#pesan">
+        Langsung ke form pesanan
+      </a>
+
       <header className="site-header">
         <div className="container header-inner">
           <a
@@ -1461,23 +1466,117 @@ export default function Home() {
               <span className="brand-meta">Demak · Semarang · Mranggen</span>
             </span>
           </a>
+
+          <nav className="header-nav" aria-label="Navigasi utama">
+            <a className="nav-link" href="#pesan">
+              Pesan
+            </a>
+            <a className="nav-link" href="#galeri">
+              Galeri
+            </a>
+            <a className="nav-link" href="#faq">
+              FAQ
+            </a>
+            <a className="nav-link" href="#kontak">
+              Kontak
+            </a>
+          </nav>
+
           <div className="header-actions">
             <a className="header-phone" href={`tel:+${BUSINESS.whatsapp}`}>
               <IconPhone size={16} />
               {BUSINESS.phoneDisplay}
             </a>
             <a
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
               href={waChatUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Chat WhatsApp"
             >
-              <IconWhatsApp size={18} />
-              <span>Chat WhatsApp</span>
+              <IconWhatsApp size={16} />
+              <span>WhatsApp</span>
             </a>
+            <button
+              type="button"
+              className="nav-burger"
+              aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              {menuOpen ? (
+                <IconX size={20} />
+              ) : (
+                <svg
+                  viewBox="0 0 20 20"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2.5 5h15M2.5 10h15M2.5 15h15"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
+
+        {menuOpen && (
+          <nav
+            id="mobile-menu"
+            className="mobile-menu"
+            aria-label="Navigasi mobile"
+          >
+            <a
+              className="mobile-menu-link"
+              href="#pesan"
+              onClick={() => setMenuOpen(false)}
+            >
+              <IconMapPin size={18} />
+              Pesan Angkut
+            </a>
+            <a
+              className="mobile-menu-link"
+              href="#galeri"
+              onClick={() => setMenuOpen(false)}
+            >
+              <IconGrid size={18} />
+              Galeri Armada
+            </a>
+            <a
+              className="mobile-menu-link"
+              href="#faq"
+              onClick={() => setMenuOpen(false)}
+            >
+              <IconAlert size={18} />
+              Tanya Jawab (FAQ)
+            </a>
+            <a
+              className="mobile-menu-link"
+              href="#kontak"
+              onClick={() => setMenuOpen(false)}
+            >
+              <IconPhone size={18} />
+              Kontak
+            </a>
+            <a
+              className="mobile-menu-link is-wa"
+              href={waChatUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+            >
+              <IconWhatsApp size={18} />
+              Chat WhatsApp
+            </a>
+          </nav>
+        )}
       </header>
 
       <main>
@@ -2918,9 +3017,141 @@ export default function Home() {
             </>
           )}
         </section>
+
+                <section className="faq-section" id="faq" aria-labelledby="faq-title">
+          <div className="faq-card">
+            <div className="faq-head">
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                Tanya Jawab
+              </span>
+              <h2 className="faq-title" id="faq-title">
+                Pertanyaan yang Sering Diajukan
+              </h2>
+              <p className="faq-lead">
+                Semua info penting seputar layanan angkutan barang dan pindahan Jasa Angkut Slamet.
+              </p>
+            </div>
+
+            <div className="faq-grid">
+              <details className="faq-item" open>
+                <summary className="faq-question">
+                  <span>Berapa tarif jasa angkut Jasa Angkut Slamet?</span>
+                  <span className="faq-chevron" aria-hidden="true">
+                    <IconPlus size={18} className="icon-open" />
+                    <IconMinus size={18} className="icon-close" />
+                  </span>
+                </summary>
+                <div className="faq-answer">
+                  <p>
+                    Tarif dihitung otomatis dan transparan: dasar tarif jarak <strong>Rp 8.000 / km</strong> dengan setoran armada awal <strong>Rp 50.000</strong>. Anda juga bisa menambahkan opsi bantuan tenaga bongkar muat serta tambahan lantai jika barang perlu dinaikkan/diturunkan lewat tangga.
+                  </p>
+                </div>
+              </details>
+
+              <details className="faq-item">
+                <summary className="faq-question">
+                  <span>Wilayah mana saja yang dilayani?</span>
+                  <span className="faq-chevron" aria-hidden="true">
+                    <IconPlus size={18} className="icon-open" />
+                    <IconMinus size={18} className="icon-close" />
+                  </span>
+                </summary>
+                <div className="faq-answer">
+                  <p>
+                    Kami melayani wilayah <strong>Demak, Semarang, Mranggen, Kebonbatur</strong>, dan sekitarnya (dalam kota). Kami juga siap melayani pengiriman <strong>Luar Kota</strong> (Jawa Tengah &amp; antar-kota lainnya) dengan sistem rute pulang-pergi terhitung dari garasi.
+                  </p>
+                </div>
+              </details>
+
+              <details className="faq-item">
+                <summary className="faq-question">
+                  <span>Bagaimana cara memesan jasa angkut?</span>
+                  <span className="faq-chevron" aria-hidden="true">
+                    <IconPlus size={18} className="icon-open" />
+                    <IconMinus size={18} className="icon-close" />
+                  </span>
+                </summary>
+                <div className="faq-answer">
+                  <p>
+                    Sangat mudah tanpa perlu download aplikasi:
+                  </p>
+                  <ol className="faq-steps">
+                    <li>Tentukan titik muat dan titik bongkar di peta (bisa lebih dari satu titik).</li>
+                    <li>Pilih jenis layanan, opsi bantuan tenaga, dan lantai bangunan.</li>
+                    <li>Klik tombol <strong>Kirim pesanan ke WhatsApp</strong> untuk konfirmasi jadwal langsung dengan sopir kami.</li>
+                  </ol>
+                </div>
+              </details>
+
+              <details className="faq-item">
+                <summary className="faq-question">
+                  <span>Apakah tersedia bantuan tenaga bongkar muat?</span>
+                  <span className="faq-chevron" aria-hidden="true">
+                    <IconPlus size={18} className="icon-open" />
+                    <IconMinus size={18} className="icon-close" />
+                  </span>
+                </summary>
+                <div className="faq-answer">
+                  <p>
+                    Ya, kami menyediakan 3 pilihan sesuai kebutuhan Anda:
+                  </p>
+                  <ul>
+                    <li><strong>Bongkar muat sendiri:</strong> Gratis, barang diserahkan di depan armada.</li>
+                    <li><strong>Sopir ikut bongkar muat:</strong> Tambahan Rp 50.000 (1 tenaga bantuan).</li>
+                    <li><strong>Sopir + Kenek:</strong> Tambahan Rp 100.000 (2 tenaga bantuan untuk barang banyak/berat).</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details className="faq-item">
+                <summary className="faq-question">
+                  <span>Apakah barang saya aman selama perjalanan?</span>
+                  <span className="faq-chevron" aria-hidden="true">
+                    <IconPlus size={18} className="icon-open" />
+                    <IconMinus size={18} className="icon-close" />
+                  </span>
+                </summary>
+                <div className="faq-answer">
+                  <p>
+                    Tentu aman. Armada kami selalu dilengkapi tali pengikat kuat dan terpal penutup anti hujan/debu untuk melindungi muatan perabotan rumah, kos, motor, maupun material usaha Anda.
+                  </p>
+                </div>
+              </details>
+
+              <details className="faq-item">
+                <summary className="faq-question">
+                  <span>Kapan jam operasional Jasa Angkut Slamet?</span>
+                  <span className="faq-chevron" aria-hidden="true">
+                    <IconPlus size={18} className="icon-open" />
+                    <IconMinus size={18} className="icon-close" />
+                  </span>
+                </summary>
+                <div className="faq-answer">
+                  <p>
+                    Kami melayani pengiriman setiap hari dari pukul <strong>06:00 sampai 22:00 WIB</strong>. Untuk pengiriman malam hari atau dini hari, silakan komunikasikan terlebih dahulu via WhatsApp agar jadwal armada dapat dipersiapkan.
+                  </p>
+                </div>
+              </details>
+            </div>
+
+            <div className="faq-foot">
+              <span>Masih ada pertanyaan seputar muatan atau rute?</span>
+              <a
+                className="btn btn-secondary btn-sm"
+                href={waChatUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconWhatsApp size={16} />
+                <span>Tanya langsung via WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <footer className="site-footer">
+      <footer className="site-footer" id="kontak">
         <div className="container">
           <div className="footer-grid">
             <div className="footer-brand">
@@ -2938,7 +3169,8 @@ export default function Home() {
               <p>
                 Melayani angkutan barang, pindahan rumah, dan kiriman usaha di
                 Demak, Semarang, Kebonbatur, Mranggen, dan sekitarnya.{" "}
-                <a href="#galeri">Lihat galeri armada</a>.
+                <a href="#galeri">Lihat galeri armada</a> atau{" "}
+                <a href="#faq">baca FAQ</a>.
               </p>
             </div>
             <div className="footer-col">

@@ -10,7 +10,7 @@
     <meta name="author" content="Jasa Angkut Slamet" />
     <meta
       name="keywords"
-      content="jasa angkut Demak, jasa angkut Semarang, angkutan barang, pindahan rumah, Jasa Angkut Slamet"
+      content="jasa angkut Demak, jasa angkut Semarang, angkutan barang, pindahan rumah, jasa pindahan Demak, angkut barang Mranggen, Jasa Angkut Slamet"
     />
     <meta name="geo.region" content="ID-JT" />
     <meta
@@ -19,27 +19,46 @@
     />
     <meta name="geo.position" content="-7.056966;110.496811" />
     <meta name="ICBM" content="-7.056966, 110.496811" />
+
+    <!-- Mobile & PWA -->
+    <meta name="theme-color" content="#1F4D3A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Angkut Slamet" />
+    <meta name="format-detection" content="telephone=yes" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap"
+    />
+
+    <!-- Title & description -->
     <title>
-      Jasa Angkut Demak & Semarang — Hitung Tarif Online | Jasa Angkut Slamet
+      Jasa Angkut Demak &amp; Semarang — Hitung Tarif Online | Jasa Angkut Slamet
     </title>
     <meta
       name="description"
-      content="Hitung ongkos angkut barang Demak, Semarang, Kebonbatur. Tandai titik muat & bongkar, langsung kirim pesanan ke WhatsApp Jasa Angkut Slamet."
+      content="Hitung ongkos angkut barang Demak, Semarang, Kebonbatur. Tandai titik muat &amp; bongkar di peta, estimasi harga langsung muncul, kirim ke WhatsApp Jasa Angkut Slamet."
     />
     <link rel="canonical" href="https://jasaangkutslamet.com/" />
     <link rel="alternate" hreflang="id" href="https://jasaangkutslamet.com/" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="id_ID" />
     <meta property="og:site_name" content="Jasa Angkut Slamet" />
     <meta
       property="og:title"
-      content="Jasa Angkut Demak & Semarang — Hitung Tarif Online | Jasa Angkut Slamet"
+      content="Jasa Angkut Demak &amp; Semarang — Hitung Tarif Online | Jasa Angkut Slamet"
     />
     <meta
       property="og:description"
-      content="Hitung ongkos angkut barang Demak, Semarang, Kebonbatur. Tandai titik muat & bongkar, langsung kirim pesanan ke WhatsApp Jasa Angkut Slamet."
+      content="Hitung ongkos angkut barang Demak, Semarang, Kebonbatur. Tandai titik muat &amp; bongkar di peta, estimasi harga langsung muncul, kirim ke WhatsApp Jasa Angkut Slamet."
     />
     <meta
       property="og:image"
@@ -65,15 +84,17 @@
       property="og:see_also"
       content="https://www.facebook.com/people/Jasa-Angkut-Slamet-Kebonbatur-Mranggen-Demak/61592066215524/"
     />
+
+    <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://jasaangkutslamet.com/" />
     <meta
       name="twitter:title"
-      content="Jasa Angkut Demak & Semarang — Hitung Tarif Online | Jasa Angkut Slamet"
+      content="Jasa Angkut Demak &amp; Semarang — Hitung Tarif Online | Jasa Angkut Slamet"
     />
     <meta
       name="twitter:description"
-      content="Hitung ongkos angkut barang Demak, Semarang, Kebonbatur. Tandai titik muat & bongkar, langsung kirim pesanan ke WhatsApp Jasa Angkut Slamet."
+      content="Hitung ongkos angkut barang Demak, Semarang, Kebonbatur. Tandai titik muat &amp; bongkar di peta, estimasi harga langsung muncul, kirim ke WhatsApp Jasa Angkut Slamet."
     />
     <meta
       name="twitter:image"
@@ -83,10 +104,13 @@
       name="twitter:image:alt"
       content="Armada truk Jasa Angkut Slamet untuk angkutan barang dan pindahan di Demak dan Semarang"
     />
-    <meta name="theme-color" content="#1F4D3A" />
+
+    <!-- Icons & Manifest -->
     <link rel="icon" type="image/png" href="/icon.png" />
     <link rel="apple-touch-icon" href="/icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Structured Data: MovingCompany (LocalBusiness) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -118,6 +142,15 @@
           "longitude": 110.496811
         },
         "areaServed": ["Demak", "Semarang", "Kebonbatur", "Mranggen"],
+        "priceRange": "Rp 50.000 – Rp 500.000",
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            "opens": "06:00",
+            "closes": "22:00"
+          }
+        ],
         "sameAs": [
           "https://www.instagram.com/jasaangkutslamet.mranggen/",
           "https://www.tiktok.com/@jasaangkutslametmranggen",
@@ -125,6 +158,87 @@
         ]
       }
     </script>
+
+    <!-- Structured Data: WebSite + SearchAction -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Jasa Angkut Slamet",
+        "url": "https://jasaangkutslamet.com/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://jasaangkutslamet.com/#pesan",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Beranda",
+            "item": "https://jasaangkutslamet.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Hitung Tarif Angkut",
+            "item": "https://jasaangkutslamet.com/#pesan"
+          }
+        ]
+      }
+    </script>
+
+    <!-- Structured Data: FAQ -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Berapa tarif jasa angkut Jasa Angkut Slamet?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tarif dihitung berdasarkan jarak (Rp 8.000/km), setoran armada Rp 50.000, dan biaya tambahan untuk bantuan bongkar muat atau angkut barang ke lantai atas. Gunakan kalkulator di website ini untuk estimasi instan."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wilayah mana saja yang dilayani Jasa Angkut Slamet?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Jasa Angkut Slamet melayani Demak, Semarang, Kebonbatur, Mranggen, dan sekitarnya. Untuk jarak yang lebih jauh, tersedia layanan luar kota."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bagaimana cara memesan jasa angkut?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tandai titik muat dan bongkar di peta, isi detail pesanan, lalu kirim estimasi langsung ke WhatsApp Jasa Angkut Slamet di nomor 0813-2762-3942."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Apakah tersedia bantuan bongkar muat?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ya, tersedia tiga pilihan: tanpa bantuan (bongkar muat sendiri), sopir ikut bongkar muat (Rp 50.000), atau sopir + kenek (Rp 100.000)."
+            }
+          }
+        ]
+      }
+    </script>
+
+    <!-- Structured Data: ImageGallery -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
