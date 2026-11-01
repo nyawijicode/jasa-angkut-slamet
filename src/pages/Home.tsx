@@ -128,6 +128,73 @@ function IconWhatsApp({ size = 20, className }: IconProps) {
   );
 }
 
+function IconInstagram({ size = 20, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <rect
+        x="3.5"
+        y="3.5"
+        width="17"
+        height="17"
+        rx="5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="4"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function IconTikTok({ size = 20, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <path
+        d="M14.5 3.5v10.2a3.8 3.8 0 1 1-3.8-3.8"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14.5 3.5c.4 2.7 2.1 4.4 4.6 4.7"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconFacebook({ size = 20, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <rect
+        x="3.5"
+        y="3.5"
+        width="17"
+        height="17"
+        rx="4.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <path
+        d="M13.7 20v-6.1h2.1l.3-2.4h-2.4V9.9c0-.7.2-1.2 1.2-1.2h1.3V6.6c-.2 0-1-.1-1.8-.1-1.8 0-3 1.1-3 3.1v1.9H9.3v2.4h2.1V20"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function IconCheck({ size = 20, className }: IconProps) {
   return (
     <svg {...svgProps} width={size} height={size} className={className}>
@@ -343,6 +410,49 @@ function IconX({ size = 20, className }: IconProps) {
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconGrid({ size = 20, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <rect
+        x="4"
+        y="4"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <rect
+        x="13"
+        y="4"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <rect
+        x="4"
+        y="13"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <rect
+        x="13"
+        y="13"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
       />
     </svg>
   );
@@ -645,6 +755,39 @@ const QUICK_NOTES = [
   "Ada tangga sempit / tinggi",
 ];
 
+const GALLERY = [
+  {
+    base: "galeri-jasa-angkut-slamet-1",
+    alt: "Dokumentasi armada truk Jasa Angkut Slamet",
+    caption: "Armada truk Jasa Angkut Slamet",
+  },
+  {
+    base: "galeri-jasa-angkut-slamet-2",
+    alt: "Dokumentasi proses bongkar muat Jasa Angkut Slamet",
+    caption: "Proses bongkar muat barang",
+  },
+  {
+    base: "galeri-jasa-angkut-slamet-3",
+    alt: "Dokumentasi layanan angkut barang Jasa Angkut Slamet",
+    caption: "Layanan angkut barang",
+  },
+  {
+    base: "galeri-jasa-angkut-slamet-4",
+    alt: "Dokumentasi pengiriman barang Jasa Angkut Slamet",
+    caption: "Pengiriman ke lokasi pelanggan",
+  },
+  {
+    base: "galeri-jasa-angkut-slamet-5",
+    alt: "Dokumentasi layanan pindahan Jasa Angkut Slamet",
+    caption: "Bantuan pindahan rumah",
+  },
+  {
+    base: "galeri-jasa-angkut-slamet-6",
+    alt: "Dokumentasi muatan angkutan Jasa Angkut Slamet",
+    caption: "Muatan tertata di bak truk",
+  },
+];
+
 export default function Home() {
   const nextStopId = useRef(3);
   const [stops, setStops] = useState<Stop[]>(() => [
@@ -671,6 +814,42 @@ export default function Home() {
   const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
 
   const panelRef = useRef<HTMLElement | null>(null);
+  const galleryTrackRef = useRef<HTMLUListElement | null>(null);
+  const galleryTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const galleryModalRef = useRef<HTMLDivElement | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
+  function scrollGalleryTo(index: number) {
+    const track = galleryTrackRef.current;
+    if (!track) return;
+    const total = GALLERY.length;
+    const wrapped = ((index % total) + total) % total;
+    track.scrollTo({
+      left: wrapped * track.clientWidth,
+      behavior: wrapped === index ? "smooth" : ("instant" as ScrollBehavior),
+    });
+    setGalleryIndex(wrapped);
+  }
+
+  function handleGalleryScroll() {
+    const track = galleryTrackRef.current;
+    if (!track || track.clientWidth === 0) return;
+    const nextIndex = Math.round(track.scrollLeft / track.clientWidth);
+    setGalleryIndex(
+      Math.max(0, Math.min(GALLERY.length - 1, nextIndex)),
+    );
+  }
+
+  function handleGalleryKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      scrollGalleryTo(galleryIndex - 1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      scrollGalleryTo(galleryIndex + 1);
+    }
+  }
 
   useEffect(() => {
     if (!mapOpen) return;
@@ -685,6 +864,48 @@ export default function Home() {
       document.body.style.overflow = previousOverflow;
     };
   }, [mapOpen]);
+
+  useEffect(() => {
+    if (!galleryOpen) return;
+    const dialog = galleryModalRef.current;
+    const getFocusable = () =>
+      dialog
+        ? Array.from(
+            dialog.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled])',
+            ),
+          )
+        : [];
+    getFocusable()[0]?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setGalleryOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = getFocusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      galleryTriggerRef.current?.focus();
+    };
+  }, [galleryOpen]);
 
   const today = useMemo(todayISO, []);
   const nameError = false;
@@ -717,7 +938,9 @@ export default function Home() {
         .map((stop) => ({ lat: stop.lat as number, lng: stop.lng as number })),
     [orderedStops],
   );
-  const routeKey = routePoints.map((point) => `${point.lat},${point.lng}`).join("|");
+  const routeKey = routePoints
+    .map((point) => `${point.lat},${point.lng}`)
+    .join("|");
 
   const loadIconKey = loadStops.map((stop) => stop.id).join(",");
   const unloadIconKey = unloadStops.map((stop) => stop.id).join(",");
@@ -760,18 +983,20 @@ export default function Home() {
     const last = routePoints[routePoints.length - 1];
 
     Promise.all([
-      ...mainPairs.map(([from, to]) =>
-        fetchRoute(from, to, controller.signal),
-      ),
+      ...mainPairs.map(([from, to]) => fetchRoute(from, to, controller.signal)),
       roundTrip ? fetchRoute(BUSINESS.garage, first, controller.signal) : null,
       roundTrip ? fetchRoute(last, BUSINESS.garage, controller.signal) : null,
     ]).then((results) => {
       if (controller.signal.aborted) return;
-      const main = results.slice(0, mainPairs.length) as Array<RouteResult | null>;
+      const main = results.slice(
+        0,
+        mainPairs.length,
+      ) as Array<RouteResult | null>;
       const garageToFirst = results[mainPairs.length] ?? null;
       const lastToGarage = results[mainPairs.length + 1] ?? null;
       const mainOk = main.length > 0 && main.every(Boolean);
-      const garageOk = !roundTrip || (Boolean(garageToFirst) && Boolean(lastToGarage));
+      const garageOk =
+        !roundTrip || (Boolean(garageToFirst) && Boolean(lastToGarage));
       setPlan({
         main: main.filter((leg): leg is RouteResult => Boolean(leg)),
         garageToFirst,
@@ -795,8 +1020,7 @@ export default function Home() {
     {
       label: "Titik muat",
       done:
-        loadStops.length > 0 &&
-        loadStops.every((stop) => stop.lat !== null),
+        loadStops.length > 0 && loadStops.every((stop) => stop.lat !== null),
     },
     {
       label: "Titik bongkar",
@@ -974,9 +1198,7 @@ export default function Home() {
       ...garageToFirstLine,
       ...routeLine,
       ...lastToGarageLine,
-      ...routePoints.map(
-        (point) => [point.lat, point.lng] as [number, number],
-      ),
+      ...routePoints.map((point) => [point.lat, point.lng] as [number, number]),
       ...(draft ? [[draft.lat, draft.lng] as [number, number]] : []),
     ],
     [garageToFirstLine, routeLine, lastToGarageLine, routePoints, draft],
@@ -1019,7 +1241,11 @@ export default function Home() {
     setStops((prev) => {
       if (kind === "unload") return [...prev, stop];
       const lastLoad = prev.map((item) => item.kind).lastIndexOf("load");
-      return [...prev.slice(0, lastLoad + 1), stop, ...prev.slice(lastLoad + 1)];
+      return [
+        ...prev.slice(0, lastLoad + 1),
+        stop,
+        ...prev.slice(lastLoad + 1),
+      ];
     });
     setActiveId(stop.id);
     setDraft(null);
@@ -1212,7 +1438,7 @@ export default function Home() {
             </span>
             <span>
               <span className="brand-name">Jasa Angkut Slamet</span>
-              <span className="brand-meta">Demak · Semarang · Kebonbatur</span>
+              <span className="brand-meta">Demak · Semarang · Mranggen</span>
             </span>
           </a>
           <div className="header-actions">
@@ -1249,8 +1475,8 @@ export default function Home() {
               </h1>
               <p className="hero-lead">
                 Tandai satu atau beberapa titik muat dan bongkar di peta.
-                Estimasi harga muncul otomatis, lengkap dengan rincian yang
-                bisa langsung dikirim ke Jasa Angkut Slamet.
+                Estimasi harga muncul otomatis, lengkap dengan rincian yang bisa
+                langsung dikirim ke Jasa Angkut Slamet.
               </p>
               <ul className="hero-points">
                 <li className="hero-point">
@@ -1394,7 +1620,9 @@ export default function Home() {
                                 onClick={() => openMap(stop.id)}
                                 aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
                               >
-                                <span className={`map-preview-label is-${kind}`}>
+                                <span
+                                  className={`map-preview-label is-${kind}`}
+                                >
                                   {label}
                                 </span>
                                 <span className="map-preview-coords">
@@ -1468,156 +1696,157 @@ export default function Home() {
             {mapOpen && (
               <>
                 <div className="map-canvas">
-              <MapContainer
-                center={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
-                zoom={12}
-                scrollWheelZoom={false}
-                zoomControl={false}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer
-                  attribution="&copy; OpenStreetMap contributors"
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <ZoomControl position="bottomleft" />
-                <ClickHandler onPick={pick} />
-                <Marker
-                  position={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
-                  icon={iconGarage}
-                />
-                {stops
-                  .filter((stop) => stop.id !== activeStop?.id)
-                  .map((stop) =>
-                    stop.lat !== null && stop.lng !== null ? (
+                  <MapContainer
+                    center={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
+                    zoom={12}
+                    scrollWheelZoom={false}
+                    zoomControl={false}
+                    style={{ height: "100%", width: "100%" }}
+                  >
+                    <TileLayer
+                      attribution="&copy; OpenStreetMap contributors"
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <ZoomControl position="bottomleft" />
+                    <ClickHandler onPick={pick} />
+                    <Marker
+                      position={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
+                      icon={iconGarage}
+                    />
+                    {stops
+                      .filter((stop) => stop.id !== activeStop?.id)
+                      .map((stop) =>
+                        stop.lat !== null && stop.lng !== null ? (
+                          <Marker
+                            key={stop.id}
+                            position={[stop.lat, stop.lng]}
+                            icon={
+                              stopIcons[stop.id] ??
+                              makeIcon(
+                                stop.kind === "load" ? "#1F4D3A" : "#E07A2E",
+                                stop.kind === "load" ? "M" : "B",
+                              )
+                            }
+                          />
+                        ) : null,
+                      )}
+                    {activeStop && draft && (
                       <Marker
-                        key={stop.id}
-                        position={[stop.lat, stop.lng]}
+                        position={[draft.lat, draft.lng]}
                         icon={
-                          stopIcons[stop.id] ??
+                          stopIcons[activeStop.id] ??
                           makeIcon(
-                            stop.kind === "load" ? "#1F4D3A" : "#E07A2E",
-                            stop.kind === "load" ? "M" : "B",
+                            activeStop.kind === "load" ? "#1F4D3A" : "#E07A2E",
+                            activeStop.kind === "load" ? "M" : "B",
+                            true,
                           )
                         }
+                        draggable
+                        eventHandlers={{
+                          dragend: (event) => {
+                            const marker = event.target.getLatLng();
+                            setDraft({
+                              lat: marker.lat,
+                              lng: marker.lng,
+                              address: `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
+                            });
+                          },
+                        }}
                       />
-                    ) : null,
-                  )}
-                {activeStop && draft && (
-                  <Marker
-                    position={[draft.lat, draft.lng]}
-                    icon={
-                      stopIcons[activeStop.id] ??
-                      makeIcon(
-                        activeStop.kind === "load" ? "#1F4D3A" : "#E07A2E",
-                        activeStop.kind === "load" ? "M" : "B",
-                        true,
-                      )
-                    }
-                    draggable
-                    eventHandlers={{
-                      dragend: (event) => {
-                        const marker = event.target.getLatLng();
-                        setDraft({
-                          lat: marker.lat,
-                          lng: marker.lng,
-                          address: `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
-                        });
-                      },
-                    }}
-                  />
-                )}
-                {garageToFirstLine.length > 1 && (
-                  <Polyline
-                    positions={garageToFirstLine}
-                    color="#6B7178"
-                    weight={3}
-                    opacity={0.65}
-                    dashArray="6 7"
-                  />
-                )}
-                {lastToGarageLine.length > 1 && (
-                  <Polyline
-                    positions={lastToGarageLine}
-                    color="#6B7178"
-                    weight={3}
-                    opacity={0.65}
-                    dashArray="6 7"
-                  />
-                )}
-                {routeLine.length > 1 && (
-                  <>
-                    <Polyline
-                      positions={routeLine}
-                      color="#FFFFFF"
-                      weight={8}
-                      opacity={0.9}
+                    )}
+                    {garageToFirstLine.length > 1 && (
+                      <Polyline
+                        positions={garageToFirstLine}
+                        color="#6B7178"
+                        weight={3}
+                        opacity={0.65}
+                        dashArray="6 7"
+                      />
+                    )}
+                    {lastToGarageLine.length > 1 && (
+                      <Polyline
+                        positions={lastToGarageLine}
+                        color="#6B7178"
+                        weight={3}
+                        opacity={0.65}
+                        dashArray="6 7"
+                      />
+                    )}
+                    {routeLine.length > 1 && (
+                      <>
+                        <Polyline
+                          positions={routeLine}
+                          color="#FFFFFF"
+                          weight={8}
+                          opacity={0.9}
+                        />
+                        <Polyline
+                          positions={routeLine}
+                          color="#1F4D3A"
+                          weight={4}
+                        />
+                      </>
+                    )}
+                    <FitRoute positions={fitPositions} signal={fitTick} />
+                    <MapSearchControl
+                      active={activeStop?.kind ?? "load"}
+                      activeLabel={
+                        activeStop ? stopLabel(activeStop, stops) : "M1"
+                      }
+                      onSelect={selectPoint}
                     />
-                    <Polyline
-                      positions={routeLine}
-                      color="#1F4D3A"
-                      weight={4}
-                    />
-                  </>
-                )}
-                <FitRoute positions={fitPositions} signal={fitTick} />
-                <MapSearchControl
-                  active={activeStop?.kind ?? "load"}
-                  activeLabel={activeStop ? stopLabel(activeStop, stops) : "M1"}
-                  onSelect={selectPoint}
-                />
-              </MapContainer>
-              <button
-                type="button"
-                className="map-locate"
-                onClick={useMyLocation}
-              >
-                <IconTarget size={17} />
-                <span>Lokasi saya</span>
-              </button>
-            </div>
-
-            <div className="map-modal-foot">
-              <div
-                className={`map-draft${draft ? "" : " is-empty"}`}
-                aria-live="polite"
-              >
-                <span
-                  className={`segment-dot ${activeStop?.kind ?? "load"}`}
-                  aria-hidden="true"
-                />
-                <div className="map-draft-text">
-                  <span className="map-draft-label">
-                    {activeStop
-                      ? `${stopLabel(activeStop, stops)} · Titik ${STOP_KIND_LABEL[activeStop.kind]}`
-                      : "Titik"}
-                  </span>
-                  <p>
-                    {draft
-                      ? draft.address
-                      : "Belum ada titik. Klik peta, cari alamat, atau pakai lokasi saya."}
-                  </p>
+                  </MapContainer>
+                  <button
+                    type="button"
+                    className="map-locate"
+                    onClick={useMyLocation}
+                  >
+                    <IconTarget size={17} />
+                    <span>Lokasi saya</span>
+                  </button>
                 </div>
-              </div>
-              <div className="map-modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setMapOpen(false)}
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={saveDraft}
-                  disabled={!draft}
-                >
-                  <IconMapPin size={15} />
-                  Simpan titik
-                </button>
-              </div>
-            </div>
 
+                <div className="map-modal-foot">
+                  <div
+                    className={`map-draft${draft ? "" : " is-empty"}`}
+                    aria-live="polite"
+                  >
+                    <span
+                      className={`segment-dot ${activeStop?.kind ?? "load"}`}
+                      aria-hidden="true"
+                    />
+                    <div className="map-draft-text">
+                      <span className="map-draft-label">
+                        {activeStop
+                          ? `${stopLabel(activeStop, stops)} · Titik ${STOP_KIND_LABEL[activeStop.kind]}`
+                          : "Titik"}
+                      </span>
+                      <p>
+                        {draft
+                          ? draft.address
+                          : "Belum ada titik. Klik peta, cari alamat, atau pakai lokasi saya."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="map-modal-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setMapOpen(false)}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={saveDraft}
+                      disabled={!draft}
+                    >
+                      <IconMapPin size={15} />
+                      Simpan titik
+                    </button>
+                  </div>
+                </div>
               </>
             )}
           </div>
@@ -2059,9 +2288,7 @@ export default function Home() {
                                 type="button"
                                 className="stepper-btn"
                                 aria-label={`Kurangi lantai ${label}`}
-                                onClick={() =>
-                                  changeFloor(stop.id, floor - 1)
-                                }
+                                onClick={() => changeFloor(stop.id, floor - 1)}
                                 disabled={floor <= 1}
                               >
                                 <IconMinus size={16} />
@@ -2073,9 +2300,7 @@ export default function Home() {
                                 type="button"
                                 className="stepper-btn"
                                 aria-label={`Tambah lantai ${label}`}
-                                onClick={() =>
-                                  changeFloor(stop.id, floor + 1)
-                                }
+                                onClick={() => changeFloor(stop.id, floor + 1)}
                                 disabled={floor >= 20}
                               >
                                 <IconPlus size={16} />
@@ -2493,6 +2718,189 @@ export default function Home() {
             </div>
           </section>
         </section>
+
+        <section
+          className="gallery"
+          id="galeri"
+          aria-labelledby="galeri-title"
+        >
+          <div className="gallery-head">
+            <div>
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                Galeri
+              </span>
+              <h2 className="gallery-title" id="galeri-title">
+                Armada dan aktivitas angkut
+              </h2>
+              <p className="gallery-lead">
+                Dokumentasi armada, proses bongkar muat, dan pengiriman barang
+                Jasa Angkut Slamet di Demak, Semarang, dan sekitarnya.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary gallery-open"
+              onClick={() => setGalleryOpen(true)}
+              ref={galleryTriggerRef}
+              aria-haspopup="dialog"
+            >
+              <IconGrid size={18} />
+              <span>Lihat semua foto</span>
+            </button>
+          </div>
+          <div
+            className="gallery-carousel"
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Galeri Jasa Angkut Slamet"
+            tabIndex={0}
+            onKeyDown={handleGalleryKeyDown}
+          >
+            <div className="gallery-viewport">
+              <ul
+                className="gallery-track"
+                ref={galleryTrackRef}
+                onScroll={handleGalleryScroll}
+              >
+                {GALLERY.map((item, index) => (
+                  <li
+                    className="gallery-slide"
+                    key={item.base}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${index + 1} dari ${GALLERY.length}`}
+                  >
+                    <a
+                      className="gallery-link"
+                      href={`/${item.base}-1200.jpg`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Buka foto: ${item.caption}`}
+                    >
+                      <img
+                        src={`/${item.base}-800.jpg`}
+                        srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w, /${item.base}-1200.jpg 1200w`}
+                        sizes="(min-width: 640px) 560px, 100vw"
+                        alt={item.alt}
+                        width={1200}
+                        height={1600}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                type="button"
+                className="gallery-nav gallery-nav-prev"
+                onClick={() => scrollGalleryTo(galleryIndex - 1)}
+                aria-label="Foto sebelumnya"
+              >
+                <IconArrowLeft size={18} />
+              </button>
+              <button
+                type="button"
+                className="gallery-nav gallery-nav-next"
+                onClick={() => scrollGalleryTo(galleryIndex + 1)}
+                aria-label="Foto berikutnya"
+              >
+                <IconArrowRight size={18} />
+              </button>
+
+              <div className="gallery-dots">
+                {GALLERY.map((item, index) => (
+                  <button
+                    type="button"
+                    className={
+                      index === galleryIndex
+                        ? "gallery-dot is-active"
+                        : "gallery-dot"
+                    }
+                    key={item.base}
+                    onClick={() => scrollGalleryTo(index)}
+                    aria-label={`Ke foto ${index + 1}: ${item.caption}`}
+                    aria-current={index === galleryIndex}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="gallery-caption-row">
+              <p className="gallery-caption" aria-live="polite">
+                {GALLERY[galleryIndex].caption}
+              </p>
+              <p className="gallery-counter" aria-hidden="true">
+                {galleryIndex + 1} / {GALLERY.length}
+              </p>
+            </div>
+          </div>
+
+          {galleryOpen && (
+            <>
+              <div
+                className="gallery-modal-backdrop"
+                onClick={() => setGalleryOpen(false)}
+                aria-hidden="true"
+              />
+              <div
+                className="gallery-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="gallery-modal-title"
+                ref={galleryModalRef}
+              >
+                <div className="gallery-modal-head">
+                  <div>
+                    <h3 id="gallery-modal-title">Galeri Jasa Angkut Slamet</h3>
+                    <p>
+                      {GALLERY.length} foto armada dan aktivitas angkut. Klik
+                      foto untuk membuka ukuran penuh.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="gallery-modal-close"
+                    onClick={() => setGalleryOpen(false)}
+                    aria-label="Tutup galeri"
+                  >
+                    <IconX size={20} />
+                  </button>
+                </div>
+                <div className="gallery-modal-body">
+                  <ul className="gallery-modal-grid">
+                    {GALLERY.map((item) => (
+                      <li key={item.base}>
+                        <a
+                          className="gallery-modal-item"
+                          href={`/${item.base}-1200.jpg`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={`/${item.base}-480.jpg`}
+                            srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w`}
+                            sizes="(min-width: 900px) 280px, 45vw"
+                            alt={item.alt}
+                            width={1200}
+                            height={1600}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                          <span className="gallery-modal-caption">
+                            {item.caption}
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
+        </section>
       </main>
 
       <footer className="site-footer">
@@ -2512,7 +2920,8 @@ export default function Home() {
               </div>
               <p>
                 Melayani angkutan barang, pindahan rumah, dan kiriman usaha di
-                Demak, Semarang, Kebonbatur, Mranggen, dan sekitarnya.
+                Demak, Semarang, Kebonbatur, Mranggen, dan sekitarnya.{" "}
+                <a href="#galeri">Lihat galeri armada</a>.
               </p>
             </div>
             <div className="footer-col">
@@ -2528,6 +2937,33 @@ export default function Home() {
               <a href={waChatUrl} target="_blank" rel="noopener noreferrer">
                 <IconWhatsApp size={15} />
                 WhatsApp
+              </a>
+            </div>
+            <div className="footer-col">
+              <h4>Sosial</h4>
+              <a
+                href={BUSINESS.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconInstagram size={15} />
+                Instagram
+              </a>
+              <a
+                href={BUSINESS.social.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconTikTok size={15} />
+                TikTok
+              </a>
+              <a
+                href={BUSINESS.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconFacebook size={15} />
+                Facebook
               </a>
             </div>
           </div>

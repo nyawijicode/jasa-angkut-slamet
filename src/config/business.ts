@@ -17,4 +17,10 @@ export const BUSINESS = {
     floor: { first: 20000, next: 10000, max: 20 },
     roundKm: "ceil" as const,
   },
+  social: {
+    instagram: "https://www.instagram.com/jasaangkutslamet.mranggen/",
+    tiktok: "https://www.tiktok.com/@jasaangkutslametmranggen",
+    facebook:
+      "https://www.facebook.com/people/Jasa-Angkut-Slamet-Kebonbatur-Mranggen-Demak/61592066215524/",
+  },
 } as const;
