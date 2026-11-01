@@ -2594,9 +2594,23 @@
   background: var(--surface);
 }
 
-.footer-grid {
+.footer-main {
   display: grid;
-  gap: 26px;
+  gap: 28px;
+}
+
+@media (min-width: 960px) {
+  .footer-main {
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+    align-items: start;
+    gap: 36px;
+  }
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .footer-brand p {
@@ -2617,6 +2631,19 @@
   text-decoration: underline;
 }
 
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .footer-columns {
+    grid-template-columns: 1.2fr 0.9fr 0.9fr;
+    gap: 24px;
+  }
+}
+
 .footer-col h4 {
   margin: 0 0 9px;
   color: var(--gray-800);
@@ -2626,7 +2653,7 @@
 }
 
 .footer-col address {
-  max-width: 34ch;
+  max-width: 32ch;
   color: var(--gray-500);
   font-size: 0.8125rem;
   font-style: normal;
@@ -2650,6 +2677,74 @@
 }
 
 .footer-col a svg {
+  color: var(--forest);
+}
+
+.footer-map-side {
+  width: 100%;
+}
+
+.footer-map-card {
+  width: 100%;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.footer-map-card:hover {
+  border-color: var(--brand-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.footer-map-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  background: var(--gray-25);
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.footer-map-head svg {
+  color: var(--forest);
+}
+
+.footer-map-iframe {
+  display: block;
+  width: 100%;
+  height: 200px;
+  border: 0;
+}
+
+.footer-map-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-top: 1px solid var(--gray-200);
+  color: var(--forest);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.footer-map-btn:hover {
+  background: var(--brand-50);
+  color: var(--forest-ink);
+}
+
+.footer-map-btn svg {
   color: var(--forest);
 }
 
@@ -2742,12 +2837,7 @@
   }
 }
 
-@media (min-width: 900px) {
-  .footer-grid {
-    grid-template-columns: 1.4fr 1fr 0.8fr 0.8fr;
-    gap: 32px;
-  }
-}
+
 
 /* Map modal */
 
@@ -3228,3 +3318,4 @@
     width: 100%;
   }
 }
+

@@ -3151,71 +3151,105 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="site-footer" id="kontak">
+            <footer className="site-footer" id="kontak">
         <div className="container">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <div className="brand">
-                <span className="brand-mark">
-                  <IconTruck size={23} />
-                </span>
-                <span>
-                  <span className="brand-name">Jasa Angkut Slamet</span>
-                  <span className="brand-meta">
-                    Angkutan barang &amp; pindahan
+          <div className="footer-main">
+            <div className="footer-content">
+              <div className="footer-brand">
+                <div className="brand">
+                  <span className="brand-mark">
+                    <IconTruck size={23} />
                   </span>
-                </span>
+                  <span>
+                    <span className="brand-name">Jasa Angkut Slamet</span>
+                    <span className="brand-meta">
+                      Angkutan barang &amp; pindahan
+                    </span>
+                  </span>
+                </div>
+                <p>
+                  Melayani angkutan barang, pindahan rumah, dan kiriman usaha di
+                  Demak, Semarang, Kebonbatur, Mranggen, dan sekitarnya.{" "}
+                  <a href="#galeri">Lihat galeri armada</a> atau{" "}
+                  <a href="#faq">baca FAQ</a>.
+                </p>
               </div>
-              <p>
-                Melayani angkutan barang, pindahan rumah, dan kiriman usaha di
-                Demak, Semarang, Kebonbatur, Mranggen, dan sekitarnya.{" "}
-                <a href="#galeri">Lihat galeri armada</a> atau{" "}
-                <a href="#faq">baca FAQ</a>.
-              </p>
+
+              <div className="footer-columns">
+                <div className="footer-col">
+                  <h4>Garasi</h4>
+                  <address>{BUSINESS.garage.address}</address>
+                </div>
+                <div className="footer-col">
+                  <h4>Kontak</h4>
+                  <a href={`tel:+${BUSINESS.whatsapp}`}>
+                    <IconPhone size={15} />
+                    {BUSINESS.phoneDisplay}
+                  </a>
+                  <a href={waChatUrl} target="_blank" rel="noopener noreferrer">
+                    <IconWhatsApp size={15} />
+                    WhatsApp
+                  </a>
+                </div>
+                <div className="footer-col">
+                  <h4>Sosial</h4>
+                  <a
+                    href={BUSINESS.social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <IconInstagram size={15} />
+                    Instagram
+                  </a>
+                  <a
+                    href={BUSINESS.social.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <IconTikTok size={15} />
+                    TikTok
+                  </a>
+                  <a
+                    href={BUSINESS.social.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <IconFacebook size={15} />
+                    Facebook
+                  </a>
+                </div>
+              </div>
             </div>
-            <div className="footer-col">
-              <h4>Garasi</h4>
-              <address>{BUSINESS.garage.address}</address>
-            </div>
-            <div className="footer-col">
-              <h4>Kontak</h4>
-              <a href={`tel:+${BUSINESS.whatsapp}`}>
-                <IconPhone size={15} />
-                {BUSINESS.phoneDisplay}
-              </a>
-              <a href={waChatUrl} target="_blank" rel="noopener noreferrer">
-                <IconWhatsApp size={15} />
-                WhatsApp
-              </a>
-            </div>
-            <div className="footer-col">
-              <h4>Sosial</h4>
-              <a
-                href={BUSINESS.social.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <IconInstagram size={15} />
-                Instagram
-              </a>
-              <a
-                href={BUSINESS.social.tiktok}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <IconTikTok size={15} />
-                TikTok
-              </a>
-              <a
-                href={BUSINESS.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <IconFacebook size={15} />
-                Facebook
-              </a>
+
+            <div className="footer-map-side">
+              <div className="footer-map-card">
+                <div className="footer-map-head">
+                  <IconMapPin size={15} />
+                  <span>Lokasi Garasi (Google Maps)</span>
+                </div>
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.59330813383!2d110.49680869999999!3d-7.056979600000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e708f76075bb581%3A0xbd15ea2a7eccde93!2sJasa%20Angkut%20Slamet!5e0!3m2!1sid!2sid!4v1793548236364!5m2!1sid!2sid"
+                  className="footer-map-iframe"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  title="Peta Lokasi Garasi Jasa Angkut Slamet di Google Maps"
+                />
+                <a
+                  href="https://maps.google.com/?cid=13625126307393437331"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-map-btn"
+                  aria-label="Buka petunjuk arah ke Garasi Jasa Angkut Slamet di Google Maps"
+                >
+                  <IconMapPin size={14} />
+                  <span>Buka di Google Maps</span>
+                </a>
+              </div>
             </div>
           </div>
+
           <div className="footer-bottom">
             <span>© {new Date().getFullYear()} Jasa Angkut Slamet</span>
             <span>Ini estimasi. Harga final dikonfirmasi lewat WhatsApp.</span>
