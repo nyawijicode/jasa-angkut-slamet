@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   Marker,
@@ -562,11 +562,39 @@ function ClickHandler({
 }: {
   onPick: (lat: number, lng: number) => void;
 }) {
+  const map = useMap();
   useMapEvents({
     click(e) {
       onPick(e.latlng.lat, e.latlng.lng);
+      map.flyTo([e.latlng.lat, e.latlng.lng], Math.max(map.getZoom(), 18), {
+        duration: 0.5,
+      });
     },
   });
+  return null;
+}
+
+function FlyToDraft({
+  target,
+}: {
+  target: { lat: number; lng: number } | null;
+}) {
+  const map = useMap();
+  const prev = useRef<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!target) return;
+    const same =
+      prev.current &&
+      prev.current.lat === target.lat &&
+      prev.current.lng === target.lng;
+    if (same) return;
+    prev.current = target;
+    map.flyTo([target.lat, target.lng], Math.max(map.getZoom(), 18), {
+      duration: 0.6,
+    });
+  }, [target, map]);
+
   return null;
 }
 
@@ -1780,6 +1808,7 @@ export default function Home() {
                       </>
                     )}
                     <FitRoute positions={fitPositions} signal={fitTick} />
+                    <FlyToDraft target={draft} />
                     <MapSearchControl
                       active={activeStop?.kind ?? "load"}
                       activeLabel={
