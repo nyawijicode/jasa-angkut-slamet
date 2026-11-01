@@ -140,13 +140,7 @@ function IconInstagram({ size = 20, className }: IconProps) {
         stroke="currentColor"
         strokeWidth="1.7"
       />
-      <circle
-        cx="12"
-        cy="12"
-        r="4"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.7" />
       <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
     </svg>
   );
@@ -784,7 +778,7 @@ const GALLERY = [
   {
     base: "galeri-jasa-angkut-slamet-6",
     alt: "Dokumentasi muatan angkutan Jasa Angkut Slamet",
-    caption: "Muatan tertata di bak truk",
+    caption: "Muatan tertata di bak armada",
   },
 ];
 
@@ -836,9 +830,7 @@ export default function Home() {
     const track = galleryTrackRef.current;
     if (!track || track.clientWidth === 0) return;
     const nextIndex = Math.round(track.scrollLeft / track.clientWidth);
-    setGalleryIndex(
-      Math.max(0, Math.min(GALLERY.length - 1, nextIndex)),
-    );
+    setGalleryIndex(Math.max(0, Math.min(GALLERY.length - 1, nextIndex)));
   }
 
   function handleGalleryKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
@@ -872,7 +864,7 @@ export default function Home() {
       dialog
         ? Array.from(
             dialog.querySelectorAll<HTMLElement>(
-              'a[href], button:not([disabled])',
+              "a[href], button:not([disabled])",
             ),
           )
         : [];
@@ -2719,11 +2711,7 @@ export default function Home() {
           </section>
         </section>
 
-        <section
-          className="gallery"
-          id="galeri"
-          aria-labelledby="galeri-title"
-        >
+        <section className="gallery" id="galeri" aria-labelledby="galeri-title">
           <div className="gallery-head">
             <div>
               <span className="eyebrow">
