@@ -780,8 +780,8 @@ const QUICK_NOTES = [
 const GALLERY = [
   {
     base: "galeri-jasa-angkut-slamet-1",
-    alt: "Dokumentasi armada truk Jasa Angkut Slamet",
-    caption: "Armada truk Jasa Angkut Slamet",
+    alt: "Dokumentasi armada Jasa Angkut Slamet",
+    caption: "Armada Jasa Angkut Slamet",
   },
   {
     base: "galeri-jasa-angkut-slamet-2",
