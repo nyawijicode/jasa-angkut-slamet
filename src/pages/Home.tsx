@@ -842,6 +842,33 @@ export default function Home() {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeNav, setActiveNav] = useState("pesan");
+
+  useEffect(() => {
+    const sectionIds = ["pesan", "galeri", "faq", "kontak"];
+    function onScroll() {
+      const scrollPos = window.scrollY + 140;
+      let current = "";
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPos >= top) {
+            current = id;
+          }
+        }
+      }
+      if (current) {
+        setActiveNav(current);
+      } else {
+        setActiveNav("pesan");
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   function scrollGalleryTo(index: number) {
     const track = galleryTrackRef.current;
@@ -1468,16 +1495,36 @@ export default function Home() {
           </a>
 
           <nav className="header-nav" aria-label="Navigasi utama">
-            <a className="nav-link" href="#pesan">
+            <a
+              className={`nav-link${activeNav === "pesan" ? " is-active" : ""}`}
+              href="#pesan"
+              onClick={() => setActiveNav("pesan")}
+              aria-current={activeNav === "pesan" ? "true" : undefined}
+            >
               Pesan
             </a>
-            <a className="nav-link" href="#galeri">
+            <a
+              className={`nav-link${activeNav === "galeri" ? " is-active" : ""}`}
+              href="#galeri"
+              onClick={() => setActiveNav("galeri")}
+              aria-current={activeNav === "galeri" ? "true" : undefined}
+            >
               Galeri
             </a>
-            <a className="nav-link" href="#faq">
+            <a
+              className={`nav-link${activeNav === "faq" ? " is-active" : ""}`}
+              href="#faq"
+              onClick={() => setActiveNav("faq")}
+              aria-current={activeNav === "faq" ? "true" : undefined}
+            >
               FAQ
             </a>
-            <a className="nav-link" href="#kontak">
+            <a
+              className={`nav-link${activeNav === "kontak" ? " is-active" : ""}`}
+              href="#kontak"
+              onClick={() => setActiveNav("kontak")}
+              aria-current={activeNav === "kontak" ? "true" : undefined}
+            >
               Kontak
             </a>
           </nav>
@@ -1534,33 +1581,49 @@ export default function Home() {
             aria-label="Navigasi mobile"
           >
             <a
-              className="mobile-menu-link"
+              className={`mobile-menu-link${activeNav === "pesan" ? " is-active" : ""}`}
               href="#pesan"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setActiveNav("pesan");
+                setMenuOpen(false);
+              }}
+              aria-current={activeNav === "pesan" ? "true" : undefined}
             >
               <IconMapPin size={18} />
               Pesan Angkut
             </a>
             <a
-              className="mobile-menu-link"
+              className={`mobile-menu-link${activeNav === "galeri" ? " is-active" : ""}`}
               href="#galeri"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setActiveNav("galeri");
+                setMenuOpen(false);
+              }}
+              aria-current={activeNav === "galeri" ? "true" : undefined}
             >
               <IconGrid size={18} />
               Galeri Armada
             </a>
             <a
-              className="mobile-menu-link"
+              className={`mobile-menu-link${activeNav === "faq" ? " is-active" : ""}`}
               href="#faq"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setActiveNav("faq");
+                setMenuOpen(false);
+              }}
+              aria-current={activeNav === "faq" ? "true" : undefined}
             >
               <IconAlert size={18} />
               Tanya Jawab (FAQ)
             </a>
             <a
-              className="mobile-menu-link"
+              className={`mobile-menu-link${activeNav === "kontak" ? " is-active" : ""}`}
               href="#kontak"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setActiveNav("kontak");
+                setMenuOpen(false);
+              }}
+              aria-current={activeNav === "kontak" ? "true" : undefined}
             >
               <IconPhone size={18} />
               Kontak

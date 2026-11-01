@@ -3019,12 +3019,19 @@
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 0.16s ease, color 0.16s ease;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .nav-link:hover {
   background: var(--brand-50);
   color: var(--forest);
+}
+
+.nav-link.is-active {
+  background: var(--brand-100);
+  color: var(--forest-ink);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgb(31 77 58 / 0.12);
 }
 
 .nav-link:focus-visible {
@@ -3111,6 +3118,13 @@
 .mobile-menu-link:focus-visible {
   background: var(--gray-50);
   color: var(--forest);
+}
+
+.mobile-menu-link.is-active {
+  background: var(--brand-50);
+  color: var(--forest-ink);
+  font-weight: 700;
+  border-left: 3px solid var(--forest);
 }
 
 .mobile-menu-link:focus-visible {
