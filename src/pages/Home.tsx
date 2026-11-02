@@ -3416,17 +3416,41 @@ export default function Home() {
       </footer>
 
       {!mapOpen && !galleryOpen && (
-        <button
-          type="button"
-          className={`scroll-top${showScrollTop ? " is-visible" : ""}`}
-          onClick={scrollToTop}
-          aria-label="Kembali ke atas halaman"
-          title="Kembali ke atas"
-          aria-hidden={!showScrollTop}
-          tabIndex={showScrollTop ? 0 : -1}
+        <div
+          className={`fab-dock${showScrollTop ? " is-visible" : ""}`}
+          role="group"
+          aria-label="Aksi cepat"
         >
-          <IconArrowUp size={20} />
-        </button>
+          <a
+            className="fab fab-wa"
+            href={waChatUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat WhatsApp Jasa Angkut Slamet"
+            title="Chat WhatsApp"
+          >
+            <IconWhatsApp size={22} />
+          </a>
+          <a
+            className="fab fab-order"
+            href="#pesan"
+            aria-label="Pesan angkut sekarang"
+            title="Pesan angkut"
+          >
+            <IconTruck size={19} />
+          </a>
+          <button
+            type="button"
+            className={`scroll-top${showScrollTop ? " is-visible" : ""}`}
+            onClick={scrollToTop}
+            aria-label="Kembali ke atas halaman"
+            title="Kembali ke atas"
+            aria-hidden={!showScrollTop}
+            tabIndex={showScrollTop ? 0 : -1}
+          >
+            <IconArrowUp size={20} />
+          </button>
+        </div>
       )}
 
       {quote && (

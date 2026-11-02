@@ -853,6 +853,7 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   padding-bottom: 36px;
+  scroll-margin-top: 88px;
 }
 
 @media (min-width: 1024px) {
@@ -3356,14 +3357,87 @@
 }
 
 /* ===========================
-   Scroll to top
+   Floating quick actions
    =========================== */
 
-.scroll-top {
+.fab-dock {
   position: fixed;
-  right: 16px;
+  right: calc(16px + env(safe-area-inset-right));
   bottom: calc(18px + env(safe-area-inset-bottom));
   z-index: 1090;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.fab-dock.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* Keep clear of the mobile price bar when it is visible. */
+.site-shell.has-mobile-bar .fab-dock {
+  bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+.fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  transition: background-color 0.16s ease, border-color 0.16s ease,
+    color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.fab svg {
+  flex: none;
+}
+
+.fab-wa {
+  width: 48px;
+  background: #128c7e;
+}
+
+.fab-wa:hover {
+  background: #0e7568;
+}
+
+.fab-order {
+  padding: 0 18px;
+  background: var(--forest);
+}
+
+.fab-order:hover {
+  background: var(--forest-ink);
+}
+
+.fab:focus-visible,
+.scroll-top:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.scroll-top {
   display: grid;
   place-items: center;
   width: 48px;
@@ -3395,34 +3469,33 @@
   color: #fff;
 }
 
-.scroll-top:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 3px;
-}
-
-/* Keep clear of the mobile price bar when it is visible. */
-.site-shell.has-mobile-bar .scroll-top {
-  bottom: calc(84px + env(safe-area-inset-bottom));
-}
-
 @media (min-width: 640px) {
-  .scroll-top {
-    right: 24px;
+  .fab-dock {
+    right: calc(24px + env(safe-area-inset-right));
   }
 }
 
 @media (min-width: 1024px) {
-  .scroll-top {
-    right: 32px;
+  .fab-dock {
+    right: calc(32px + env(safe-area-inset-right));
     bottom: 32px;
   }
 
-  .site-shell.has-mobile-bar .scroll-top {
+  .site-shell.has-mobile-bar .fab-dock {
     bottom: 32px;
   }
 }
 
+@media (max-width: 400px) {
+  .fab-order {
+    padding: 0 14px;
+    font-size: 0.8125rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .fab-dock,
+  .fab,
   .scroll-top {
     transition: none;
   }
