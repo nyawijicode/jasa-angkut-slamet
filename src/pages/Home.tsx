@@ -824,6 +824,76 @@ const GALLERY = [
   },
 ];
 
+const SERVICE_AREAS = [
+  {
+    title: "Kabupaten Demak",
+    description: "Termasuk Mranggen, Kebonbatur, Sayung, dan sekitarnya.",
+    districts: [
+      "Bonang",
+      "Demak",
+      "Dempet",
+      "Gajah",
+      "Guntur",
+      "Karanganyar",
+      "Karangawen",
+      "Karangtengah",
+      "Kebonagung",
+      "Mijen",
+      "Mranggen",
+      "Sayung",
+      "Wedung",
+      "Wonosalam",
+    ],
+  },
+  {
+    title: "Kota Semarang",
+    description: "Dari Semarang Tengah hingga Tugu, Ngaliyan, dan Tembalang.",
+    districts: [
+      "Banyumanik",
+      "Candisari",
+      "Gajahmungkur",
+      "Gayamsari",
+      "Genuk",
+      "Gunungpati",
+      "Mijen",
+      "Ngaliyan",
+      "Pedurungan",
+      "Semarang Barat",
+      "Semarang Selatan",
+      "Semarang Tengah",
+      "Semarang Timur",
+      "Semarang Utara",
+      "Tembalang",
+      "Tugu",
+    ],
+  },
+  {
+    title: "Kabupaten Semarang",
+    description: "Ungaran, Ambarawa, Bawen, Bandungan, dan sekitarnya.",
+    districts: [
+      "Ambarawa",
+      "Bancak",
+      "Bandungan",
+      "Banyubiru",
+      "Bawen",
+      "Bergas",
+      "Bringin",
+      "Getasan",
+      "Jambu",
+      "Kaliwungu",
+      "Pabelan",
+      "Pringapus",
+      "Sumowono",
+      "Suruh",
+      "Susukan",
+      "Tengaran",
+      "Tuntang",
+      "Ungaran Barat",
+      "Ungaran Timur",
+    ],
+  },
+] as const;
+
 export default function Home() {
   const nextStopId = useRef(3);
   const [stops, setStops] = useState<Stop[]>(() => [
@@ -860,13 +930,14 @@ export default function Home() {
   const [activeNav, setActiveNav] = useState<string>(() => {
     if (typeof window !== "undefined" && window.location.hash) {
       const h = window.location.hash.replace("#", "");
-      if (["pesan", "galeri", "faq", "kontak"].includes(h)) return h;
+      if (["pesan", "galeri", "area-layanan", "faq", "kontak"].includes(h))
+        return h;
     }
     return "pesan";
   });
 
   useEffect(() => {
-    const sectionIds = ["pesan", "galeri", "faq", "kontak"];
+    const sectionIds = ["pesan", "galeri", "area-layanan", "faq", "kontak"];
     let ticking = false;
 
     function detectSection(): string {
@@ -1579,6 +1650,17 @@ export default function Home() {
               Galeri
             </a>
             <a
+              className={`nav-link${activeNav === "area-layanan" ? " is-active" : ""}`}
+              href="#area-layanan"
+              onClick={() => setActiveNav("area-layanan")}
+              aria-label="Area layanan"
+              aria-current={
+                activeNav === "area-layanan" ? "true" : undefined
+              }
+            >
+              Area
+            </a>
+            <a
               className={`nav-link${activeNav === "faq" ? " is-active" : ""}`}
               href="#faq"
               onClick={() => setActiveNav("faq")}
@@ -1670,6 +1752,20 @@ export default function Home() {
             >
               <IconGrid size={18} />
               Galeri Armada
+            </a>
+            <a
+              className={`mobile-menu-link${activeNav === "area-layanan" ? " is-active" : ""}`}
+              href="#area-layanan"
+              onClick={() => {
+                setActiveNav("area-layanan");
+                setMenuOpen(false);
+              }}
+              aria-current={
+                activeNav === "area-layanan" ? "true" : undefined
+              }
+            >
+              <IconRoute size={18} />
+              Area Layanan
             </a>
             <a
               className={`mobile-menu-link${activeNav === "faq" ? " is-active" : ""}`}
@@ -3148,6 +3244,76 @@ export default function Home() {
           )}
         </section>
 
+        <section
+          className="area-section"
+          id="area-layanan"
+          aria-labelledby="area-title"
+        >
+          <div className="area-shell">
+            <div className="area-head">
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                49 Kecamatan
+              </span>
+              <h2 className="area-title" id="area-title">
+                Area layanan jasa angkut Demak, Semarang &amp; Kabupaten
+                Semarang
+              </h2>
+              <p className="area-lead">
+                Kami melayani angkut barang dan pindahan ke seluruh kecamatan di
+                Kabupaten Demak, Kota Semarang, dan Kabupaten Semarang. Cek
+                daftar lengkapnya di bawah, lalu hitung tarif langsung dari
+                peta.
+              </p>
+            </div>
+
+            <div className="area-grid">
+              {SERVICE_AREAS.map((area) => (
+                <article className="area-coverage-card" key={area.title}>
+                  <div className="area-coverage-head">
+                    <span className="area-coverage-icon">
+                      <IconMapPin size={18} />
+                    </span>
+                    <div>
+                      <h3 className="area-coverage-title">{area.title}</h3>
+                      <p className="area-coverage-meta">
+                        {area.districts.length} kecamatan
+                      </p>
+                    </div>
+                  </div>
+                  <p className="area-coverage-desc">{area.description}</p>
+                  <ul
+                    className="hero-points area-points"
+                    aria-label={`Kecamatan di ${area.title}`}
+                  >
+                    {area.districts.map((district) => (
+                      <li className="hero-point" key={district}>
+                        <IconCheck size={16} />
+                        {district}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+
+            <div className="area-foot">
+              <span>
+                Di luar daftar ini? Kami juga melayani pengiriman luar kota.
+              </span>
+              <a
+                className="btn btn-secondary btn-sm"
+                href={waChatUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconWhatsApp size={16} />
+                <span>Tanya via WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
         <section className="faq-section" id="faq" aria-labelledby="faq-title">
           <div className="faq-card">
             <div className="faq-head">
@@ -3193,9 +3359,15 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Kami melayani wilayah{" "}
-                    <strong>Demak, Semarang, Mranggen, Kebonbatur</strong>, dan
-                    sekitarnya (dalam kota). Kami juga siap melayani pengiriman{" "}
+                    Kami melayani{" "}
+                    <strong>
+                      seluruh kecamatan di Kabupaten Demak, Kota Semarang, dan
+                      Kabupaten Semarang
+                    </strong>
+                    , termasuk Mranggen, Kebonbatur, Sayung, Ungaran, Ambarawa,
+                    Bawen, dan Bandungan.{" "}
+                    <a href="#area-layanan">Lihat daftar lengkap area layanan</a>
+                    . Kami juga siap melayani pengiriman{" "}
                     <strong>Luar Kota</strong> (Jawa Tengah &amp; antar-kota
                     lainnya) dengan sistem rute pulang-pergi terhitung dari
                     garasi.
@@ -3327,8 +3499,10 @@ export default function Home() {
                 </div>
                 <p>
                   Melayani angkutan barang, pindahan rumah, dan kiriman usaha di
-                  Demak, Semarang, Kebonbatur, Mranggen, dan sekitarnya.{" "}
-                  <a href="#galeri">Lihat galeri armada</a> atau{" "}
+                  Kabupaten Demak, Kota Semarang, Kabupaten Semarang, dan
+                  sekitarnya.{" "}
+                  <a href="#area-layanan">Lihat area layanan</a>,{" "}
+                  <a href="#galeri">galeri armada</a>, atau{" "}
                   <a href="#faq">baca FAQ</a>.
                 </p>
               </div>
