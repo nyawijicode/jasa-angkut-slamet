@@ -535,6 +535,20 @@ function IconArrowRight({ size = 18, className }: IconProps) {
   );
 }
 
+function IconArrowUp({ size = 18, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <path
+        d="M12 19V5m0 0-6 6m6-6 6 6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function makeIcon(color: string, label: string, active = false) {
   return L.divIcon({
     className: "",
@@ -842,6 +856,7 @@ export default function Home() {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeNav, setActiveNav] = useState<string>(() => {
     if (typeof window !== "undefined" && window.location.hash) {
       const h = window.location.hash.replace("#", "");
@@ -884,6 +899,7 @@ export default function Home() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const current = detectSection();
+          setShowScrollTop(window.scrollY > 480);
           setActiveNav((prev) => {
             if (prev !== current) {
               if (window.location.hash !== `#${current}`) {
@@ -1459,6 +1475,13 @@ export default function Home() {
     panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function scrollToTop() {
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  }
+
   function validateStep1() {
     if (phone.trim() === "" || isValidPhone(phone)) {
       return true;
@@ -1517,11 +1540,7 @@ export default function Home() {
   }
 
   return (
-    <div
-      className={
-        step === 5 && quote ? "site-shell has-mobile-bar" : "site-shell"
-      }
-    >
+    <div className={quote ? "site-shell has-mobile-bar" : "site-shell"}>
       <a className="skip-link" href="#pesan">
         Langsung ke form pesanan
       </a>
@@ -3395,6 +3414,20 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {!mapOpen && !galleryOpen && (
+        <button
+          type="button"
+          className={`scroll-top${showScrollTop ? " is-visible" : ""}`}
+          onClick={scrollToTop}
+          aria-label="Kembali ke atas halaman"
+          title="Kembali ke atas"
+          aria-hidden={!showScrollTop}
+          tabIndex={showScrollTop ? 0 : -1}
+        >
+          <IconArrowUp size={20} />
+        </button>
+      )}
 
       {quote && (
         <div className="mobile-bar">

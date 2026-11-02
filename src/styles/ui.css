@@ -3355,3 +3355,76 @@
   }
 }
 
+/* ===========================
+   Scroll to top
+   =========================== */
+
+.scroll-top {
+  position: fixed;
+  right: 16px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 1090;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--forest);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.94);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease,
+    background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.scroll-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.scroll-top:hover {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: #fff;
+}
+
+.scroll-top:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Keep clear of the mobile price bar when it is visible. */
+.site-shell.has-mobile-bar .scroll-top {
+  bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .scroll-top {
+    right: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .scroll-top {
+    right: 32px;
+    bottom: 32px;
+  }
+
+  .site-shell.has-mobile-bar .scroll-top {
+    bottom: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-top {
+    transition: none;
+  }
+}
+
