@@ -3157,7 +3157,7 @@ export default function Home() {
                 <div className="faq-answer">
                   <p>
                     Tarif dihitung otomatis dan transparan,estimasi tarif dasar
-                    jarak <strong>Rp 8.000/km</strong>. Anda juga bisa
+                    jarak <strong>Rp 6.500/km</strong>. Anda juga bisa
                     menambahkan opsi bantuan tenaga bongkar muat serta tambahan
                     lantai jika barang perlu dinaikkan/diturunkan lewat tangga.
                   </p>

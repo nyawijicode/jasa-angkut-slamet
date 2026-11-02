@@ -14,14 +14,14 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
   - Titik bisa dipilih lewat klik peta, pencarian alamat, atau deteksi lokasi; perubahan baru tersimpan setelah **Simpan titik** ditekan, dan tombol **Batal** membuang pilihan.
   - Default 1 titik muat dan 1 titik bongkar; titik tambahan bisa ditambah atau dihapus kapan saja dari daftar titik di halaman.
   - Pencarian alamat cepat menggunakan layanan geocoding OpenStreetMap Nominatim.
-  - Tombol deteksi lokasi otomatis (*Geolocation*).
-  - Rute mobil mengikuti jalan sebenarnya (profil *driving* OSRM), bukan garis lurus, dan otomatis menyesuaikan urutan seluruh titik.
+  - Tombol deteksi lokasi otomatis (_Geolocation_).
+  - Rute mobil mengikuti jalan sebenarnya (profil _driving_ OSRM), bukan garis lurus, dan otomatis menyesuaikan urutan seluruh titik.
   - Pilihan titik aktif yang jelas, lengkap dengan penanda di peta.
 
 - **📊 Kalkulator Ongkos Otomatis & Transparan**:
-  - Perhitungan jarak kilometer otomatis mengikuti rute jalan (*dalam kota* antar semua titik, *luar kota* termasuk perjalanan dari dan kembali ke garasi).
+  - Perhitungan jarak kilometer otomatis mengikuti rute jalan (_dalam kota_ antar semua titik, _luar kota_ termasuk perjalanan dari dan kembali ke garasi).
   - Pilihan layanan: **Dalam Kota** dan **Luar Kota**.
-  - Pilihan bantuan tenaga bongkar muat: *Bongkar sendiri (Gratis)*, *Sopir ikut bongkar muat*, atau *Sopir + Kenek*.
+  - Pilihan bantuan tenaga bongkar muat: _Bongkar sendiri (Gratis)_, _Sopir ikut bongkar muat_, atau _Sopir + Kenek_.
   - Biaya tambahan tangga / lantai bertingkat dihitung untuk setiap titik muat dan bongkar (lantai 1 s/d 20).
   - Rincian biaya transparan yang dapat dilihat langsung oleh pelanggan.
 
@@ -29,7 +29,7 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
   1. **Langkah 1 (Data Pemesan)**: Nama lengkap, nomor WhatsApp yang tervalidasi, serta pemilihan jadwal angkut (tanggal dan selektor jam & menit yang responsif dengan pengelompokan waktu Pagi, Siang, Sore, Malam).
   2. **Langkah 2 (Layanan)**: Pilihan jangkauan wilayah (Dalam Kota vs Luar Kota).
   3. **Langkah 3 (Bantuan & Lantai)**: Pilihan bantuan tenaga angkut dan pengaturan lantai untuk masing-masing titik muat dan bongkar.
-  4. **Langkah 4 (Catatan Tambahan)**: Keterangan khusus seputar muatan beserta saran catatan cepat (misal: *butuh terpal*, *gang sempit*, *barang pecah belah*).
+  4. **Langkah 4 (Catatan Tambahan)**: Keterangan khusus seputar muatan beserta saran catatan cepat (misal: _butuh terpal_, _gang sempit_, _barang pecah belah_).
   5. **Langkah 5 (Ringkasan Estimasi)**: Tinjauan lengkap data pemesan, rute, rincian biaya estimasi, peringatan jika rute peta belum dipilih, dan tombol konfirmasi pesanan.
 
 - **💬 Integrasi Direct WhatsApp**:
@@ -37,7 +37,7 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
   - Data pesanan hanya dikirim saat pelanggan menekan tombol WhatsApp.
 
 - **📱 Mobile-Friendly & Responsif**:
-  - Antarmuka ramah perangkat seluler dengan *bar* estimasi biaya melayang (*sticky mobile bar*) di bagian bawah layar ponsel.
+  - Antarmuka ramah perangkat seluler dengan _bar_ estimasi biaya melayang (_sticky mobile bar_) di bagian bawah layar ponsel.
 
 ---
 
@@ -55,17 +55,20 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 ## 🚀 Memulai (Panduan Instalasi)
 
 ### Prasyarat
+
 - Pastikan telah menginstal [Node.js](https://nodejs.org/) (versi 18 ke atas disarankan) dan `npm`.
 
 ### Langkah Instalasi
 
 1. **Clone repositori**:
+
    ```bash
    git clone https://github.com/username/jasa-angkut-slamet.git
    cd jasa-angkut-slamet
    ```
 
 2. **Instal dependensi**:
+
    ```bash
    npm install
    ```
@@ -80,15 +83,15 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 
 ## 📜 Perintah yang Tersedia (NPM Scripts)
 
-| Perintah | Deskripsi |
-| --- | --- |
-| `npm run dev` | Menjalankan server pengembangan Vite secara lokal |
-| `npm run build` | Menjalankan type-checking TypeScript dan membuat build produksi di folder `dist/` |
-| `npm run preview` | Meninjau hasil build produksi secara lokal |
-| `npm test` | Menjalankan seluruh pengujian unit menggunakan Vitest |
-| `npm run test:watch` | Menjalankan Vitest dalam mode watch |
-| `npm run e2e` | Menjalankan pengujian end-to-end dengan Playwright |
-| `npm run lint` | Menjalankan linter ESLint dan type-checking TypeScript |
+| Perintah             | Deskripsi                                                                         |
+| -------------------- | --------------------------------------------------------------------------------- |
+| `npm run dev`        | Menjalankan server pengembangan Vite secara lokal                                 |
+| `npm run build`      | Menjalankan type-checking TypeScript dan membuat build produksi di folder `dist/` |
+| `npm run preview`    | Meninjau hasil build produksi secara lokal                                        |
+| `npm test`           | Menjalankan seluruh pengujian unit menggunakan Vitest                             |
+| `npm run test:watch` | Menjalankan Vitest dalam mode watch                                               |
+| `npm run e2e`        | Menjalankan pengujian end-to-end dengan Playwright                                |
+| `npm run lint`       | Menjalankan linter ESLint dan type-checking TypeScript                            |
 
 ---
 
@@ -143,17 +146,17 @@ export const BUSINESS = {
     lng: 110.496811,
   },
   pricing: {
-    perKm: 8000,           // Biaya per km
-    setoran: 50000,        // Biaya dasar angkutan
+    perKm: 6500, // Biaya per km
+    setoran: 50000, // Biaya dasar angkutan
     helper: {
-      none: 0,             // Bongkar muat sendiri
-      driver: 50000,       // Sopir ikut bongkar muat
+      none: 0, // Bongkar muat sendiri
+      driver: 50000, // Sopir ikut bongkar muat
       driverAndAssistant: 100000, // Sopir + Kenek
     },
     floor: {
-      first: 20000,        // Biaya naik ke lantai 2
-      next: 10000,         // Biaya tambahan per lantai berikutnya
-      max: 20
+      first: 20000, // Biaya naik ke lantai 2
+      next: 10000, // Biaya tambahan per lantai berikutnya
+      max: 20,
     },
   },
 };
