@@ -1,50 +1,56 @@
 :root {
   color-scheme: light;
 
-  --paper: #F7F5F0;
-  --surface: #FFFFFF;
-  --surface-sunken: #EFEBE2;
-  --ink: #16191C;
-  --ink-soft: #4A5058;
-  --ink-faint: #6B7178;
-  --line: #E1DBCE;
-  --line-strong: #B9B2A2;
-  --forest: #1F4D3A;
-  --forest-ink: #143528;
-  --forest-wash: #E4EEE8;
-  --truck: #B4501A;
-  --truck-bright: #E07A2E;
-  --truck-wash: #FBEBDD;
-  --danger: #B3261E;
-  --danger-wash: #FBE9E7;
-  --focus: #1A6FD1;
+  --paper: #f5f7f3;
+  --surface: #ffffff;
+  --surface-sunken: #edf1ec;
+  --ink: #0c1f18;
+  --ink-soft: #40534a;
+  --ink-faint: #667a70;
+  --line: #dde5de;
+  --line-strong: #c2cfc4;
+  --forest: #0d4a34;
+  --forest-ink: #073826;
+  --forest-deep: #05291c;
+  --forest-wash: #e6f0e9;
+  --truck: #b4501a;
+  --truck-bright: #e07a2e;
+  --truck-wash: #fbebdd;
+  --accent: #f2a93b;
+  --accent-strong: #e08a15;
+  --accent-ink: #5c3706;
+  --accent-wash: #fff6e6;
+  --danger: #b3261e;
+  --danger-wash: #fbe9e7;
+  --focus: #1a6fd1;
 
   /* Neutral scale borrowed from Untitled UI's component language. */
-  --gray-25: #FCFCFD;
-  --gray-50: #F9FAFB;
-  --gray-100: #F2F4F7;
-  --gray-200: #EAECF0;
-  --gray-300: #D0D5DD;
-  --gray-400: #98A2B3;
+  --gray-25: #fcfcfd;
+  --gray-50: #f9fafb;
+  --gray-100: #f2f4f7;
+  --gray-200: #eaecf0;
+  --gray-300: #d0d5dd;
+  --gray-400: #98a2b3;
   --gray-500: #667085;
   --gray-600: #475467;
   --gray-700: #344054;
-  --gray-800: #1D2939;
+  --gray-800: #1d2939;
   --gray-900: #101828;
 
-  --brand-25: #F7FBF8;
-  --brand-50: #EDF5F0;
-  --brand-100: #DCEDE3;
-  --brand-200: #BEDCC9;
+  --brand-25: #f7fbf8;
+  --brand-50: #edf5f0;
+  --brand-100: #dcede3;
+  --brand-200: #bedcc9;
   --brand-500: var(--forest);
-  --brand-600: #1A4232;
+  --brand-600: #0a3f2c;
   --brand-700: var(--forest-ink);
 
   --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-3xl: 30px;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -57,16 +63,27 @@
   --space-9: 64px;
   --space-10: 96px;
 
-  --text-display: clamp(2.125rem, 4.6vw, 3.25rem);
-  --text-h2: clamp(1.5rem, 2.6vw, 2rem);
-  --text-h3: clamp(1.0625rem, 1.4vw, 1.1875rem);
+  --font-heading: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", sans-serif;
+
+  --text-display: clamp(2.35rem, 5.1vw, 3.9rem);
+  --text-h2: clamp(1.7rem, 3vw, 2.4rem);
+  --text-h3: clamp(1.0625rem, 1.4vw, 1.25rem);
   --text-price: clamp(2rem, 5vw, 2.5rem);
   --text-body: 1rem;
   --text-small: 0.875rem;
 
-  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
-  --shadow-sm: 0 1px 3px rgb(16 24 40 / 0.1), 0 1px 2px rgb(16 24 40 / 0.06);
-  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.06);
-  --shadow-lg: 0 12px 16px -4px rgb(16 24 40 / 0.08), 0 4px 6px -2px rgb(16 24 40 / 0.03);
-  --shadow-sticky: 0 -8px 24px rgb(22 25 28 / 0.08);
+  --gradient-brand: linear-gradient(135deg, #0e5138 0%, #073826 55%, #05291c 100%);
+  --gradient-hero:
+    radial-gradient(1100px 520px at 82% -8%, rgb(242 169 59 / 0.16), transparent 60%),
+    radial-gradient(900px 560px at 4% 4%, rgb(13 74 52 / 0.1), transparent 62%);
+  --gradient-panel: linear-gradient(160deg, #0d4a34 0%, #05291c 100%);
+
+  --shadow-xs: 0 1px 2px rgb(12 31 24 / 0.05);
+  --shadow-sm: 0 2px 6px rgb(12 31 24 / 0.06), 0 1px 2px rgb(12 31 24 / 0.04);
+  --shadow-md: 0 10px 24px -8px rgb(12 31 24 / 0.16), 0 2px 6px rgb(12 31 24 / 0.05);
+  --shadow-lg: 0 22px 50px -18px rgb(12 31 24 / 0.24), 0 8px 18px -12px rgb(12 31 24 / 0.12);
+  --shadow-xl: 0 36px 80px -24px rgb(5 41 28 / 0.35);
+  --shadow-sticky: 0 -10px 30px rgb(12 31 24 / 0.1);
 }

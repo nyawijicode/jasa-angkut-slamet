@@ -5,6 +5,7 @@ import './styles/tokens.css'
 import './styles/base.css'
 import 'leaflet/dist/leaflet.css'
 import './styles/ui.css'
+import './styles/refresh.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

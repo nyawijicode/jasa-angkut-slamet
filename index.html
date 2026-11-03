@@ -26,7 +26,7 @@
     <meta name="ICBM" content="-7.05698, 110.49681" />
 
     <!-- Mobile & PWA -->
-    <meta name="theme-color" content="#1F4D3A" />
+    <meta name="theme-color" content="#0D4A34" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -36,19 +36,20 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin />
+    <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin />
     <link
-      rel="preload"
-      as="style"
+      rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap"
     />
 
     <!-- Title & description -->
     <title>
-      Jasa Angkut Demak &amp; Semarang — Hitung Tarif Online | Jasa Angkut Slamet
+      Jasa Angkut Slamet | Tarif Transparan Demak–Semarang
     </title>
     <meta
       name="description"
-      content="Jasa angkut barang &amp; pindahan di seluruh kecamatan Kabupaten Demak, Kota Semarang, dan Kabupaten Semarang. Hitung ongkos di peta, kirim ke WhatsApp."
+      content="Jasa angkut barang &amp; pindahan di Demak, Semarang, dan Kab. Semarang. Hitung tarif transparan di peta, lalu pesan langsung via WhatsApp. Buka setiap hari 06.00–22.00 WIB."
     />
     <link rel="canonical" href="https://jasa-angkut-slamet.vercel.app/" />
     <link rel="alternate" hreflang="id" href="https://jasa-angkut-slamet.vercel.app/" />
@@ -64,11 +65,11 @@
     <meta property="og:site_name" content="Jasa Angkut Slamet" />
     <meta
       property="og:title"
-      content="Jasa Angkut Demak &amp; Semarang — Hitung Tarif Online | Jasa Angkut Slamet"
+      content="Jasa Angkut Slamet | Tarif Transparan Demak–Semarang"
     />
     <meta
       property="og:description"
-      content="Jasa angkut barang &amp; pindahan di seluruh kecamatan Kabupaten Demak, Kota Semarang, dan Kabupaten Semarang. Hitung ongkos di peta, kirim ke WhatsApp."
+      content="Jasa angkut barang &amp; pindahan di Demak, Semarang, dan Kab. Semarang. Hitung tarif transparan di peta, lalu pesan langsung via WhatsApp. Buka setiap hari 06.00–22.00 WIB."
     />
     <meta
       property="og:image"
@@ -104,11 +105,11 @@
     <meta name="twitter:url" content="https://jasa-angkut-slamet.vercel.app/" />
     <meta
       name="twitter:title"
-      content="Jasa Angkut Demak &amp; Semarang — Hitung Tarif Online | Jasa Angkut Slamet"
+      content="Jasa Angkut Slamet | Tarif Transparan Demak–Semarang"
     />
     <meta
       name="twitter:description"
-      content="Jasa angkut barang &amp; pindahan di seluruh kecamatan Kabupaten Demak, Kota Semarang, dan Kabupaten Semarang. Hitung ongkos di peta, kirim ke WhatsApp."
+      content="Jasa angkut barang &amp; pindahan di Demak, Semarang, dan Kab. Semarang. Hitung tarif transparan di peta, lalu pesan langsung via WhatsApp. Buka setiap hari 06.00–22.00 WIB."
     />
     <meta
       name="twitter:image"
@@ -131,6 +132,8 @@
         "@type": "MovingCompany",
         "@id": "https://jasa-angkut-slamet.vercel.app/#business",
         "name": "Jasa Angkut Slamet",
+        "description": "Jasa angkut barang dan pindahan di Kabupaten Demak, Kota Semarang, dan Kabupaten Semarang. Tarif transparan, bisa bantu bongkar muat, dan pemesanan via WhatsApp.",
+        "slogan": "Hitung ongkos angkut, kirim WhatsApp.",
         "url": "https://jasa-angkut-slamet.vercel.app/",
         "logo": "https://jasa-angkut-slamet.vercel.app/icon.png",
         "image": [
@@ -227,17 +230,97 @@
       }
     </script>
 
-    <!-- Structured Data: WebSite + SearchAction -->
+    <!-- Structured Data: WebSite -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Jasa Angkut Slamet",
         "url": "https://jasa-angkut-slamet.vercel.app/",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://jasa-angkut-slamet.vercel.app/#pesan",
-          "query-input": "required name=search_term_string"
+        "inLanguage": "id-ID",
+        "publisher": {
+          "@id": "https://jasa-angkut-slamet.vercel.app/#business"
+        }
+      }
+    </script>
+
+    <!-- Structured Data: Service + Offer Catalog -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Jasa Angkut Barang & Pindahan",
+        "serviceType": [
+          "Jasa angkut barang",
+          "Jasa pindahan rumah",
+          "Jasa pindahan kantor",
+          "Jasa angkut material"
+        ],
+        "url": "https://jasa-angkut-slamet.vercel.app/#pesan",
+        "inLanguage": "id-ID",
+        "provider": {
+          "@id": "https://jasa-angkut-slamet.vercel.app/#business"
+        },
+        "areaServed": [
+          "Kabupaten Demak",
+          "Kota Semarang",
+          "Kabupaten Semarang"
+        ],
+        "offers": {
+          "@type": "OfferCatalog",
+          "name": "Layanan Jasa Angkut Slamet",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Pindahan rumah & kos"
+              },
+              "priceCurrency": "IDR",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "6500",
+                "priceCurrency": "IDR",
+                "unitText": "per km",
+                "referenceQuantity": {
+                  "@type": "QuantitativeValue",
+                  "value": 1,
+                  "unitCode": "KMT"
+                }
+              },
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Angkut barang & material"
+              },
+              "priceCurrency": "IDR",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "6500",
+                "priceCurrency": "IDR",
+                "unitText": "per km"
+              },
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Pindahan kantor & usaha"
+              },
+              "priceCurrency": "IDR",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "6500",
+                "priceCurrency": "IDR",
+                "unitText": "per km"
+              },
+              "availability": "https://schema.org/InStock"
+            }
+          ]
         }
       }
     </script>
@@ -369,6 +452,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width: 640px; margin: 48px auto; padding: 24px; font-family: system-ui, sans-serif; line-height: 1.6; color: #0c1f18;">
+        <h1 style="font-size: 1.5rem;">Jasa Angkut Slamet</h1>
+        <p>
+          Jasa angkut barang dan pindahan di Kabupaten Demak, Kota Semarang,
+          dan Kabupaten Semarang. Aktifkan JavaScript untuk menghitung tarif
+          langsung di peta, atau hubungi kami di
+          <a href="https://wa.me/6281327623942">WhatsApp 0813-2762-3942</a>.
+        </p>
+        <p>Buka setiap hari 06.00–22.00 WIB.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

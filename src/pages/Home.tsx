@@ -488,6 +488,54 @@ function IconLock({ size = 16, className }: IconProps) {
   );
 }
 
+function IconShield({ size = 20, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <path
+        d="M12 3.2 5.2 6v5.3c0 4.3 2.9 7.7 6.8 9.2 3.9-1.5 6.8-4.9 6.8-9.2V6L12 3.2Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m9.2 12.1 2 2 3.6-3.9"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconWallet({ size = 20, className }: IconProps) {
+  return (
+    <svg {...svgProps} width={size} height={size} className={className}>
+      <path
+        d="M4.5 7.5A2.5 2.5 0 0 1 7 5h10.5A1.5 1.5 0 0 1 19 6.5V8"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <rect
+        x="4.5"
+        y="8"
+        width="15"
+        height="11"
+        rx="2.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <path
+        d="M15.2 13.5h.1"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function IconReceipt({ size = 20, className }: IconProps) {
   return (
     <svg {...svgProps} width={size} height={size} className={className}>
@@ -1610,11 +1658,38 @@ export default function Home() {
     openMap(target?.id);
   }
 
+  const showMobileBar = !mapOpen && !galleryOpen;
+
   return (
-    <div className={quote ? "site-shell has-mobile-bar" : "site-shell"}>
+    <div className={showMobileBar ? "site-shell has-mobile-bar" : "site-shell"}>
       <a className="skip-link" href="#pesan">
         Langsung ke form pesanan
       </a>
+
+      <div className="topbar">
+        <div className="container topbar-inner">
+          <span className="topbar-item">
+            <IconMapPin size={14} />
+            <span className="topbar-area-full">
+              Melayani Demak, Semarang &amp; Kab. Semarang
+            </span>
+            <span className="topbar-area-short">Demak · Semarang</span>
+          </span>
+          <span className="topbar-item topbar-hours">
+            <IconClock size={14} />
+            Buka setiap hari 06.00–22.00 WIB
+          </span>
+          <a
+            className="topbar-cta"
+            href={waChatUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Konsultasi gratis
+            <IconArrowRight size={14} />
+          </a>
+        </div>
+      </div>
 
       <header className="site-header">
         <div className="container header-inner">
@@ -1654,9 +1729,7 @@ export default function Home() {
               href="#area-layanan"
               onClick={() => setActiveNav("area-layanan")}
               aria-label="Area layanan"
-              aria-current={
-                activeNav === "area-layanan" ? "true" : undefined
-              }
+              aria-current={activeNav === "area-layanan" ? "true" : undefined}
             >
               Area
             </a>
@@ -1760,9 +1833,7 @@ export default function Home() {
                 setActiveNav("area-layanan");
                 setMenuOpen(false);
               }}
-              aria-current={
-                activeNav === "area-layanan" ? "true" : undefined
-              }
+              aria-current={activeNav === "area-layanan" ? "true" : undefined}
             >
               <IconRoute size={18} />
               Area Layanan
@@ -1806,31 +1877,48 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="container hero">
+        <section className="container hero" aria-labelledby="hero-title">
           <div className="hero-grid">
             <div className="hero-content">
               <span className="eyebrow">
                 <span className="eyebrow-dot" />
-                Melayani Mranggen, Demak &amp; Semarang
+                Jasa angkut &amp; pindahan · Demak, Semarang
               </span>
-              <h1 className="hero-title">
+              <h1 className="hero-title" id="hero-title">
                 Hitung ongkos angkut,
                 <br />
-                <span>langsung kirim ke WhatsApp.</span>
+                <span>kirim WhatsApp.</span>
               </h1>
               <p className="hero-lead">
-                Tandai satu atau beberapa titik muat dan bongkar di peta.
-                Estimasi harga muncul otomatis, lengkap dengan rincian yang bisa
-                langsung dikirim ke Jasa Angkut Slamet.
+                Tandai titik muat dan bongkar di peta. Tarif muncul otomatis dan
+                transparan, lalu kirim ringkasannya ke WhatsApp — tanpa
+                aplikasi, tanpa daftar akun.
               </p>
-              <ul className="hero-points">
-                <li className="hero-point">
-                  <IconCheck size={16} />
-                  Tanpa aplikasi
-                </li>
+
+              <div className="hero-cta">
+                <a className="btn btn-primary btn-lg" href="#pesan">
+                  Hitung tarif gratis
+                  <IconArrowRight size={18} />
+                </a>
+                <a
+                  className="btn btn-secondary btn-lg"
+                  href={waChatUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <IconWhatsApp size={18} />
+                  Chat WhatsApp
+                </a>
+              </div>
+
+              <ul className="hero-points" aria-label="Keunggulan layanan">
                 <li className="hero-point">
                   <IconCheck size={16} />
                   Harga transparan
+                </li>
+                <li className="hero-point">
+                  <IconCheck size={16} />
+                  Bisa bantu bongkar muat
                 </li>
                 <li className="hero-point">
                   <IconCheck size={16} />
@@ -1839,32 +1927,114 @@ export default function Home() {
               </ul>
             </div>
 
-            <aside className="area-card" aria-label="Area layanan">
-              <div className="area-card-head">
-                <IconMapPin size={16} />
-                Area layanan
+            <aside className="hero-quote" aria-label="Ringkasan tarif">
+              <div className="hero-quote-top">
+                <span className="hero-quote-badge">
+                  <IconReceipt size={15} />
+                  Estimasi gratis
+                </span>
+                <span className="hero-quote-live">
+                  <span className="live-dot" aria-hidden="true" />
+                  Respon cepat via WhatsApp
+                </span>
               </div>
-              <div className="area-chips">
-                {[
-                  "Kab Semarang",
-                  "Semarang",
-                  "Kebonbatur",
-                  "Mranggen",
-                  "Demak",
-                ].map((area) => (
-                  <span className="chip" key={area}>
-                    {area}
+
+              <div className="hero-quote-price">
+                <span>Mulai dari</span>
+                <strong>
+                  Rp 6.500<small> /km</small>
+                </strong>
+              </div>
+              <p className="hero-quote-note">
+                Total menyesuaikan jarak, bantuan bongkar muat, dan lantai.
+              </p>
+
+              <ul className="hero-quote-list">
+                <li>
+                  <span className="hero-quote-icon">
+                    <IconMapPin size={16} />
                   </span>
-                ))}
-              </div>
-              <div className="area-card-foot">
-                Garasi kami di Kebonbatur, Mranggen, Demak. Butuh jadwal khusus?{" "}
-                <a href={waChatUrl} target="_blank" rel="noopener noreferrer">
-                  Tanya via WhatsApp
-                </a>
-                .
-              </div>
+                  Tandai titik muat &amp; bongkar
+                </li>
+                <li>
+                  <span className="hero-quote-icon">
+                    <IconRoute size={16} />
+                  </span>
+                  Rute mobil dihitung otomatis
+                </li>
+                <li>
+                  <span className="hero-quote-icon">
+                    <IconWhatsApp size={16} />
+                  </span>
+                  Kirim rincian ke WhatsApp
+                </li>
+              </ul>
+
+              <a
+                className="btn btn-primary btn-lg btn-block hero-quote-cta"
+                href="#pesan"
+              >
+                Mulai hitung tarif
+                <IconArrowRight size={18} />
+              </a>
+              <a
+                className="hero-quote-wa"
+                href={waChatUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconWhatsApp size={16} />
+                Atau tanya langsung via WhatsApp
+              </a>
+              <p className="hero-quote-foot">
+                <IconLock size={13} />
+                Tanpa daftar akun · data hanya dikirim saat Anda menekan tombol
+              </p>
             </aside>
+          </div>
+        </section>
+
+        <section
+          className="trust-strip"
+          aria-label="Keunggulan Jasa Angkut Slamet"
+        >
+          <div className="container trust-grid">
+            <div className="trust-item">
+              <span className="trust-icon">
+                <IconShield size={19} />
+              </span>
+              <div>
+                <strong>Barang lebih aman</strong>
+                <span>Terpal &amp; tali pengikat muatan</span>
+              </div>
+            </div>
+            <div className="trust-item">
+              <span className="trust-icon">
+                <IconWallet size={19} />
+              </span>
+              <div>
+                <strong>Harga di muka</strong>
+                <span>Rincian sebelum kirim pesanan</span>
+              </div>
+            </div>
+            <div className="trust-item">
+              <span className="trust-icon">
+                <IconClock size={19} />
+              </span>
+              <div>
+                <strong>Buka setiap hari</strong>
+                <span>06.00–22.00 WIB</span>
+              </div>
+            </div>
+            <div className="trust-item">
+              <span className="trust-icon">
+                <IconRoute size={19} />
+              </span>
+              <div>
+                <strong>49 kecamatan</strong>
+                <span>Demak · Semarang · Kab. Semarang</span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -3065,6 +3235,152 @@ export default function Home() {
           </section>
         </section>
 
+        <section
+          className="services"
+          id="layanan"
+          aria-labelledby="layanan-title"
+        >
+          <div className="container">
+            <div className="section-intro">
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                Layanan kami
+              </span>
+              <h2 className="section-title" id="layanan-title">
+                Satu layanan untuk barang, pindahan, dan usaha
+              </h2>
+              <p className="section-lead">
+                Armada, sopir, dan bantuan bongkar muat yang sama — dipilih
+                sesuai kebutuhan Anda. Semua biaya terlihat sebelum pesanan
+                dikirim.
+              </p>
+            </div>
+
+            <div className="service-grid">
+              <article className="service-card">
+                <span className="service-icon">
+                  <IconBuilding size={22} />
+                </span>
+                <h3 className="service-title">Pindahan rumah &amp; kos</h3>
+                <p className="service-desc">
+                  Perabot, kasur, lemari, hingga barang pecah belah diangkut
+                  rapi dengan terpal dan tali pengikat.
+                </p>
+                <ul className="service-list">
+                  <li>
+                    <IconCheck size={15} />
+                    Bisa dibantu bongkar muat
+                  </li>
+                  <li>
+                    <IconCheck size={15} />
+                    Hitung biaya naik lantai
+                  </li>
+                </ul>
+                <a className="service-link" href="#pesan">
+                  Hitung tarif pindahan
+                  <IconArrowRight size={16} />
+                </a>
+              </article>
+
+              <article className="service-card is-featured">
+                <span className="service-icon">
+                  <IconBox size={22} />
+                </span>
+                <h3 className="service-title">Angkut barang &amp; material</h3>
+                <p className="service-desc">
+                  Kirim barang dagangan, material bangunan, atau perabot dalam
+                  jumlah banyak dengan rute yang jelas.
+                </p>
+                <ul className="service-list">
+                  <li>
+                    <IconCheck size={15} />
+                    Bisa beberapa titik muat
+                  </li>
+                  <li>
+                    <IconCheck size={15} />
+                    Bisa beberapa titik bongkar
+                  </li>
+                </ul>
+                <a className="service-link" href="#pesan">
+                  Hitung tarif angkut
+                  <IconArrowRight size={16} />
+                </a>
+              </article>
+
+              <article className="service-card">
+                <span className="service-icon">
+                  <IconUsers size={22} />
+                </span>
+                <h3 className="service-title">Pindahan kantor &amp; usaha</h3>
+                <p className="service-desc">
+                  Pindahkan meja, kursi, komputer, dan perlengkapan usaha dengan
+                  jadwal yang bisa disepakati.
+                </p>
+                <ul className="service-list">
+                  <li>
+                    <IconCheck size={15} />
+                    Jadwal fleksibel 06.00–22.00
+                  </li>
+                  <li>
+                    <IconCheck size={15} />
+                    Bisa luar kota
+                  </li>
+                </ul>
+                <a className="service-link" href="#pesan">
+                  Hitung tarif usaha
+                  <IconArrowRight size={16} />
+                </a>
+              </article>
+            </div>
+
+            <div className="process-panel">
+              <div className="process-head">
+                <div>
+                  <span className="process-eyebrow">Cara pesan</span>
+                  <h3 className="process-title">
+                    Tiga langkah, armada siap berangkat
+                  </h3>
+                  <p className="process-lead">
+                    Tanpa aplikasi dan tanpa antre. Semua dikonfirmasi langsung
+                    oleh tim kami lewat WhatsApp.
+                  </p>
+                </div>
+                <a className="btn btn-accent btn-lg" href="#pesan">
+                  Mulai sekarang
+                  <IconArrowRight size={17} />
+                </a>
+              </div>
+
+              <ol className="process-grid">
+                <li className="process-step">
+                  <span className="process-num">01</span>
+                  <h4>Tandai titik muat &amp; bongkar</h4>
+                  <p>
+                    Pilih lokasi di peta, cari alamat, atau gunakan lokasi saat
+                    ini. Bisa lebih dari satu titik.
+                  </p>
+                </li>
+                <li className="process-step">
+                  <span className="process-num">02</span>
+                  <h4>Lihat estimasi transparan</h4>
+                  <p>
+                    Jarak, bantuan bongkar muat, dan biaya lantai dihitung
+                    otomatis dengan rincian yang jelas.
+                  </p>
+                </li>
+                <li className="process-step">
+                  <span className="process-num">03</span>
+                  <h4>Konfirmasi via WhatsApp</h4>
+                  <p>
+                    Kirim ringkasan pesanan. Tim kami membalas untuk memastikan
+                    jadwal dan harga final.
+                  </p>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
         <section className="gallery" id="galeri" aria-labelledby="galeri-title">
           <div className="gallery-head">
             <div>
@@ -3366,7 +3682,9 @@ export default function Home() {
                     </strong>
                     , termasuk Mranggen, Kebonbatur, Sayung, Ungaran, Ambarawa,
                     Bawen, dan Bandungan.{" "}
-                    <a href="#area-layanan">Lihat daftar lengkap area layanan</a>
+                    <a href="#area-layanan">
+                      Lihat daftar lengkap area layanan
+                    </a>
                     . Kami juga siap melayani pengiriman{" "}
                     <strong>Luar Kota</strong> (Jawa Tengah &amp; antar-kota
                     lainnya) dengan sistem rute pulang-pergi terhitung dari
@@ -3479,6 +3797,52 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <section className="cta-section" aria-labelledby="cta-title">
+          <div className="container">
+            <div className="cta-band">
+              <div className="cta-copy">
+                <span className="cta-eyebrow">Siap angkut?</span>
+                <h2 className="cta-title" id="cta-title">
+                  Barang sudah siap pindah? Kami siap berangkat.
+                </h2>
+                <p className="cta-lead">
+                  Hitung estimasi gratis dalam hitungan menit, lalu konfirmasi
+                  jadwal langsung dengan sopir kami via WhatsApp.
+                </p>
+                <ul className="cta-points">
+                  <li>
+                    <IconCheck size={15} />
+                    Tanpa aplikasi
+                  </li>
+                  <li>
+                    <IconCheck size={15} />
+                    Tanpa biaya tersembunyi
+                  </li>
+                  <li>
+                    <IconCheck size={15} />
+                    Dibalas tim kami
+                  </li>
+                </ul>
+              </div>
+              <div className="cta-actions">
+                <a className="btn btn-accent btn-lg" href="#pesan">
+                  Hitung tarif gratis
+                  <IconArrowRight size={18} />
+                </a>
+                <a
+                  className="btn btn-outline btn-lg"
+                  href={waChatUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <IconWhatsApp size={18} />
+                  Chat WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="site-footer" id="kontak">
@@ -3500,8 +3864,7 @@ export default function Home() {
                 <p>
                   Melayani angkutan barang, pindahan rumah, dan kiriman usaha di
                   Kabupaten Demak, Kota Semarang, Kabupaten Semarang, dan
-                  sekitarnya.{" "}
-                  <a href="#area-layanan">Lihat area layanan</a>,{" "}
+                  sekitarnya. <a href="#area-layanan">Lihat area layanan</a>,{" "}
                   <a href="#galeri">galeri armada</a>, atau{" "}
                   <a href="#faq">baca FAQ</a>.
                 </p>
@@ -3627,25 +3990,49 @@ export default function Home() {
         </div>
       )}
 
-      {quote && (
+      {showMobileBar && (
         <div className="mobile-bar">
           <div className="mobile-bar-total">
-            <span className="mobile-bar-label">Total estimasi</span>
-            <strong className="mobile-bar-value">
-              Rp {quote.total.toLocaleString("id-ID")}
-            </strong>
+            <span className="mobile-bar-label">
+              {quote ? "Total estimasi" : "Mulai dari"}
+            </span>
+            {quote ? (
+              <strong className="mobile-bar-value">
+                Rp {quote.total.toLocaleString("id-ID")}
+              </strong>
+            ) : (
+              <strong className="mobile-bar-value">
+                Rp 6.500<small>/km</small>
+              </strong>
+            )}
           </div>
-          {waUrl && (
+          <div className="mobile-bar-actions">
             <a
-              className="btn btn-primary"
-              href={waUrl}
+              className="btn btn-secondary mobile-bar-wa"
+              href={waChatUrl}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Chat WhatsApp Jasa Angkut Slamet"
             >
               <IconWhatsApp size={18} />
-              Kirim
             </a>
-          )}
+            {quote && waUrl ? (
+              <a
+                className="btn btn-primary mobile-bar-cta"
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Pesan
+                <IconArrowRight size={16} />
+              </a>
+            ) : (
+              <a className="btn btn-primary mobile-bar-cta" href="#pesan">
+                Hitung tarif
+                <IconArrowRight size={16} />
+              </a>
+            )}
+          </div>
         </div>
       )}
     </div>
