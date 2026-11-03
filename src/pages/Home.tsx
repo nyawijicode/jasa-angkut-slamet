@@ -1450,6 +1450,12 @@ export default function Home() {
     };
   }, [plan, routeStatus]);
 
+  const routeSummaryLabel = !allStopsSet
+    ? "Rute belum lengkap"
+    : routeStatus === "ready" && routeSummary
+      ? `${stops.length} titik · ${routeSummary.km.toFixed(1)} km`
+      : `${stops.length} titik · rute disiapkan`;
+
   function updateStopPoint(
     id: string,
     lat: number,
@@ -1683,6 +1689,18 @@ export default function Home() {
     const target =
       orderedStops.find((stop) => stop.lat === null) ?? orderedStops[0];
     openMap(target?.id);
+  }
+
+  function handleRouteShortcut() {
+    if (allStopsSet) {
+      openRouteMap();
+      return;
+    }
+    if (step !== 1) {
+      goToStep(1);
+      return;
+    }
+    openRouteMap();
   }
 
   const showMobileBar = !mapOpen && !galleryOpen;
@@ -2272,25 +2290,50 @@ export default function Home() {
                   akhir.
                 </p>
               </div>
-              <div className="progress">
-                <div className="progress-label">
-                  <span>
-                    Langkah {step} dari {wizardSteps.length}
-                  </span>
-                  <span>{Math.round((step / wizardSteps.length) * 100)}%</span>
+              <div className="panel-head-side">
+                <div className="progress">
+                  <div className="progress-label">
+                    <span>
+                      Langkah {step} dari {wizardSteps.length}
+                    </span>
+                    <span>
+                      {Math.round((step / wizardSteps.length) * 100)}%
+                    </span>
+                  </div>
+                  <div
+                    className="progress-track"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={wizardSteps.length}
+                    aria-valuenow={step}
+                    aria-label="Langkah pengisian pesanan"
+                  >
+                    <span
+                      className="progress-fill"
+                      style={{ width: `${(step / wizardSteps.length) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div
-                  className="progress-track"
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={wizardSteps.length}
-                  aria-valuenow={step}
-                  aria-label="Langkah pengisian pesanan"
-                >
+
+                <div className="panel-route">
                   <span
-                    className="progress-fill"
-                    style={{ width: `${(step / wizardSteps.length) * 100}%` }}
-                  />
+                    className={`panel-route-summary${allStopsSet ? "" : " is-empty"}`}
+                  >
+                    {allStopsSet ? (
+                      <IconRoute size={14} />
+                    ) : (
+                      <IconAlert size={14} />
+                    )}
+                    {routeSummaryLabel}
+                  </span>
+                  <button
+                    type="button"
+                    className="panel-route-btn"
+                    onClick={handleRouteShortcut}
+                  >
+                    <IconMapPin size={14} />
+                    {allStopsSet ? "Lihat rute" : "Lengkapi rute"}
+                  </button>
                 </div>
               </div>
             </div>
