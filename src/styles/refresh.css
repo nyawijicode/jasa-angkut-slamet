@@ -598,8 +598,52 @@
    ------------------------------------------------------------ */
 
 .workspace {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1020px;
+  margin-inline: auto;
   gap: 22px;
   padding-block: 34px 12px;
+}
+
+/* Route becomes step 1 inside the booking panel. */
+
+.route-preview {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, #fbfdfb 0%, #ffffff 100%);
+}
+
+.route-preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.route-preview-label {
+  display: block;
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.route-preview-note {
+  margin: 2px 0 0;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.route-preview .map-preview-group {
+  gap: 7px;
+}
+
+.route-preview .map-preview-rows {
+  gap: 7px;
 }
 
 .map-card,
@@ -1690,7 +1734,12 @@
   }
 
   .workspace {
+    grid-template-columns: minmax(0, 1fr);
     padding-block: 40px 20px;
+  }
+
+  .route-preview {
+    padding: 22px;
   }
 
   .area-section {
@@ -1836,6 +1885,14 @@
 
   .map-card-head {
     padding: 16px;
+  }
+
+  .route-preview {
+    padding: 14px;
+  }
+
+  .route-preview-head .btn {
+    width: 100%;
   }
 
   .section-intro {

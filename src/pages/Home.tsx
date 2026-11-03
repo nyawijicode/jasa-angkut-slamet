@@ -963,6 +963,7 @@ export default function Home() {
 
   const [step, setStep] = useState(1);
   const [furthest, setFurthest] = useState(1);
+  const [routeError, setRouteError] = useState(false);
 
   const [plan, setPlan] = useState<RoutePlan | null>(null);
   const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
@@ -1266,6 +1267,7 @@ export default function Home() {
   const missing = steps.filter((step) => !step.done).map((step) => step.label);
 
   const wizardSteps = [
+    "Rute",
     "Pemesan",
     "Layanan",
     "Bantuan & lantai",
@@ -1601,7 +1603,21 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   }
 
-  function validateStep1() {
+  function validateRoute() {
+    if (allStopsSet) {
+      setRouteError(false);
+      return true;
+    }
+
+    setRouteError(true);
+    window.setTimeout(() => {
+      document.getElementById("route-open-map")?.focus();
+    }, 0);
+
+    return false;
+  }
+
+  function validateCustomer() {
     if (phone.trim() === "" || isValidPhone(phone)) {
       return true;
     }
@@ -1614,7 +1630,8 @@ export default function Home() {
   }
 
   function advance() {
-    if (step === 1 && !validateStep1()) return;
+    if (step === 1 && !validateRoute()) return;
+    if (step === 2 && !validateCustomer()) return;
     const next = Math.min(wizardSteps.length, step + 1);
     setStep(next);
     setFurthest((current) => Math.max(current, next));
@@ -1628,8 +1645,12 @@ export default function Home() {
 
   function goToStep(target: number) {
     if (target > furthest) return;
-    if (target > 1 && !validateStep1()) {
+    if (target > 1 && !validateRoute()) {
       setStep(1);
+      return;
+    }
+    if (target > 2 && !validateCustomer()) {
+      setStep(2);
       return;
     }
     setStep(target);
@@ -1655,6 +1676,12 @@ export default function Home() {
     const target =
       stops.find((stop) => stop.kind === mode && stop.lat === null) ??
       stops.find((stop) => stop.kind === mode);
+    openMap(target?.id);
+  }
+
+  function openRouteMap() {
+    const target =
+      orderedStops.find((stop) => stop.lat === null) ?? orderedStops[0];
     openMap(target?.id);
   }
 
@@ -2040,176 +2067,38 @@ export default function Home() {
 
         <section className="container workspace" id="pesan">
           {mapOpen && (
-            <div
-              className="map-backdrop"
-              onClick={() => setMapOpen(false)}
-              aria-hidden="true"
-            />
-          )}
-          <div className={`map-card${mapOpen ? " is-modal" : ""}`} id="peta">
-            <div className="map-card-head">
-              <div className="map-card-title">
-                <h2>
-                  {mapOpen
-                    ? `Pilih titik ${activeStop ? stopLabel(activeStop, stops) : ""}`
-                    : "Rute angkutan"}
-                </h2>
-                <p>
-                  {mapOpen ? (
-                    <>
+            <>
+              <div
+                className="map-backdrop"
+                onClick={() => setMapOpen(false)}
+                aria-hidden="true"
+              />
+              <div className="map-card is-modal" id="peta">
+                <div className="map-card-head">
+                  <div className="map-card-title">
+                    <h2>
+                      Pilih titik{" "}
+                      {activeStop ? stopLabel(activeStop, stops) : ""}
+                    </h2>
+                    <p>
                       Klik peta, cari alamat, atau pakai lokasi saya. Tekan{" "}
                       <strong>Simpan titik</strong> untuk menyimpan{" "}
                       {activeStop ? stopLabel(activeStop, stops) : "titik"}.
-                    </>
-                  ) : (
-                    "Tandai titik muat dan bongkar lewat peta. Rute mobil dan jarak dihitung otomatis."
-                  )}
-                </p>
-              </div>
-              <div className="map-card-head-actions">
-                {mapOpen ? (
-                  <button
-                    type="button"
-                    className="map-close"
-                    onClick={() => setMapOpen(false)}
-                    aria-label="Tutup peta"
-                    autoFocus
-                  >
-                    <IconX size={18} />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={() => openMap()}
-                  >
-                    <IconMapPin size={15} />
-                    Buka peta
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {!mapOpen && (
-              <div className="map-preview">
-                {(
-                  [
-                    { kind: "load", items: loadStops },
-                    { kind: "unload", items: unloadStops },
-                  ] as Array<{ kind: StopKind; items: Stop[] }>
-                ).map(({ kind, items }) => (
-                  <div className={`map-preview-group is-${kind}`} key={kind}>
-                    <div className="map-preview-group-head">
-                      <span className="map-preview-group-title">
-                        <span
-                          className={`segment-dot ${kind}`}
-                          aria-hidden="true"
-                        />
-                        Titik {STOP_KIND_LABEL[kind]}
-                      </span>
-                      <button
-                        type="button"
-                        className="map-preview-add"
-                        onClick={() => addStop(kind)}
-                      >
-                        <IconPlus size={13} />
-                        Tambah
-                      </button>
-                    </div>
-                    <ul className="map-preview-rows">
-                      {items.map((stop, index) => {
-                        const hasPoint = stop.lat !== null && stop.lng !== null;
-                        const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
-                        const coords = hasPoint
-                          ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
-                          : "Belum ditandai";
-                        return (
-                          <li
-                            key={stop.id}
-                            className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
-                          >
-                            <div className="map-preview-main">
-                              <button
-                                type="button"
-                                className="map-preview-pick"
-                                onClick={() => openMap(stop.id)}
-                                aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
-                              >
-                                <span
-                                  className={`map-preview-label is-${kind}`}
-                                >
-                                  {label}
-                                </span>
-                                <span className="map-preview-coords">
-                                  {coords}
-                                </span>
-                                <span className="map-preview-action">
-                                  {hasPoint ? "Ubah" : "Pilih"}
-                                </span>
-                              </button>
-                              {hasPoint && (
-                                <span
-                                  className="map-preview-address"
-                                  title={stop.address}
-                                >
-                                  {stop.address}
-                                </span>
-                              )}
-                            </div>
-                            {(items.length > 1 || hasPoint) && (
-                              <button
-                                type="button"
-                                className="map-preview-remove"
-                                aria-label={`Hapus titik ${label}`}
-                                onClick={() => removeStop(stop.id)}
-                              >
-                                Hapus
-                              </button>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    </p>
                   </div>
-                ))}
-                <div
-                  className={`map-preview-meta${routeStatus === "error" ? " is-warn" : ""}`}
-                  aria-live="polite"
-                >
-                  {routeStatus === "loading" && (
-                    <>
-                      <span className="spinner" aria-hidden="true" />
-                      <span>Menghitung rute mobil...</span>
-                    </>
-                  )}
-                  {routeStatus === "ready" && routeSummary && (
-                    <>
-                      <IconRoute size={14} />
-                      <span>
-                        Rute mobil {routeSummary.km.toFixed(1)} km · ±
-                        {Math.max(1, Math.round(routeSummary.minutes))} menit ·{" "}
-                        {stops.length} titik
-                      </span>
-                    </>
-                  )}
-                  {routeStatus === "error" && (
-                    <>
-                      <IconAlert size={14} />
-                      <span>Rute mobil belum tersedia.</span>
-                    </>
-                  )}
-                  {routeStatus === "idle" && !allStopsSet && (
-                    <>
-                      <IconAlert size={14} />
-                      <span>Lengkapi semua titik untuk melihat rute.</span>
-                    </>
-                  )}
+                  <div className="map-card-head-actions">
+                    <button
+                      type="button"
+                      className="map-close"
+                      onClick={() => setMapOpen(false)}
+                      aria-label="Tutup peta"
+                      autoFocus
+                    >
+                      <IconX size={18} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {mapOpen && (
-              <>
                 <div className="map-canvas">
                   <MapContainer
                     center={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
@@ -2363,9 +2252,9 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
 
           <section
             className="panel"
@@ -2376,10 +2265,11 @@ export default function Home() {
               <div>
                 <span className="panel-eyebrow">Pesan angkutan</span>
                 <h2 className="panel-title" id="form-title">
-                  Isi detail angkutan
+                  Rute &amp; detail angkutan
                 </h2>
                 <p className="panel-sub">
-                  Ikuti langkah singkat, estimasi muncul di akhir.
+                  Tandai rute dulu, lalu lengkapi detail. Estimasi muncul di
+                  akhir.
                 </p>
               </div>
               <div className="progress">
@@ -2432,9 +2322,185 @@ export default function Home() {
 
               <div className="wizard-body">
                 {step === 1 && (
-                  <section className="form-section">
+                  <section className="form-section route-step">
                     <div className="section-head">
                       <span className="step-badge">1</span>
+                      <div className="section-copy">
+                        <h3>Rute angkutan</h3>
+                        <p>
+                          Tandai titik muat dan bongkar dulu. Jarak dan rute
+                          mobil dihitung otomatis.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="route-preview">
+                      <div className="route-preview-head">
+                        <div>
+                          <span className="route-preview-label">
+                            Titik angkutan
+                          </span>
+                          <p className="route-preview-note">
+                            Minimal satu titik muat dan satu titik bongkar.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          id="route-open-map"
+                          className="btn btn-primary btn-sm"
+                          onClick={openRouteMap}
+                        >
+                          <IconMapPin size={15} />
+                          {allStopsSet ? "Ubah rute" : "Buka peta"}
+                        </button>
+                      </div>
+
+                      {(
+                        [
+                          { kind: "load", items: loadStops },
+                          { kind: "unload", items: unloadStops },
+                        ] as Array<{ kind: StopKind; items: Stop[] }>
+                      ).map(({ kind, items }) => (
+                        <div
+                          className={`map-preview-group is-${kind}`}
+                          key={kind}
+                        >
+                          <div className="map-preview-group-head">
+                            <span className="map-preview-group-title">
+                              <span
+                                className={`segment-dot ${kind}`}
+                                aria-hidden="true"
+                              />
+                              Titik {STOP_KIND_LABEL[kind]}
+                            </span>
+                            <button
+                              type="button"
+                              className="map-preview-add"
+                              onClick={() => addStop(kind)}
+                            >
+                              <IconPlus size={13} />
+                              Tambah
+                            </button>
+                          </div>
+                          <ul className="map-preview-rows">
+                            {items.map((stop, index) => {
+                              const hasPoint =
+                                stop.lat !== null && stop.lng !== null;
+                              const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
+                              const coords = hasPoint
+                                ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
+                                : "Belum ditandai";
+                              return (
+                                <li
+                                  key={stop.id}
+                                  className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
+                                >
+                                  <div className="map-preview-main">
+                                    <button
+                                      type="button"
+                                      className="map-preview-pick"
+                                      onClick={() => openMap(stop.id)}
+                                      aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
+                                    >
+                                      <span
+                                        className={`map-preview-label is-${kind}`}
+                                      >
+                                        {label}
+                                      </span>
+                                      <span className="map-preview-coords">
+                                        {coords}
+                                      </span>
+                                      <span className="map-preview-action">
+                                        {hasPoint ? "Ubah" : "Pilih"}
+                                      </span>
+                                    </button>
+                                    {hasPoint && (
+                                      <span
+                                        className="map-preview-address"
+                                        title={stop.address}
+                                      >
+                                        {stop.address}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {(items.length > 1 || hasPoint) && (
+                                    <button
+                                      type="button"
+                                      className="map-preview-remove"
+                                      aria-label={`Hapus titik ${label}`}
+                                      onClick={() => removeStop(stop.id)}
+                                    >
+                                      Hapus
+                                    </button>
+                                  )}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      ))}
+
+                      <div
+                        className={`map-preview-meta${routeStatus === "error" ? " is-warn" : ""}`}
+                        aria-live="polite"
+                      >
+                        {routeStatus === "loading" && (
+                          <>
+                            <span className="spinner" aria-hidden="true" />
+                            <span>Menghitung rute mobil...</span>
+                          </>
+                        )}
+                        {routeStatus === "ready" && routeSummary && (
+                          <>
+                            <IconRoute size={14} />
+                            <span>
+                              Rute mobil {routeSummary.km.toFixed(1)} km · ±
+                              {Math.max(1, Math.round(routeSummary.minutes))}{" "}
+                              menit · {stops.length} titik
+                            </span>
+                          </>
+                        )}
+                        {routeStatus === "error" && (
+                          <>
+                            <IconAlert size={14} />
+                            <span>Rute mobil belum tersedia.</span>
+                          </>
+                        )}
+                        {routeStatus === "idle" && !allStopsSet && (
+                          <>
+                            <IconAlert size={14} />
+                            <span>
+                              Lengkapi semua titik untuk melihat rute.
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      {routeError && !allStopsSet && (
+                        <p className="field-error" role="alert">
+                          <IconAlert size={15} />
+                          Tandai titik muat dan bongkar dulu sebelum lanjut.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="wizard-actions">
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-lg wizard-actions-right"
+                        onClick={advance}
+                      >
+                        <span>Lanjut ke Data Pemesan</span>
+                        <IconArrowRight size={18} />
+                      </button>
+                    </div>
+                  </section>
+                )}
+
+                {step === 2 && (
+                  <section className="form-section">
+                    <div className="section-head">
+                      <span className="step-badge">2</span>
                       <div className="section-copy">
                         <h3>Data pemesan</h3>
                         <p>Nama dan nomor yang bisa kami hubungi.</p>
@@ -2655,7 +2721,15 @@ export default function Home() {
                     <div className="wizard-actions">
                       <button
                         type="button"
-                        className="btn btn-primary btn-lg wizard-actions-right"
+                        className="btn btn-secondary"
+                        onClick={goBack}
+                      >
+                        <IconArrowLeft size={18} />
+                        <span>Kembali ke Rute</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-lg"
                         onClick={advance}
                       >
                         <span>Lanjut ke Layanan</span>
@@ -2665,10 +2739,10 @@ export default function Home() {
                   </section>
                 )}
 
-                {step === 2 && (
+                {step === 3 && (
                   <section className="form-section">
                     <div className="section-head">
-                      <span className="step-badge">2</span>
+                      <span className="step-badge">3</span>
                       <div className="section-copy">
                         <h3>Layanan</h3>
                         <p>Pilih jangkauan rute angkutan Anda.</p>
@@ -2738,10 +2812,10 @@ export default function Home() {
                   </section>
                 )}
 
-                {step === 3 && (
+                {step === 4 && (
                   <section className="form-section">
                     <div className="section-head">
-                      <span className="step-badge">3</span>
+                      <span className="step-badge">4</span>
                       <div className="section-copy">
                         <h3>Bantuan &amp; lantai</h3>
                         <p>Pilih bantuan dan akses lantai di kedua titik.</p>
@@ -2856,10 +2930,10 @@ export default function Home() {
                   </section>
                 )}
 
-                {step === 4 && (
+                {step === 5 && (
                   <section className="form-section">
                     <div className="section-head">
-                      <span className="step-badge">4</span>
+                      <span className="step-badge">5</span>
                       <div className="section-copy">
                         <h3>Catatan tambahan</h3>
                         <p>
@@ -2926,10 +3000,10 @@ export default function Home() {
                   </section>
                 )}
 
-                {step === 5 && (
+                {step === 6 && (
                   <section className="form-section">
                     <div className="section-head">
-                      <span className="step-badge">5</span>
+                      <span className="step-badge">6</span>
                       <div className="section-copy">
                         <h3>Ringkasan estimasi</h3>
                         <p>
@@ -2986,7 +3060,7 @@ export default function Home() {
                           <button
                             type="button"
                             className="review-edit-btn"
-                            onClick={() => goToStep(1)}
+                            onClick={() => goToStep(2)}
                           >
                             Ubah
                           </button>
@@ -3053,7 +3127,7 @@ export default function Home() {
                           <button
                             type="button"
                             className="review-edit-btn"
-                            onClick={() => goToStep(2)}
+                            onClick={() => goToStep(3)}
                           >
                             Ubah
                           </button>

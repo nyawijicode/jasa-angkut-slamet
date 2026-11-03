@@ -34,5 +34,5 @@ for (const sel of [
   const box = await loc.boundingBox();
   console.log(sel, "visible:", await loc.isVisible(), "box:", box);
 }
-await page.locator(".map-preview").screenshot({ path: "C:/Users/ThinkPad/AppData/Local/Temp/opencode/preview-mobile.png" });
+await page.locator(".route-preview").screenshot({ path: "C:/Users/ThinkPad/AppData/Local/Temp/opencode/preview-mobile.png" });
 await browser.close();
