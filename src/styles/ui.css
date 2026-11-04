@@ -128,7 +128,7 @@
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.1s ease;
 }
 
 .btn-primary {
@@ -918,15 +918,7 @@
   position: fixed;
   z-index: 1300;
   inset: 0;
-  background: rgba(12, 30, 23, 0.42);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  backdrop-filter: blur(10px) saturate(120%);
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .map-backdrop {
-    background: rgba(12, 30, 23, 0.72);
-  }
+  background: rgba(12, 30, 23, 0.55);
 }
 
 .map-card.is-modal {

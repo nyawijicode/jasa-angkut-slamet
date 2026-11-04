@@ -963,12 +963,19 @@ export default function Home() {
 
   const [step, setStep] = useState(1);
   const [furthest, setFurthest] = useState(1);
+  const [stepDirection, setStepDirection] = useState<"forward" | "back">(
+    "forward",
+  );
   const [routeError, setRouteError] = useState(false);
 
   const [plan, setPlan] = useState<RoutePlan | null>(null);
   const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
 
   const panelRef = useRef<HTMLElement | null>(null);
+  const wizardNavRef = useRef<HTMLElement | null>(null);
+  const wizardTrackRef = useRef<HTMLDivElement | null>(null);
+  const lastStepRef = useRef(1);
+  const routePathRef = useRef<L.Polyline | null>(null);
   const galleryTrackRef = useRef<HTMLUListElement | null>(null);
   const galleryTriggerRef = useRef<HTMLButtonElement | null>(null);
   const galleryModalRef = useRef<HTMLDivElement | null>(null);
@@ -1053,6 +1060,63 @@ export default function Home() {
       window.removeEventListener("hashchange", onHashChange);
     };
   }, []);
+
+  useEffect(() => {
+    const nav = wizardNavRef.current;
+    const track = wizardTrackRef.current;
+    if (!nav || !track) return;
+
+    const move = (behavior: ScrollBehavior) => {
+      const steps = track.querySelectorAll<HTMLElement>(".wizard-step");
+      const active = track.querySelector<HTMLElement>(".wizard-step.is-active");
+      if (!active || steps.length === 0) return;
+
+      const first = steps[0];
+      const last = steps[steps.length - 1];
+      const railStart = first.offsetLeft + first.offsetWidth / 2;
+      const railEnd = last.offsetLeft + last.offsetWidth / 2;
+      const railWidth = Math.max(railEnd - railStart, 0);
+      const activeCenter = active.offsetLeft + active.offsetWidth / 2;
+
+      track.style.setProperty("--wizard-rail-start", `${railStart}px`);
+      track.style.setProperty("--wizard-rail-width", `${railWidth}px`);
+      track.style.setProperty(
+        "--wizard-progress",
+        `${Math.min(Math.max(activeCenter - railStart, 0), railWidth)}px`,
+      );
+
+      const navRect = nav.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const delta =
+        activeRect.left +
+        activeRect.width / 2 -
+        (navRect.left + navRect.width / 2);
+
+      nav.scrollTo({
+        left: Math.max(0, nav.scrollLeft + delta),
+        behavior,
+      });
+    };
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    move(reduceMotion ? "auto" : "smooth");
+
+    const onResize = () => move("auto");
+    window.addEventListener("resize", onResize);
+    document.fonts?.ready.then(onResize).catch(() => undefined);
+
+    return () => window.removeEventListener("resize", onResize);
+  }, [step]);
+
+  useEffect(() => {
+    if (lastStepRef.current === step) return;
+    lastStepRef.current = step;
+    document
+      .getElementById("wizard-step-title")
+      ?.focus({ preventScroll: true });
+  }, [step]);
 
   function scrollGalleryTo(index: number) {
     const track = galleryTrackRef.current;
@@ -1410,6 +1474,72 @@ export default function Home() {
     return [];
   }, [routeStatus, mainRouteLine, fallbackLine]);
 
+  useEffect(() => {
+    if (!mapOpen || routeLine.length < 2) return;
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    let frame = 0;
+    let attempts = 0;
+    let cancelled = false;
+    let paths: SVGPathElement[] = [];
+    let animations: Animation[] = [];
+
+    const reset = () => {
+      paths.forEach((path) => {
+        path.removeAttribute("pathLength");
+        path.style.strokeDasharray = "";
+        path.style.strokeDashoffset = "";
+      });
+    };
+
+    const draw = () => {
+      if (cancelled) return;
+      // The leaflet layer mounts a frame after the modal state flips.
+      const element = routePathRef.current?.getElement() as
+        | SVGPathElement
+        | undefined;
+      const svg = element?.ownerSVGElement;
+      paths = svg
+        ? Array.from(svg.querySelectorAll<SVGPathElement>(".map-route-anim"))
+        : [];
+      if (paths.length === 0) {
+        if (attempts++ < 60) frame = requestAnimationFrame(draw);
+        return;
+      }
+
+      animations = paths.map((path) => {
+        // pathLength normalizes the dash math so a map resize mid-draw
+        // cannot leave half the route missing.
+        path.setAttribute("pathLength", "1");
+        path.style.strokeDasharray = "1";
+        path.style.strokeDashoffset = "1";
+        return path.animate(
+          [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
+          {
+            duration: 600,
+            easing: "cubic-bezier(0.2, 0.7, 0.2, 1)",
+            fill: "forwards",
+          },
+        );
+      });
+
+      const last = animations[animations.length - 1];
+      if (last) last.onfinish = reset;
+    };
+
+    frame = requestAnimationFrame(draw);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+      animations.forEach((animation) => animation.cancel());
+      reset();
+    };
+  }, [routeLine, mapOpen]);
+
   const garageToFirstLine = useMemo<Array<[number, number]>>(
     () =>
       routeStatus === "ready" && service === "luar-kota"
@@ -1599,7 +1729,13 @@ export default function Home() {
       typeof window.matchMedia === "function" &&
       window.matchMedia("(max-width: 1023px)").matches;
     if (!isSmallScreen) return;
-    panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    panelRef.current?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
   }
 
   function scrollToTop() {
@@ -1639,26 +1775,35 @@ export default function Home() {
     if (step === 1 && !validateRoute()) return;
     if (step === 2 && !validateCustomer()) return;
     const next = Math.min(wizardSteps.length, step + 1);
+    setStepDirection("forward");
     setStep(next);
     setFurthest((current) => Math.max(current, next));
     scrollToPanel();
   }
 
   function goBack() {
+    setStepDirection("back");
     setStep((current) => Math.max(1, current - 1));
     scrollToPanel();
   }
 
   function goToStep(target: number) {
-    if (target > furthest) return;
+    if (target === step || target > furthest) return;
     if (target > 1 && !validateRoute()) {
-      setStep(1);
+      if (step !== 1) {
+        setStepDirection("back");
+        setStep(1);
+      }
       return;
     }
     if (target > 2 && !validateCustomer()) {
-      setStep(2);
+      if (step !== 2) {
+        setStepDirection("back");
+        setStep(2);
+      }
       return;
     }
+    setStepDirection(target > step ? "forward" : "back");
     setStep(target);
     scrollToPanel();
   }
@@ -1979,7 +2124,7 @@ export default function Home() {
                   Estimasi gratis
                 </span>
                 <span className="hero-quote-live">
-                  <span className="live-dot" aria-hidden="true" />
+                  <IconWhatsApp size={13} />
                   Respon cepat via WhatsApp
                 </span>
               </div>
@@ -2201,11 +2346,14 @@ export default function Home() {
                           color="#FFFFFF"
                           weight={8}
                           opacity={0.9}
+                          className="map-route-anim"
                         />
                         <Polyline
                           positions={routeLine}
                           color="#1F4D3A"
                           weight={4}
+                          className="map-route-anim"
+                          ref={routePathRef}
                         />
                       </>
                     )}
@@ -2339,37 +2487,48 @@ export default function Home() {
             </div>
 
             <div className="panel-body">
-              <nav className="wizard-nav" aria-label="Langkah pemesanan">
-                {wizardSteps.map((label, index) => {
-                  const value = index + 1;
-                  const isActive = value === step;
-                  const isDone = value < step;
-                  const isReachable = value <= furthest;
-                  return (
-                    <button
-                      key={label}
-                      type="button"
-                      className={`wizard-step${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`}
-                      onClick={() => goToStep(value)}
-                      disabled={!isReachable}
-                      aria-current={isActive ? "step" : undefined}
-                    >
-                      <span className="wizard-step-marker">
-                        {isDone ? <IconCheck size={13} /> : value}
-                      </span>
-                      <span className="wizard-step-label">{label}</span>
-                    </button>
-                  );
-                })}
+              <nav
+                className="wizard-nav"
+                aria-label="Langkah pemesanan"
+                ref={wizardNavRef}
+              >
+                <div className="wizard-track" ref={wizardTrackRef}>
+                  {wizardSteps.map((label, index) => {
+                    const value = index + 1;
+                    const isActive = value === step;
+                    const isDone = value < step;
+                    const isReachable = value <= furthest;
+                    return (
+                      <button
+                        key={label}
+                        type="button"
+                        className={`wizard-step${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`}
+                        onClick={() => goToStep(value)}
+                        disabled={!isReachable}
+                        aria-current={isActive ? "step" : undefined}
+                      >
+                        <span className="wizard-step-marker">
+                          {isDone ? <IconCheck size={13} /> : value}
+                        </span>
+                        <span className="wizard-step-label">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </nav>
 
-              <div className="wizard-body">
+              <div
+                className={`wizard-body${stepDirection === "back" ? " is-back" : ""}`}
+                key={step}
+              >
                 {step === 1 && (
                   <section className="form-section route-step">
                     <div className="section-head">
                       <span className="step-badge">1</span>
                       <div className="section-copy">
-                        <h3>Rute angkutan</h3>
+                        <h3 id="wizard-step-title" tabIndex={-1}>
+                          Rute angkutan
+                        </h3>
                         <p>
                           Tandai titik muat dan bongkar dulu. Jarak dan rute
                           mobil dihitung otomatis.
@@ -2398,7 +2557,90 @@ export default function Home() {
                         </button>
                       </div>
 
-                      {(
+                      <div className="route-sequence">
+                        <div className="route-sequence-head">
+                          <span className="route-sequence-kicker">
+                            Urutan rute
+                          </span>
+                          <span
+                            className={`route-sequence-meta${routeStatus === "error" ? " is-warn" : ""}`}
+                            aria-live="polite"
+                          >
+                            {routeStatus === "loading" && (
+                              <>
+                                <span className="spinner" aria-hidden="true" />
+                                <span>Menghitung rute...</span>
+                              </>
+                            )}
+                            {routeStatus === "ready" && routeSummary && (
+                              <>
+                                <IconRoute size={14} />
+                                <span>
+                                  {routeSummary.km.toFixed(1)} km · ±
+                                  {Math.max(
+                                    1,
+                                    Math.round(routeSummary.minutes),
+                                  )}{" "}
+                                  mnt
+                                </span>
+                              </>
+                            )}
+                            {routeStatus === "error" && (
+                              <>
+                                <IconAlert size={14} />
+                                <span>Rute mobil belum tersedia.</span>
+                              </>
+                            )}
+                            {routeStatus === "idle" && !allStopsSet && (
+                              <>
+                                <IconAlert size={14} />
+                                <span>
+                                  Lengkapi titik untuk menghitung rute.
+                                </span>
+                              </>
+                            )}
+                          </span>
+                        </div>
+                        <ol
+                          className="route-sequence-list"
+                          aria-label="Urutan titik angkutan"
+                        >
+                          {orderedStops.map((stop, index) => {
+                            const label = stopLabel(stop, stops);
+                            const hasPoint =
+                              stop.lat !== null && stop.lng !== null;
+                            return (
+                              <li
+                                className="route-sequence-item"
+                                key={stop.id}
+                              >
+                                {index > 0 && (
+                                  <IconArrowRight
+                                    size={13}
+                                    className="route-sequence-arrow"
+                                  />
+                                )}
+                                <span
+                                  className={`route-sequence-stop is-${stop.kind}${hasPoint ? "" : " is-empty"}`}
+                                >
+                                  <span className="route-sequence-badge">
+                                    {label}
+                                  </span>
+                                  <span className="route-sequence-state">
+                                    Titik {STOP_KIND_LABEL[stop.kind]}
+                                    {hasPoint ? "" : ", belum ditandai"}
+                                  </span>
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ol>
+                      </div>
+
+                      <div
+                        className={`route-timeline${routeStatus === "ready" ? " is-ready" : ""}`}
+                      >
+                        {(
                         [
                           { kind: "load", items: loadStops },
                           { kind: "unload", items: unloadStops },
@@ -2482,41 +2724,6 @@ export default function Home() {
                           </ul>
                         </div>
                       ))}
-
-                      <div
-                        className={`map-preview-meta${routeStatus === "error" ? " is-warn" : ""}`}
-                        aria-live="polite"
-                      >
-                        {routeStatus === "loading" && (
-                          <>
-                            <span className="spinner" aria-hidden="true" />
-                            <span>Menghitung rute mobil...</span>
-                          </>
-                        )}
-                        {routeStatus === "ready" && routeSummary && (
-                          <>
-                            <IconRoute size={14} />
-                            <span>
-                              Rute mobil {routeSummary.km.toFixed(1)} km · ±
-                              {Math.max(1, Math.round(routeSummary.minutes))}{" "}
-                              menit · {stops.length} titik
-                            </span>
-                          </>
-                        )}
-                        {routeStatus === "error" && (
-                          <>
-                            <IconAlert size={14} />
-                            <span>Rute mobil belum tersedia.</span>
-                          </>
-                        )}
-                        {routeStatus === "idle" && !allStopsSet && (
-                          <>
-                            <IconAlert size={14} />
-                            <span>
-                              Lengkapi semua titik untuk melihat rute.
-                            </span>
-                          </>
-                        )}
                       </div>
 
                       {routeError && !allStopsSet && (
@@ -2545,7 +2752,9 @@ export default function Home() {
                     <div className="section-head">
                       <span className="step-badge">2</span>
                       <div className="section-copy">
-                        <h3>Data pemesan</h3>
+                        <h3 id="wizard-step-title" tabIndex={-1}>
+                          Data pemesan
+                        </h3>
                         <p>Nama dan nomor yang bisa kami hubungi.</p>
                       </div>
                     </div>
@@ -2787,7 +2996,9 @@ export default function Home() {
                     <div className="section-head">
                       <span className="step-badge">3</span>
                       <div className="section-copy">
-                        <h3>Layanan</h3>
+                        <h3 id="wizard-step-title" tabIndex={-1}>
+                          Layanan
+                        </h3>
                         <p>Pilih jangkauan rute angkutan Anda.</p>
                       </div>
                     </div>
@@ -2860,7 +3071,9 @@ export default function Home() {
                     <div className="section-head">
                       <span className="step-badge">4</span>
                       <div className="section-copy">
-                        <h3>Bantuan &amp; lantai</h3>
+                        <h3 id="wizard-step-title" tabIndex={-1}>
+                          Bantuan &amp; lantai
+                        </h3>
                         <p>Pilih bantuan dan akses lantai di kedua titik.</p>
                       </div>
                     </div>
@@ -2978,7 +3191,9 @@ export default function Home() {
                     <div className="section-head">
                       <span className="step-badge">5</span>
                       <div className="section-copy">
-                        <h3>Catatan tambahan</h3>
+                        <h3 id="wizard-step-title" tabIndex={-1}>
+                          Catatan tambahan
+                        </h3>
                         <p>
                           Detail yang membantu tim kami di lapangan (opsional).
                         </p>
@@ -3048,7 +3263,9 @@ export default function Home() {
                     <div className="section-head">
                       <span className="step-badge">6</span>
                       <div className="section-copy">
-                        <h3>Ringkasan estimasi</h3>
+                        <h3 id="wizard-step-title" tabIndex={-1}>
+                          Ringkasan estimasi
+                        </h3>
                         <p>
                           Periksa kembali rincian data dan estimasi ongkos
                           sebelum kirim ke WhatsApp.
