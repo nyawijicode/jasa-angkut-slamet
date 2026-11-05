@@ -45,9 +45,9 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 ## 🛠️ Teknologi yang Digunakan
 
 - **Frontend Core**: [React 18](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
-- **Build Tool**: [Vite 5](https://vitejs.dev/)
+- **Build Tool**: [Vite 8](https://vitejs.dev/)
 - **Peta & Geospasial**: [MapLibre GL JS](https://maplibre.org/), [OpenFreeMap](https://openfreemap.org/), OpenStreetMap
-- **Validasi Data**: [Zod](https://zod.dev/)
+- **Validasi Data**: Validasi form dan nomor telepon tanpa dependensi tambahan
 - **Pengujian (Testing)**: [Vitest](https://vitest.dev/), [Testing Library](https://testing-library.com/), [Playwright](https://playwright.dev/)
 - **Styling**: Modern Vanilla CSS dengan CSS Custom Properties (Design Tokens)
 
