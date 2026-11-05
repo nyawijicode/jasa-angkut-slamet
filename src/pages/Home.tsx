@@ -1823,7 +1823,7 @@ export default function Home() {
               className="nav-burger"
               aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
               aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
+              aria-controls={menuOpen ? "mobile-menu" : undefined}
               onClick={() => setMenuOpen((v) => !v)}
             >
               {menuOpen ? (
@@ -1937,7 +1937,7 @@ export default function Home() {
                 Jasa angkut &amp; pindahan · Demak, Semarang
               </span>
               <h1 className="hero-title" id="hero-title">
-                Hitung ongkos angkut,
+                Hitung ongkos angkut,{" "}
                 <br />
                 <span>kirim WhatsApp.</span>
               </h1>
@@ -3999,11 +3999,11 @@ export default function Home() {
 
               <div className="footer-columns">
                 <div className="footer-col">
-                  <h4>Garasi</h4>
+                  <h3>Garasi</h3>
                   <address>{BUSINESS.garage.address}</address>
                 </div>
                 <div className="footer-col">
-                  <h4>Kontak</h4>
+                  <h3>Kontak</h3>
                   <a href={`tel:+${BUSINESS.whatsapp}`}>
                     <IconPhone size={15} />
                     {BUSINESS.phoneDisplay}
@@ -4014,7 +4014,7 @@ export default function Home() {
                   </a>
                 </div>
                 <div className="footer-col">
-                  <h4>Sosial</h4>
+                  <h3>Sosial</h3>
                   <a
                     href={BUSINESS.social.instagram}
                     target="_blank"
