@@ -73,6 +73,6 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 1,
     });
-    expect((q as any).setoran).toBeUndefined();
+    expect((q as unknown as Record<string, unknown>).setoran).toBeUndefined();
   });
 });

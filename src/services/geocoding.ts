@@ -4,6 +4,12 @@ export interface GeocodeResult {
   lon: number;
 }
 
+interface NominatimPlace {
+  display_name?: string;
+  lat?: string;
+  lon?: string;
+}
+
 export async function searchAddress(query: string, signal?: AbortSignal): Promise<GeocodeResult[]> {
   const q = query.trim();
   if (q.length < 3) return [];
@@ -18,12 +24,12 @@ export async function searchAddress(query: string, signal?: AbortSignal): Promis
     signal,
   });
   if (!res.ok) return [];
-  const data = (await res.json()) as Array<any>;
+  const data = (await res.json()) as NominatimPlace[];
   return data
     .map((d) => ({
-      display_name: d.display_name,
-      lat: parseFloat(d.lat),
-      lon: parseFloat(d.lon),
+      display_name: d.display_name ?? "",
+      lat: parseFloat(d.lat ?? ""),
+      lon: parseFloat(d.lon ?? ""),
     }))
     .filter((d) => !Number.isNaN(d.lat) && !Number.isNaN(d.lon));
 }

@@ -1138,11 +1138,12 @@ export default function Home() {
 
     document.addEventListener("keydown", onKeyDown);
     const previousOverflow = document.body.style.overflow;
+    const trigger = galleryTriggerRef.current;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      galleryTriggerRef.current?.focus();
+      trigger?.focus();
     };
   }, [galleryOpen]);
 
@@ -1223,6 +1224,8 @@ export default function Home() {
     });
 
     return () => controller.abort();
+    // routeKey already captures the coordinates this request depends on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeKey, service, allStopsSet]);
 
   function appendQuickNote(snippet: string) {

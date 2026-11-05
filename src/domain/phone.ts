@@ -1,6 +1,6 @@
 export function normalizePhone(input: string): string {
   if (!input) return '';
-  let s = input.trim().replace(/[\s\-\(\)]/g, '');
+  let s = input.trim().replace(/[\s()-]/g, '');
   if (s.startsWith('+62')) {
     s = '62' + s.slice(3);
   } else if (s.startsWith('62')) {
