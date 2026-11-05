@@ -1314,39 +1314,57 @@
   background: var(--gray-100);
 }
 
-.map-canvas .leaflet-container {
+.map-libre,
+.map-libre-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.map-canvas .maplibregl-map {
   font-family: inherit;
   background: var(--gray-100);
   z-index: 0;
 }
 
-.map-canvas .leaflet-bottom.leaflet-left {
+.map-canvas .maplibregl-canvas {
+  outline: none;
+}
+
+.map-canvas .maplibregl-ctrl-bottom-left {
   bottom: 14px;
   left: 12px;
 }
 
-.leaflet-bar {
+.map-canvas .maplibregl-ctrl-bottom-right {
+  right: 8px;
+  bottom: 6px;
+}
+
+.map-canvas .maplibregl-ctrl-group {
   border: 0 !important;
   border-radius: 10px !important;
+  background: var(--surface);
   box-shadow: var(--shadow-md) !important;
   overflow: hidden;
 }
 
-.leaflet-bar a {
-  width: 36px !important;
-  height: 36px !important;
-  line-height: 36px !important;
-  border-bottom-color: var(--gray-200) !important;
-  background: var(--surface) !important;
-  color: var(--gray-700) !important;
+.map-canvas .maplibregl-ctrl-group button {
+  width: 36px;
+  height: 36px;
+  background: var(--surface);
 }
 
-.leaflet-bar a:hover {
-  background: var(--gray-50) !important;
-  color: var(--forest) !important;
+.map-canvas .maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--gray-200);
 }
 
-.leaflet-control-attribution {
+.map-canvas .maplibregl-ctrl-group button:hover {
+  background: var(--gray-50);
+}
+
+.map-canvas .maplibregl-ctrl-attrib {
   padding: 2px 5px !important;
   border-radius: 6px 0 0 0 !important;
   background: rgb(255 255 255 / 0.88) !important;
@@ -1355,8 +1373,44 @@
   line-height: 1.5 !important;
 }
 
-.leaflet-control-attribution a {
+.map-canvas .maplibregl-ctrl-attrib a {
   color: var(--gray-600) !important;
+}
+
+.map-canvas .maplibregl-ctrl-attrib-button {
+  background-color: rgb(255 255 255 / 0.88);
+}
+
+.map-pin {
+  cursor: grab;
+}
+
+.map-pin:active {
+  cursor: grabbing;
+}
+
+.map-garage {
+  pointer-events: none;
+}
+
+.map-loading {
+  position: absolute;
+  z-index: 700;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.map-loading.is-error {
+  color: var(--gray-600);
 }
 
 .map-search {
@@ -1455,7 +1509,7 @@
   position: absolute;
   z-index: 800;
   right: 12px;
-  bottom: 14px;
+  bottom: 48px;
   display: inline-flex;
   align-items: center;
   gap: 7px;

@@ -4,7 +4,7 @@ export interface LatLngLike {
 }
 
 export interface RouteResult {
-  /** Leaflet-ready [lat, lng] pairs following the road network. */
+  /** [lat, lng] pairs following the road network. */
   coordinates: Array<[number, number]>;
   distanceKm: number;
   durationMin: number;

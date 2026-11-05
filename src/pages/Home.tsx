@@ -1,14 +1,11 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  MapContainer,
-  Marker,
-  Polyline,
-  TileLayer,
-  ZoomControl,
-  useMap,
-  useMapEvents,
-} from "react-leaflet";
-import L from "leaflet";
+﻿import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { BUSINESS } from "../config/business";
 import { calculateQuote, floorFee } from "../domain/pricing";
 import { isValidPhone } from "../domain/phone";
@@ -17,6 +14,8 @@ import { buildWhatsAppUrl, type WaStop } from "../domain/whatsapp";
 import type { Helper, Service } from "../domain/types";
 import { searchAddress, type GeocodeResult } from "../services/geocoding";
 import { fetchRoute, type RouteResult } from "../services/routing";
+
+const MapCanvas = lazy(() => import("../components/MapCanvas"));
 
 type StopKind = "load" | "unload";
 
@@ -597,90 +596,6 @@ function IconArrowUp({ size = 18, className }: IconProps) {
   );
 }
 
-function makeIcon(color: string, label: string, active = false) {
-  return L.divIcon({
-    className: "",
-    html: `<div style="position:relative;width:36px;height:44px;${active ? "transform:scale(1.12);transform-origin:50% 100%;" : ""}">
-      <svg width="36" height="44" viewBox="0 0 36 44" xmlns="http://www.w3.org/2000/svg">
-        ${active ? `<circle cx="18" cy="14" r="14.5" fill="none" stroke="${color}" stroke-width="2" opacity="0.35"/>` : ""}
-        <path d="M18 0C10.268 0 4 6.268 4 14c0 10.5 14 30 14 30s14-19.5 14-30C32 6.268 25.732 0 18 0z" fill="${color}" stroke="#fff" stroke-width="2"/>
-      </svg>
-      <div style="position:absolute;top:8px;left:0;width:36px;text-align:center;font-weight:700;color:#fff;font-family:Inter,sans-serif;font-size:14px">${label}</div>
-    </div>`,
-    iconSize: [36, 44],
-    iconAnchor: [18, 44],
-  });
-}
-
-const iconGarage = L.divIcon({
-  className: "",
-  html: `<div style="width:14px;height:14px;border-radius:50%;background:#6B7178;border:2px solid #fff;box-shadow:0 1px 4px rgba(16,24,40,.24)"></div>`,
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
-});
-
-function ClickHandler({
-  onPick,
-}: {
-  onPick: (lat: number, lng: number) => void;
-}) {
-  const map = useMap();
-  useMapEvents({
-    click(e) {
-      onPick(e.latlng.lat, e.latlng.lng);
-      map.flyTo([e.latlng.lat, e.latlng.lng], Math.max(map.getZoom(), 18), {
-        duration: 0.5,
-      });
-    },
-  });
-  return null;
-}
-
-function FlyToDraft({
-  target,
-}: {
-  target: { lat: number; lng: number } | null;
-}) {
-  const map = useMap();
-  const prev = useRef<{ lat: number; lng: number } | null>(null);
-
-  useEffect(() => {
-    if (!target) return;
-    const same =
-      prev.current &&
-      prev.current.lat === target.lat &&
-      prev.current.lng === target.lng;
-    if (same) return;
-    prev.current = target;
-    map.flyTo([target.lat, target.lng], Math.max(map.getZoom(), 18), {
-      duration: 0.6,
-    });
-  }, [target, map]);
-
-  return null;
-}
-
-function FitRoute({
-  positions,
-  signal,
-}: {
-  positions: Array<[number, number]>;
-  signal: number;
-}) {
-  const map = useMap();
-  const positionsRef = useRef(positions);
-  positionsRef.current = positions;
-
-  useEffect(() => {
-    if (signal <= 0 || positionsRef.current.length < 2) return;
-    map.fitBounds(L.latLngBounds(positionsRef.current), {
-      padding: [36, 36],
-      maxZoom: 16,
-    });
-  }, [signal, map]);
-  return null;
-}
-
 function MapSearchControl({
   active,
   activeLabel,
@@ -690,7 +605,6 @@ function MapSearchControl({
   activeLabel: string;
   onSelect: (lat: number, lng: number, addr: string) => void;
 }) {
-  const map = useMap();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -722,7 +636,6 @@ function MapSearchControl({
 
   function pick(result: GeocodeResult) {
     onSelect(result.lat, result.lon, result.display_name);
-    map.flyTo([result.lat, result.lon], 16, { duration: 0.6 });
     setQuery(result.display_name);
     setResults([]);
   }
@@ -975,7 +888,6 @@ export default function Home() {
   const wizardNavRef = useRef<HTMLElement | null>(null);
   const wizardTrackRef = useRef<HTMLDivElement | null>(null);
   const lastStepRef = useRef(1);
-  const routePathRef = useRef<L.Polyline | null>(null);
   const galleryTrackRef = useRef<HTMLUListElement | null>(null);
   const galleryTriggerRef = useRef<HTMLButtonElement | null>(null);
   const galleryModalRef = useRef<HTMLDivElement | null>(null);
@@ -1269,28 +1181,6 @@ export default function Home() {
     .map((point) => `${point.lat},${point.lng}`)
     .join("|");
 
-  const loadIconKey = loadStops.map((stop) => stop.id).join(",");
-  const unloadIconKey = unloadStops.map((stop) => stop.id).join(",");
-  const stopIcons = useMemo(() => {
-    const icons: Record<string, L.DivIcon> = {};
-    loadStops.forEach((stop, index) => {
-      icons[stop.id] = makeIcon(
-        "#1F4D3A",
-        `M${index + 1}`,
-        stop.id === activeId,
-      );
-    });
-    unloadStops.forEach((stop, index) => {
-      icons[stop.id] = makeIcon(
-        "#E07A2E",
-        `B${index + 1}`,
-        stop.id === activeId,
-      );
-    });
-    return icons;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadIconKey, unloadIconKey, activeId]);
-
   useEffect(() => {
     if (!allStopsSet || routePoints.length < 2) {
       setPlan(null);
@@ -1504,72 +1394,6 @@ export default function Home() {
     if (routeStatus === "error") return fallbackLine;
     return [];
   }, [routeStatus, mainRouteLine, fallbackLine]);
-
-  useEffect(() => {
-    if (!mapOpen || routeLine.length < 2) return;
-    const reduceMotion =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) return;
-
-    let frame = 0;
-    let attempts = 0;
-    let cancelled = false;
-    let paths: SVGPathElement[] = [];
-    let animations: Animation[] = [];
-
-    const reset = () => {
-      paths.forEach((path) => {
-        path.removeAttribute("pathLength");
-        path.style.strokeDasharray = "";
-        path.style.strokeDashoffset = "";
-      });
-    };
-
-    const draw = () => {
-      if (cancelled) return;
-      // The leaflet layer mounts a frame after the modal state flips.
-      const element = routePathRef.current?.getElement() as
-        | SVGPathElement
-        | undefined;
-      const svg = element?.ownerSVGElement;
-      paths = svg
-        ? Array.from(svg.querySelectorAll<SVGPathElement>(".map-route-anim"))
-        : [];
-      if (paths.length === 0) {
-        if (attempts++ < 60) frame = requestAnimationFrame(draw);
-        return;
-      }
-
-      animations = paths.map((path) => {
-        // pathLength normalizes the dash math so a map resize mid-draw
-        // cannot leave half the route missing.
-        path.setAttribute("pathLength", "1");
-        path.style.strokeDasharray = "1";
-        path.style.strokeDashoffset = "1";
-        return path.animate(
-          [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
-          {
-            duration: 600,
-            easing: "cubic-bezier(0.2, 0.7, 0.2, 1)",
-            fill: "forwards",
-          },
-        );
-      });
-
-      const last = animations[animations.length - 1];
-      if (last) last.onfinish = reset;
-    };
-
-    frame = requestAnimationFrame(draw);
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(frame);
-      animations.forEach((animation) => animation.cancel());
-      reset();
-    };
-  }, [routeLine, mapOpen]);
 
   const garageToFirstLine = useMemo<Array<[number, number]>>(
     () =>
@@ -2305,110 +2129,34 @@ export default function Home() {
                 </div>
 
                 <div className="map-canvas">
-                  <MapContainer
-                    center={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
-                    zoom={12}
-                    scrollWheelZoom={false}
-                    zoomControl={false}
-                    style={{ height: "100%", width: "100%" }}
+                  <Suspense
+                    fallback={
+                      <div className="map-loading" role="status">
+                        <span className="spinner" aria-hidden="true" />
+                        <span>Memuat peta…</span>
+                      </div>
+                    }
                   >
-                    <TileLayer
-                      attribution="&copy; OpenStreetMap contributors"
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    <MapCanvas
+                      stops={stops}
+                      activeId={activeId}
+                      draft={draft}
+                      routeLine={routeLine}
+                      garageToFirstLine={garageToFirstLine}
+                      lastToGarageLine={lastToGarageLine}
+                      fitPositions={fitPositions}
+                      fitSignal={fitTick}
+                      onPick={pick}
+                      onDraftMove={pick}
                     />
-                    <ZoomControl position="bottomleft" />
-                    <ClickHandler onPick={pick} />
-                    <Marker
-                      position={[BUSINESS.garage.lat, BUSINESS.garage.lng]}
-                      icon={iconGarage}
-                    />
-                    {stops
-                      .filter((stop) => stop.id !== activeStop?.id)
-                      .map((stop) =>
-                        stop.lat !== null && stop.lng !== null ? (
-                          <Marker
-                            key={stop.id}
-                            position={[stop.lat, stop.lng]}
-                            icon={
-                              stopIcons[stop.id] ??
-                              makeIcon(
-                                stop.kind === "load" ? "#1F4D3A" : "#E07A2E",
-                                stop.kind === "load" ? "M" : "B",
-                              )
-                            }
-                          />
-                        ) : null,
-                      )}
-                    {activeStop && draft && (
-                      <Marker
-                        position={[draft.lat, draft.lng]}
-                        icon={
-                          stopIcons[activeStop.id] ??
-                          makeIcon(
-                            activeStop.kind === "load" ? "#1F4D3A" : "#E07A2E",
-                            activeStop.kind === "load" ? "M" : "B",
-                            true,
-                          )
-                        }
-                        draggable
-                        eventHandlers={{
-                          dragend: (event) => {
-                            const marker = event.target.getLatLng();
-                            setDraft({
-                              lat: marker.lat,
-                              lng: marker.lng,
-                              address: `Titik di peta (${marker.lat.toFixed(5)}, ${marker.lng.toFixed(5)})`,
-                            });
-                          },
-                        }}
-                      />
-                    )}
-                    {garageToFirstLine.length > 1 && (
-                      <Polyline
-                        positions={garageToFirstLine}
-                        color="#6B7178"
-                        weight={3}
-                        opacity={0.65}
-                        dashArray="6 7"
-                      />
-                    )}
-                    {lastToGarageLine.length > 1 && (
-                      <Polyline
-                        positions={lastToGarageLine}
-                        color="#6B7178"
-                        weight={3}
-                        opacity={0.65}
-                        dashArray="6 7"
-                      />
-                    )}
-                    {routeLine.length > 1 && (
-                      <>
-                        <Polyline
-                          positions={routeLine}
-                          color="#FFFFFF"
-                          weight={8}
-                          opacity={0.9}
-                          className="map-route-anim"
-                        />
-                        <Polyline
-                          positions={routeLine}
-                          color="#1F4D3A"
-                          weight={4}
-                          className="map-route-anim"
-                          ref={routePathRef}
-                        />
-                      </>
-                    )}
-                    <FitRoute positions={fitPositions} signal={fitTick} />
-                    <FlyToDraft target={draft} />
-                    <MapSearchControl
-                      active={activeStop?.kind ?? "load"}
-                      activeLabel={
-                        activeStop ? stopLabel(activeStop, stops) : "M1"
-                      }
-                      onSelect={selectPoint}
-                    />
-                  </MapContainer>
+                  </Suspense>
+                  <MapSearchControl
+                    active={activeStop?.kind ?? "load"}
+                    activeLabel={
+                      activeStop ? stopLabel(activeStop, stops) : "M1"
+                    }
+                    onSelect={selectPoint}
+                  />
                   <button
                     type="button"
                     className="map-locate"

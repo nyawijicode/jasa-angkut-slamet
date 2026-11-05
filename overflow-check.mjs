@@ -4,7 +4,7 @@ const browser = await chromium.launch({ channel: "chrome" });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 await page.goto("http://localhost:5199", { waitUntil: "networkidle" });
 await page.waitForTimeout(900);
-const map = page.locator(".leaflet-container");
+const map = page.locator(".maplibregl-canvas");
 const modal = page.locator(".map-card.is-modal");
 const save = page.getByRole("button", { name: "Simpan titik" });
 

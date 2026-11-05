@@ -9,7 +9,8 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 ## 🌟 Fitur Utama
 
 - **🗺️ Peta Interaktif & Penentuan Rute**:
-  - Peta interaktif (Leaflet / OpenStreetMap) dibuka dalam modal per titik: pilih satu titik (misalnya **M1** atau **B1**), tandai di peta, lalu tekan **Simpan titik** dan modal otomatis tertutup.
+  - Peta interaktif (MapLibre / OpenFreeMap) dibuka dalam modal per titik: pilih satu titik (misalnya **M1** atau **B1**), tandai di peta, lalu tekan **Simpan titik** dan modal otomatis tertutup.
+  - Tampilan peta memakai vektor tiles dengan bangunan 3D saat diperbesar, sehingga titik muat dan bongkar lebih mudah dikenali.
   - Penandaan banyak titik muat (jemput) dan bongkar (tujuan) langsung di peta, dengan label **M1, M2, B1, B2**, dan seterusnya.
   - Titik bisa dipilih lewat klik peta, pencarian alamat, atau deteksi lokasi; perubahan baru tersimpan setelah **Simpan titik** ditekan, dan tombol **Batal** membuang pilihan.
   - Default 1 titik muat dan 1 titik bongkar; titik tambahan bisa ditambah atau dihapus kapan saja dari daftar titik di halaman.
@@ -45,7 +46,7 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 
 - **Frontend Core**: [React 18](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
 - **Build Tool**: [Vite 5](https://vitejs.dev/)
-- **Peta & Geospasial**: [Leaflet](https://leafletjs.com/), [React-Leaflet](https://react-leaflet.js.org/), OpenStreetMap
+- **Peta & Geospasial**: [MapLibre GL JS](https://maplibre.org/), [OpenFreeMap](https://openfreemap.org/), OpenStreetMap
 - **Validasi Data**: [Zod](https://zod.dev/)
 - **Pengujian (Testing)**: [Vitest](https://vitest.dev/), [Testing Library](https://testing-library.com/), [Playwright](https://playwright.dev/)
 - **Styling**: Modern Vanilla CSS dengan CSS Custom Properties (Design Tokens)
