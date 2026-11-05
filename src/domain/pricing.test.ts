@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { billableKm, calculateQuote, floorFee } from './pricing';
 
 describe('pricing', () => {
-  it('example: 12.3 km, dalam kota, sopir, lantai 1 / 3 -> total 234000', () => {
+  it('example: 12.3 km, dalam kota, sopir, lantai 1 / 3 -> total 214500', () => {
     const quote = calculateQuote({
       service: 'dalam-kota',
       distances: { loadToUnload: 12.3 },
@@ -11,11 +11,11 @@ describe('pricing', () => {
       unloadFloor: 3,
     });
     expect(quote.billableKm).toBe(13);
-    expect(quote.transport).toBe(154000);
+    expect(quote.transport).toBe(134500);
     expect(quote.helper).toBe(50000);
     expect(quote.loadFloor).toBe(0);
     expect(quote.unloadFloor).toBe(30000);
-    expect(quote.total).toBe(234000);
+    expect(quote.total).toBe(214500);
   });
 
   it('floor fees', () => {
@@ -57,7 +57,7 @@ describe('pricing', () => {
     });
     expect(q.loadFloor).toBe(20000);
     expect(q.unloadFloor).toBe(30000);
-    expect(q.total).toBe(180000);
+    expect(q.total).toBe(165000);
   });
 
   it('throws on invalid floor', () => {
