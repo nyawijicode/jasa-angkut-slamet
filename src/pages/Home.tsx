@@ -979,6 +979,8 @@ export default function Home() {
   const galleryTrackRef = useRef<HTMLUListElement | null>(null);
   const galleryTriggerRef = useRef<HTMLButtonElement | null>(null);
   const galleryModalRef = useRef<HTMLDivElement | null>(null);
+  const mapTriggerRef = useRef<HTMLElement | null>(null);
+  const mapModalRef = useRef<HTMLDivElement | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -1149,15 +1151,44 @@ export default function Home() {
 
   useEffect(() => {
     if (!mapOpen) return;
+    const dialog = mapModalRef.current;
+    const getFocusable = () =>
+      dialog
+        ? Array.from(
+            dialog.querySelectorAll<HTMLElement>(
+              "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
+            ),
+          )
+        : [];
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMapOpen(false);
+      if (event.key === "Escape") {
+        setMapOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = getFocusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+
     document.addEventListener("keydown", onKeyDown);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
+      if (mapTriggerRef.current?.isConnected) {
+        mapTriggerRef.current.focus();
+      }
     };
   }, [mapOpen]);
 
@@ -1813,6 +1844,10 @@ export default function Home() {
       ? stops.find((stop) => stop.id === stopId)
       : (activeStop ?? stops[0]);
     if (!target) return;
+    mapTriggerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     setActiveId(target.id);
     setDraft(
       target.lat !== null && target.lng !== null
@@ -2236,10 +2271,17 @@ export default function Home() {
                 onClick={() => setMapOpen(false)}
                 aria-hidden="true"
               />
-              <div className="map-card is-modal" id="peta">
+              <div
+                className="map-card is-modal"
+                id="peta"
+                ref={mapModalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="map-modal-title"
+              >
                 <div className="map-card-head">
                   <div className="map-card-title">
-                    <h2>
+                    <h2 id="map-modal-title">
                       Pilih titik{" "}
                       {activeStop ? stopLabel(activeStop, stops) : ""}
                     </h2>
@@ -3686,7 +3728,7 @@ export default function Home() {
               </div>
 
               <ol className="process-grid">
-                <li className="process-step">
+                <li className="process-step" tabIndex={0}>
                   <span className="process-num">01</span>
                   <h4>Tandai titik muat &amp; bongkar</h4>
                   <p>
@@ -3694,7 +3736,7 @@ export default function Home() {
                     ini. Bisa lebih dari satu titik.
                   </p>
                 </li>
-                <li className="process-step">
+                <li className="process-step" tabIndex={0}>
                   <span className="process-num">02</span>
                   <h4>Lihat estimasi transparan</h4>
                   <p>
@@ -3702,7 +3744,7 @@ export default function Home() {
                     otomatis dengan rincian yang jelas.
                   </p>
                 </li>
-                <li className="process-step">
+                <li className="process-step" tabIndex={0}>
                   <span className="process-num">03</span>
                   <h4>Konfirmasi via WhatsApp</h4>
                   <p>
