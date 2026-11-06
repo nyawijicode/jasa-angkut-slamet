@@ -2578,8 +2578,22 @@
   .map-preview-remove,
   .footer-map-btn,
   .footer-col a,
-  .header-phone {
+  .header-phone,
+  .time-chip,
+  .quick-suggestion-btn,
+  .stepper-btn,
+  .stepper-value,
+  .review-edit-btn {
     min-height: 44px;
+  }
+
+  .stepper-btn,
+  .review-edit-btn {
+    min-width: 44px;
+  }
+
+  .map-search-field {
+    height: 46px;
   }
 
   .btn.btn-sm,
