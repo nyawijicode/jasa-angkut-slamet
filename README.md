@@ -102,6 +102,8 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 jasa-angkut-slamet/
 ├── assets/
 │   └── originals/          # Foto & ikon sumber, tidak ikut build
+├── e2e/
+│   └── home.spec.ts        # Smoke test Playwright (copy, overflow, tap target, modal)
 ├── public/                 # Asset statis publik (gambar teroptimasi, ikon, manifest)
 ├── src/
 │   ├── components/
@@ -109,6 +111,7 @@ jasa-angkut-slamet/
 │   ├── config/
 │   │   └── business.ts     # Konfigurasi data bisnis, garasi, dan tarif
 │   ├── domain/             # Logika inti bisnis
+│   │   ├── customer.ts     # Validasi nama & nomor HP pemesan
 │   │   ├── phone.ts        # Validasi format nomor telepon Indonesia
 │   │   ├── pricing.ts      # Rumus kalkulasi biaya angkutan & lantai
 │   │   ├── schedule.ts     # Pemformat tanggal & waktu jemput
@@ -128,9 +131,37 @@ jasa-angkut-slamet/
 ├── .gitignore              # Daftar berkas/folder yang diabaikan Git
 ├── index.html              # Template HTML utama
 ├── package.json            # Konfigurasi paket & dependensi
+├── playwright.config.ts    # Konfigurasi Playwright (testDir, mobile Chrome, web server)
 ├── tsconfig.json           # Konfigurasi TypeScript
-└── vite.config.ts          # Konfigurasi Vite
+└── vite.config.ts          # Konfigurasi Vite & Vitest
 ```
+
+---
+
+## 🧪 Pengujian
+
+**Unit test (Vitest)** mencakup rumus tarif, format jadwal, validasi nomor HP,
+validasi data pemesan, dan isi pesan WhatsApp:
+
+```bash
+npm test
+```
+
+**Smoke test end-to-end (Playwright)** memeriksa tampilan mobile 320px, tidak ada
+overflow horizontal, target sentuh minimal 44px, menu mobile, dan modal galeri:
+
+```bash
+npm run e2e
+```
+
+Playwright memakai Google Chrome (`channel: "chrome"`), jadi tidak perlu mengunduh
+browser tambahan. Jika server dev belum berjalan, Playwright otomatis menjalankan
+`npm run dev -- --port 5199`; bila sudah ada, server tersebut dipakai ulang.
+
+Nama dan nomor HP wajib valid sebelum pesanan bisa dikirim ke WhatsApp. Aturan ini
+diuji di `src/domain/customer.test.ts` dan dipakai langsung oleh wizard di
+`src/pages/Home.tsx`, sehingga tombol WhatsApp tidak pernah menghasilkan pesan tanpa
+identitas pemesan.
 
 ---
 
