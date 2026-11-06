@@ -880,6 +880,7 @@ export default function Home() {
   const [draft, setDraft] = useState<MapPoint | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [customerAttempted, setCustomerAttempted] = useState(false);
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
   const [service, setService] = useState<Service>("dalam-kota");
@@ -1197,8 +1198,9 @@ export default function Home() {
   }, [galleryOpen]);
 
   const today = useMemo(todayISO, []);
-  const nameError = false;
-  const phoneError = phone.trim().length > 0 && !isValidPhone(phone);
+  const nameError = customerAttempted && name.trim() === "";
+  const phoneError =
+    !isValidPhone(phone) && (phone.trim() !== "" || customerAttempted);
   const waChatUrl = `https://wa.me/${BUSINESS.whatsapp}`;
 
   const loadStops = useMemo(
@@ -1297,8 +1299,8 @@ export default function Home() {
         unloadStops.length > 0 &&
         unloadStops.every((stop) => stop.lat !== null),
     },
-    { label: "Nama", done: true },
-    { label: "Nomor HP", done: true },
+    { label: "Nama", done: name.trim() !== "" },
+    { label: "Nomor HP", done: isValidPhone(phone) },
     { label: "Layanan", done: true },
   ];
   const missing = steps.filter((step) => !step.done).map((step) => step.label);
@@ -1378,6 +1380,10 @@ export default function Home() {
   const waUrl = useMemo(() => {
     if (!quote || !allStopsSet) return null;
 
+    const trimmedName = name.trim();
+    const trimmedPhone = phone.trim();
+    if (!trimmedName || !isValidPhone(trimmedPhone)) return null;
+
     const toWaStop = (stop: Stop, index: number): WaStop => ({
       label: `${stop.kind === "load" ? "M" : "B"}${index + 1}`,
       address:
@@ -1389,8 +1395,8 @@ export default function Home() {
     });
 
     return buildWhatsAppUrl({
-      name: name.trim(),
-      phone: phone.trim(),
+      name: trimmedName,
+      phone: trimmedPhone,
       pickupDate,
       pickupTime,
       serviceLabel: service === "dalam-kota" ? "Dalam Kota" : "Luar Kota",
@@ -1667,12 +1673,18 @@ export default function Home() {
   }
 
   function validateCustomer() {
-    if (phone.trim() === "" || isValidPhone(phone)) {
+    setCustomerAttempted(true);
+
+    const nameMissing = name.trim() === "";
+    const phoneInvalid = !isValidPhone(phone);
+    if (!nameMissing && !phoneInvalid) {
       return true;
     }
 
     window.setTimeout(() => {
-      document.getElementById("customer-phone")?.focus();
+      document
+        .getElementById(nameMissing ? "customer-name" : "customer-phone")
+        ?.focus();
     }, 0);
 
     return false;
@@ -2637,7 +2649,7 @@ export default function Home() {
                           />
                         </div>
                         {nameError && (
-                          <p className="field-error" id="name-error">
+                          <p className="field-error" id="name-error" role="alert">
                             <IconAlert size={15} />
                             Nama belum diisi.
                           </p>
@@ -2676,7 +2688,7 @@ export default function Home() {
                           />
                         </div>
                         {phoneError ? (
-                          <p className="field-error" id="phone-error">
+                          <p className="field-error" id="phone-error" role="alert">
                             <IconAlert size={15} />
                             {phone.trim().length > 0
                               ? "Nomor HP belum benar. Contoh: 0813 2762 3942"
