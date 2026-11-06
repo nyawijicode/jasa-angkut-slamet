@@ -7,8 +7,8 @@
   useState,
 } from "react";
 import { BUSINESS } from "../config/business";
+import { validateCustomer } from "../domain/customer";
 import { calculateQuote, floorFee } from "../domain/pricing";
-import { isValidPhone } from "../domain/phone";
 import { formatPickupTime, formatSchedule } from "../domain/schedule";
 import { buildWhatsAppUrl, type WaStop } from "../domain/whatsapp";
 import type { Helper, Service } from "../domain/types";
@@ -1198,9 +1198,14 @@ export default function Home() {
   }, [galleryOpen]);
 
   const today = useMemo(todayISO, []);
-  const nameError = customerAttempted && name.trim() === "";
+  const customerCheck = useMemo(
+    () => validateCustomer({ name, phone }),
+    [name, phone],
+  );
+  const nameError = customerAttempted && customerCheck.nameMissing;
   const phoneError =
-    !isValidPhone(phone) && (phone.trim() !== "" || customerAttempted);
+    customerCheck.phoneInvalid &&
+    (phone.trim() !== "" || customerAttempted);
   const waChatUrl = `https://wa.me/${BUSINESS.whatsapp}`;
 
   const loadStops = useMemo(
@@ -1299,8 +1304,8 @@ export default function Home() {
         unloadStops.length > 0 &&
         unloadStops.every((stop) => stop.lat !== null),
     },
-    { label: "Nama", done: name.trim() !== "" },
-    { label: "Nomor HP", done: isValidPhone(phone) },
+    { label: "Nama", done: !customerCheck.nameMissing },
+    { label: "Nomor HP", done: !customerCheck.phoneInvalid },
     { label: "Layanan", done: true },
   ];
   const missing = steps.filter((step) => !step.done).map((step) => step.label);
@@ -1348,7 +1353,6 @@ export default function Home() {
 
   const quote = useMemo(() => {
     if (!allStopsSet || !routeDistances) return null;
-    if (phone.trim() !== "" && !isValidPhone(phone)) return null;
 
     const loadFloorList = loadStops.map((stop) => floors[stop.id] ?? 1);
     const unloadFloorList = unloadStops.map((stop) => floors[stop.id] ?? 1);
@@ -1369,7 +1373,6 @@ export default function Home() {
   }, [
     allStopsSet,
     routeDistances,
-    phone,
     service,
     helper,
     floors,
@@ -1382,7 +1385,7 @@ export default function Home() {
 
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
-    if (!trimmedName || !isValidPhone(trimmedPhone)) return null;
+    if (!customerCheck.valid) return null;
 
     const toWaStop = (stop: Stop, index: number): WaStop => ({
       label: `${stop.kind === "load" ? "M" : "B"}${index + 1}`,
@@ -1419,6 +1422,7 @@ export default function Home() {
     unloadStops,
     name,
     phone,
+    customerCheck,
     pickupDate,
     pickupTime,
     service,
@@ -1672,18 +1676,17 @@ export default function Home() {
     return false;
   }
 
-  function validateCustomer() {
+  function validateCustomerStep() {
     setCustomerAttempted(true);
-
-    const nameMissing = name.trim() === "";
-    const phoneInvalid = !isValidPhone(phone);
-    if (!nameMissing && !phoneInvalid) {
+    if (customerCheck.valid) {
       return true;
     }
 
     window.setTimeout(() => {
       document
-        .getElementById(nameMissing ? "customer-name" : "customer-phone")
+        .getElementById(
+          customerCheck.nameMissing ? "customer-name" : "customer-phone",
+        )
         ?.focus();
     }, 0);
 
@@ -1692,7 +1695,7 @@ export default function Home() {
 
   function advance() {
     if (step === 1 && !validateRoute()) return;
-    if (step === 2 && !validateCustomer()) return;
+    if (step === 2 && !validateCustomerStep()) return;
     const next = Math.min(wizardSteps.length, step + 1);
     setStepDirection("forward");
     setStep(next);
@@ -1715,7 +1718,7 @@ export default function Home() {
       }
       return;
     }
-    if (target > 2 && !validateCustomer()) {
+    if (target > 2 && !validateCustomerStep()) {
       if (step !== 2) {
         setStepDirection("back");
         setStep(2);
