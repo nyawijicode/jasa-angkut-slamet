@@ -2061,7 +2061,8 @@ export default function Home() {
                 </strong>
               </div>
               <p className="hero-quote-note">
-                Total menyesuaikan jarak, bantuan bongkar muat, dan lantai.
+                Plus setoran armada Rp 50.000. Total menyesuaikan jarak,
+                bantuan bongkar muat, dan lantai.
               </p>
 
               <ul className="hero-quote-list">
@@ -3847,10 +3848,11 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Tarif dihitung otomatis dan transparan,estimasi tarif dasar
-                    jarak <strong>Rp 6.500/km</strong>. Anda juga bisa
-                    menambahkan opsi bantuan tenaga bongkar muat serta tambahan
-                    lantai jika barang perlu dinaikkan/diturunkan lewat tangga.
+                    Tarif dihitung otomatis dan transparan. Estimasi tarif dasar
+                    jarak <strong>Rp 6.500/km</strong> ditambah setoran armada{" "}
+                    <strong>Rp 50.000</strong>. Anda juga bisa menambahkan opsi
+                    bantuan tenaga bongkar muat serta tambahan lantai jika
+                    barang perlu dinaikkan/diturunkan lewat tangga.
                   </p>
                 </div>
               </details>
