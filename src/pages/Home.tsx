@@ -2612,7 +2612,7 @@ export default function Home() {
                         <h3 id="wizard-step-title" tabIndex={-1}>
                           Data pemesan
                         </h3>
-                        <p>Nama dan nomor yang bisa kami hubungi.</p>
+                        <p>Nama dan nomor HP wajib diisi agar pesanan bisa dikirim lewat WhatsApp.</p>
                       </div>
                     </div>
 
@@ -2635,6 +2635,8 @@ export default function Home() {
                             placeholder="Contoh: Budi Santoso"
                             autoComplete="name"
                             enterKeyHint="next"
+                            required
+                            maxLength={80}
                             aria-invalid={nameError}
                             aria-describedby={
                               nameError ? "name-error" : undefined
@@ -2670,12 +2672,15 @@ export default function Home() {
                           <input
                             id="customer-phone"
                             className="field-input"
+                            type="tel"
                             value={phone}
                             onChange={(event) => setPhone(event.target.value)}
                             placeholder="0813 2762 3942"
                             inputMode="tel"
                             autoComplete="tel"
                             enterKeyHint="next"
+                            required
+                            maxLength={20}
                             aria-invalid={phoneError}
                             aria-describedby={
                               phoneError ? "phone-error" : "phone-hint"
