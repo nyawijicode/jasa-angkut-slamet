@@ -100,8 +100,12 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 
 ```text
 jasa-angkut-slamet/
-├── public/                 # Asset statis publik
+├── assets/
+│   └── originals/          # Foto & ikon sumber, tidak ikut build
+├── public/                 # Asset statis publik (gambar teroptimasi, ikon, manifest)
 ├── src/
+│   ├── components/
+│   │   └── MapCanvas.tsx   # Peta MapLibre, rute, dan marker
 │   ├── config/
 │   │   └── business.ts     # Konfigurasi data bisnis, garasi, dan tarif
 │   ├── domain/             # Logika inti bisnis
@@ -117,6 +121,7 @@ jasa-angkut-slamet/
 │   ├── styles/
 │   │   ├── base.css        # Reset CSS dasar
 │   │   ├── tokens.css      # Variabel warna, tipografi, dan spasi
+│   │   ├── refresh.css     # Lapisan visual & responsif
 │   │   └── ui.css          # Desain komponen antarmuka aplikasi
 │   ├── App.tsx             # Root component
 │   └── main.tsx            # Entry point aplikasi

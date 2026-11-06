@@ -757,31 +757,43 @@ const GALLERY = [
     base: "galeri-jasa-angkut-slamet-1",
     alt: "Dokumentasi armada Jasa Angkut Slamet",
     caption: "Armada Jasa Angkut Slamet",
+    width: 1200,
+    height: 1800,
   },
   {
     base: "galeri-jasa-angkut-slamet-2",
     alt: "Dokumentasi proses bongkar muat Jasa Angkut Slamet",
     caption: "Proses bongkar muat barang",
+    width: 1200,
+    height: 1600,
   },
   {
     base: "galeri-jasa-angkut-slamet-3",
     alt: "Dokumentasi layanan angkut barang Jasa Angkut Slamet",
     caption: "Layanan angkut barang",
+    width: 1200,
+    height: 1600,
   },
   {
     base: "galeri-jasa-angkut-slamet-4",
     alt: "Dokumentasi pengiriman barang Jasa Angkut Slamet",
     caption: "Pengiriman ke lokasi pelanggan",
+    width: 1200,
+    height: 1600,
   },
   {
     base: "galeri-jasa-angkut-slamet-5",
     alt: "Dokumentasi layanan pindahan Jasa Angkut Slamet",
     caption: "Bantuan pindahan rumah",
+    width: 1200,
+    height: 1600,
   },
   {
     base: "galeri-jasa-angkut-slamet-6",
     alt: "Dokumentasi muatan angkutan Jasa Angkut Slamet",
     caption: "Muatan tertata di bak armada",
+    width: 1200,
+    height: 1600,
   },
 ];
 
@@ -893,6 +905,8 @@ export default function Home() {
   const galleryModalRef = useRef<HTMLDivElement | null>(null);
   const mapTriggerRef = useRef<HTMLElement | null>(null);
   const mapModalRef = useRef<HTMLDivElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLElement | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -974,6 +988,41 @@ export default function Home() {
       window.removeEventListener("hashchange", onHashChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (
+        menuRef.current?.contains(target) ||
+        menuButtonRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setMenuOpen(false);
+    };
+    const desktopQuery = window.matchMedia("(min-width: 960px)");
+    const onDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) setMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    desktopQuery.addEventListener("change", onDesktop);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      desktopQuery.removeEventListener("change", onDesktop);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const nav = wizardNavRef.current;
@@ -1821,6 +1870,7 @@ export default function Home() {
             <button
               type="button"
               className="nav-burger"
+              ref={menuButtonRef}
               aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
               aria-expanded={menuOpen}
               aria-controls={menuOpen ? "mobile-menu" : undefined}
@@ -1853,6 +1903,7 @@ export default function Home() {
             id="mobile-menu"
             className="mobile-menu"
             aria-label="Navigasi mobile"
+            ref={menuRef}
           >
             <a
               className={`mobile-menu-link${activeNav === "pesan" ? " is-active" : ""}`}
@@ -3568,8 +3619,8 @@ export default function Home() {
                         srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w, /${item.base}-1200.jpg 1200w`}
                         sizes="(min-width: 640px) 560px, 100vw"
                         alt={item.alt}
-                        width={1200}
-                        height={1600}
+                        width={item.width}
+                        height={item.height}
                         loading={index === 0 ? "eager" : "lazy"}
                         decoding="async"
                       />
@@ -3669,8 +3720,8 @@ export default function Home() {
                             srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w`}
                             sizes="(min-width: 900px) 280px, 45vw"
                             alt={item.alt}
-                            width={1200}
-                            height={1600}
+                            width={item.width}
+                            height={item.height}
                             loading="lazy"
                             decoding="async"
                           />
