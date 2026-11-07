@@ -608,11 +608,13 @@ function MapSearchControl({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
     const q = query.trim();
     if (q.length < 3) {
       setResults([]);
+      setActiveIndex(-1);
       return;
     }
     const controller = new AbortController();
@@ -621,6 +623,7 @@ function MapSearchControl({
       try {
         const found = await searchAddress(q, controller.signal);
         setResults(found);
+        setActiveIndex(-1);
       } catch {
         if (!controller.signal.aborted) setResults([]);
       } finally {
@@ -638,6 +641,7 @@ function MapSearchControl({
     onSelect(result.lat, result.lon, result.display_name);
     setQuery(result.display_name);
     setResults([]);
+    setActiveIndex(-1);
   }
 
   return (
@@ -648,11 +652,29 @@ function MapSearchControl({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && results[0]) {
+            if (event.key === "ArrowDown") {
               event.preventDefault();
-              pick(results[0]);
+              setActiveIndex((index) =>
+                Math.min(results.length - 1, index + 1),
+              );
+              return;
             }
-            if (event.key === "Escape") setResults([]);
+            if (event.key === "ArrowUp") {
+              event.preventDefault();
+              setActiveIndex((index) => Math.max(0, index - 1));
+              return;
+            }
+            if (event.key === "Enter") {
+              const result = results[activeIndex] ?? results[0];
+              if (result) {
+                event.preventDefault();
+                pick(result);
+              }
+            }
+            if (event.key === "Escape") {
+              setResults([]);
+              setActiveIndex(-1);
+            }
           }}
           placeholder={`Cari alamat titik ${activeLabel} (${STOP_KIND_LABEL[active]})...`}
           aria-label={`Cari alamat titik ${activeLabel} (${STOP_KIND_LABEL[active]})`}
@@ -660,6 +682,9 @@ function MapSearchControl({
           aria-autocomplete="list"
           aria-controls="map-search-results"
           aria-expanded={results.length > 0}
+          aria-activedescendant={
+            activeIndex >= 0 ? `map-result-${activeIndex}` : undefined
+          }
         />
         {loading && (
           <span className="spinner" role="status" aria-label="Mencari alamat" />
@@ -675,10 +700,13 @@ function MapSearchControl({
           {results.map((result, index) => (
             <button
               key={`${result.lat}-${result.lon}-${index}`}
+              id={`map-result-${index}`}
               type="button"
-              className="map-result"
+              className={`map-result${index === activeIndex ? " is-active" : ""}`}
               role="option"
-              aria-selected={false}
+              aria-selected={index === activeIndex}
+              tabIndex={-1}
+              onMouseEnter={() => setActiveIndex(index)}
               onClick={() => pick(result)}
             >
               <strong>{result.display_name.split(",")[0]}</strong>

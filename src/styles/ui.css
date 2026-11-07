@@ -987,7 +987,7 @@
 }
 
 .map-draft.is-empty .map-draft-text p {
-  color: var(--gray-400);
+  color: var(--gray-500);
   font-style: italic;
 }
 
@@ -1482,7 +1482,8 @@
 }
 
 .map-result:hover,
-.map-result:focus-visible {
+.map-result:focus-visible,
+.map-result.is-active {
   background: var(--gray-50);
 }
 
