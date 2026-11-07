@@ -1150,7 +1150,7 @@
   flex: none;
   margin-left: auto;
   padding-left: 6px;
-  color: var(--gray-400);
+  color: var(--gray-500);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -1164,7 +1164,7 @@
 }
 
 .map-preview-row.is-empty .map-preview-coords {
-  color: var(--gray-400);
+  color: var(--gray-500);
   font-style: italic;
 }
 
@@ -2305,7 +2305,7 @@
 }
 
 .option-desc {
-  color: var(--gray-500);
+  color: var(--gray-600);
   font-size: 0.71875rem;
   line-height: 1.4;
 }

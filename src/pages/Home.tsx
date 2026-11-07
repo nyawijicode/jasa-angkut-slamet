@@ -656,6 +656,9 @@ function MapSearchControl({
           }}
           placeholder={`Cari alamat titik ${activeLabel} (${STOP_KIND_LABEL[active]})...`}
           aria-label={`Cari alamat titik ${activeLabel} (${STOP_KIND_LABEL[active]})`}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="map-search-results"
           aria-expanded={results.length > 0}
         />
         {loading && (
@@ -665,6 +668,7 @@ function MapSearchControl({
       {results.length > 0 && (
         <div
           className="map-search-results"
+          id="map-search-results"
           role="listbox"
           aria-label="Hasil pencarian alamat"
         >
@@ -3621,31 +3625,31 @@ export default function Home() {
                 onScroll={handleGalleryScroll}
               >
                 {GALLERY.map((item, index) => (
-                  <li
-                    className="gallery-slide"
-                    key={item.base}
-                    role="group"
-                    aria-roledescription="slide"
-                    aria-label={`${index + 1} dari ${GALLERY.length}`}
-                  >
-                    <a
-                      className="gallery-link"
-                      href={`/${item.base}-1200.jpg`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Buka foto: ${item.caption}`}
+                  <li className="gallery-slide" key={item.base}>
+                    <div
+                      role="group"
+                      aria-roledescription="slide"
+                      aria-label={`${index + 1} dari ${GALLERY.length}`}
                     >
-                      <img
-                        src={`/${item.base}-800.jpg`}
-                        srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w, /${item.base}-1200.jpg 1200w`}
-                        sizes="(min-width: 640px) 560px, 100vw"
-                        alt={item.alt}
-                        width={item.width}
-                        height={item.height}
-                        loading={index === 0 ? "eager" : "lazy"}
-                        decoding="async"
-                      />
-                    </a>
+                      <a
+                        className="gallery-link"
+                        href={`/${item.base}-1200.jpg`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Buka foto: ${item.caption}`}
+                      >
+                        <img
+                          src={`/${item.base}-800.jpg`}
+                          srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w, /${item.base}-1200.jpg 1200w`}
+                          sizes="(min-width: 640px) 560px, 100vw"
+                          alt={item.alt}
+                          width={item.width}
+                          height={item.height}
+                          loading={index === 0 ? "eager" : "lazy"}
+                          decoding="async"
+                        />
+                      </a>
+                    </div>
                   </li>
                 ))}
               </ul>
