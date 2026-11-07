@@ -4198,16 +4198,19 @@ export default function Home() {
         <div className="mobile-bar">
           <div className="mobile-bar-total">
             <span className="mobile-bar-label">
-              {quote ? "Total estimasi" : "Mulai dari"}
+              {quote ? "Total estimasi" : "Tarif dasar"}
             </span>
             {quote ? (
               <strong className="mobile-bar-value">
                 Rp {quote.total.toLocaleString("id-ID")}
               </strong>
             ) : (
-              <strong className="mobile-bar-value">
-                Rp 6.500<small>/km</small>
-              </strong>
+              <>
+                <strong className="mobile-bar-value">
+                  Rp 6.500<small>/km</small>
+                </strong>
+                <span className="mobile-bar-note">+ setoran Rp 50.000</span>
+              </>
             )}
           </div>
           <div className="mobile-bar-actions">

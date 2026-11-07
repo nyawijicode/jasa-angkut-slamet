@@ -14,6 +14,7 @@ test("menampilkan tarif transparan tanpa overflow horizontal", async ({
   );
   await expect(page.locator(".hero-quote-note")).toContainText("Rp 50.000");
   await expect(page.locator(".faq-answer").first()).toContainText("Rp 50.000");
+  await expect(page.locator(".mobile-bar-note")).toContainText("Rp 50.000");
 
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
@@ -87,6 +88,14 @@ test("modal galeri mengunci fokus dan menutup dengan Escape", async ({
 }) => {
   const trigger = page.locator(".gallery-open");
   const modal = page.locator(".gallery-modal");
+
+  await expect(page.locator(".gallery-track > li")).toHaveCount(6);
+  const nonListChildren = await page.evaluate(() =>
+    Array.from(document.querySelector(".gallery-track")?.children ?? [])
+      .filter((el) => el.tagName !== "LI")
+      .map((el) => el.tagName),
+  );
+  expect(nonListChildren).toEqual([]);
 
   await trigger.click();
   await expect(modal).toBeVisible();
