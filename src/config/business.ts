@@ -16,6 +16,7 @@ export const BUSINESS = {
     helper: { none: 0, driver: 50000, driverAndAssistant: 100000 } as const,
     floor: { first: 20000, next: 10000, max: 20 },
     roundKm: "ceil" as const,
+    outOfTownSurchargeRate: 0.5,
   },
   social: {
     instagram: "https://www.instagram.com/jasaangkutslamet.mranggen/",

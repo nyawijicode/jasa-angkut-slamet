@@ -37,4 +37,29 @@ describe('whatsapp message', () => {
     expect(message).toContain('*Titik Muat:*');
     expect(message).toContain('*Titik Bongkar:*');
   });
+
+  it('includes out of town surcharge in message when applicable', () => {
+    const luarKotaQuote = calculateQuote({
+      service: 'luar-kota',
+      distances: { loadToUnload: 89 },
+      helper: 'none',
+      loadFloor: 1,
+      unloadFloor: 1,
+    });
+
+    const message = buildWhatsAppMessage({
+      name: 'Agus',
+      phone: '081327623942',
+      serviceLabel: 'Luar Kota',
+      loads: [{ label: 'M1', address: 'Demak', lat: -7.0, lng: 110.5, floor: 1 }],
+      unloads: [{ label: 'B1', address: 'Kudus', lat: -6.8, lng: 110.8, floor: 1 }],
+      helperLabel: 'Tanpa bantuan',
+      distanceKm: 89,
+      quote: luarKotaQuote,
+    });
+
+    expect(message).toContain('Ongkos angkut dasar: Rp 628.500');
+    expect(message).toContain('Tambahan luar kota (+50%): Rp 314.250');
+    expect(message).toContain('Total ongkos angkut: Rp 942.750');
+  });
 });

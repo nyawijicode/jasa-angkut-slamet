@@ -54,7 +54,13 @@ export function buildWhatsAppMessage(p: WaPayload): string {
   }
   lines.push('');
   lines.push('*Rincian Harga (estimasi)*');
-  lines.push(`Ongkos angkut: Rp ${p.quote.transport.toLocaleString('id-ID')}`);
+  if (p.quote.outOfTownSurcharge > 0) {
+    lines.push(`Ongkos angkut dasar: Rp ${p.quote.baseTransport.toLocaleString('id-ID')}`);
+    lines.push(`Tambahan luar kota (+50%): Rp ${p.quote.outOfTownSurcharge.toLocaleString('id-ID')}`);
+    lines.push(`Total ongkos angkut: Rp ${p.quote.transport.toLocaleString('id-ID')}`);
+  } else {
+    lines.push(`Ongkos angkut: Rp ${p.quote.transport.toLocaleString('id-ID')}`);
+  }
   if (p.quote.helper > 0) {
     lines.push(`Bantuan bongkar muat: Rp ${p.quote.helper.toLocaleString('id-ID')}`);
   }

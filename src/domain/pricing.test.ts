@@ -26,13 +26,27 @@ describe('pricing', () => {
     expect(floorFee(10)).toBe(100000);
   });
 
-  it('luar kota sums three legs', () => {
+  it('luar kota uses delivery route distance and adds 50% surcharge', () => {
     const km = billableKm('luar-kota', {
-      garageToLoad: 5,
-      loadToUnload: 10,
-      unloadToGarage: 7,
+      loadToUnload: 89,
     });
-    expect(km).toBe(22);
+    expect(km).toBe(89);
+
+    const q = calculateQuote({
+      service: 'luar-kota',
+      distances: { loadToUnload: 89 },
+      helper: 'none',
+      loadFloor: 1,
+      unloadFloor: 1,
+    });
+    // 89 km * 6.500 + 50.000 (jasa sopir) = 578.500 + 50.000 = 628.500
+    // +50% luar kota = 314.250
+    // Total ongkos angkut luar kota = 628.500 + 314.250 = 942.750
+    expect(q.billableKm).toBe(89);
+    expect(q.baseTransport).toBe(628500);
+    expect(q.outOfTownSurcharge).toBe(314250);
+    expect(q.transport).toBe(942750);
+    expect(q.total).toBe(942750);
   });
 
   it('dalam kota ignores garage', () => {

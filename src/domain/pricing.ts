@@ -22,6 +22,8 @@ export interface QuoteInput {
 
 export interface Quote {
   billableKm: number;
+  baseTransport: number;
+  outOfTownSurcharge: number;
   transport: number;
   helper: number;
   loadFloor: number;
@@ -39,18 +41,19 @@ export const floorFee = (floor: number): number => {
   return first + (floor - 2) * next;
 };
 
-export function billableKm(service: Service, d: Distances): number {
-  const raw =
-    service === 'luar-kota'
-      ? (d.garageToLoad ?? 0) + d.loadToUnload + (d.unloadToGarage ?? 0)
-      : d.loadToUnload;
-  return Math.ceil(raw - 1e-9);
+export function billableKm(_service: Service, d: Distances): number {
+  return Math.ceil(d.loadToUnload - 1e-9);
 }
 
 export function calculateQuote(i: QuoteInput): Quote {
   const { perKm, setoran, helper } = BUSINESS.pricing;
   const km = billableKm(i.service, i.distances);
-  const transport = km * perKm + setoran;
+  const baseTransport = km * perKm + setoran;
+  const outOfTownSurcharge =
+    i.service === 'luar-kota'
+      ? Math.round(baseTransport * (BUSINESS.pricing.outOfTownSurchargeRate ?? 0.5))
+      : 0;
+  const transport = baseTransport + outOfTownSurcharge;
   const h = helper[i.helper];
   const lf =
     i.loadFloors && i.loadFloors.length > 0
@@ -63,6 +66,8 @@ export function calculateQuote(i: QuoteInput): Quote {
   const priorityFee = i.priority ? 50000 : 0;
   return {
     billableKm: km,
+    baseTransport,
+    outOfTownSurcharge,
     transport,
     helper: h,
     loadFloor: lf,

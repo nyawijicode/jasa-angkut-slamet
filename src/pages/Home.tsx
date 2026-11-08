@@ -1316,43 +1316,30 @@ export default function Home() {
     }
 
     const controller = new AbortController();
-    const roundTrip = service === "luar-kota";
-    setPlan(null);
     setRouteStatus("loading");
 
     const mainPairs = routePoints
       .slice(0, -1)
       .map((point, index) => [point, routePoints[index + 1]] as const);
-    const first = routePoints[0];
-    const last = routePoints[routePoints.length - 1];
 
-    Promise.all([
-      ...mainPairs.map(([from, to]) => fetchRoute(from, to, controller.signal)),
-      roundTrip ? fetchRoute(BUSINESS.garage, first, controller.signal) : null,
-      roundTrip ? fetchRoute(last, BUSINESS.garage, controller.signal) : null,
-    ]).then((results) => {
+    Promise.all(
+      mainPairs.map(([from, to]) => fetchRoute(from, to, controller.signal)),
+    ).then((results) => {
       if (controller.signal.aborted) return;
-      const main = results.slice(
-        0,
-        mainPairs.length,
-      ) as Array<RouteResult | null>;
-      const garageToFirst = results[mainPairs.length] ?? null;
-      const lastToGarage = results[mainPairs.length + 1] ?? null;
+      const main = results as Array<RouteResult | null>;
       const mainOk = main.length > 0 && main.every(Boolean);
-      const garageOk =
-        !roundTrip || (Boolean(garageToFirst) && Boolean(lastToGarage));
       setPlan({
         main: main.filter((leg): leg is RouteResult => Boolean(leg)),
-        garageToFirst,
-        lastToGarage,
+        garageToFirst: null,
+        lastToGarage: null,
       });
-      setRouteStatus(mainOk && garageOk ? "ready" : "error");
+      setRouteStatus(mainOk ? "ready" : "error");
     });
 
     return () => controller.abort();
     // routeKey already captures the coordinates this request depends on.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeKey, service, allStopsSet]);
+  }, [routeKey, allStopsSet]);
 
   function appendQuickNote(snippet: string) {
     setNote((prev) => {
@@ -1395,31 +1382,16 @@ export default function Home() {
     for (let index = 0; index < routePoints.length - 1; index++) {
       mainKm += straightLineKm(routePoints[index], routePoints[index + 1]);
     }
-    if (service === "luar-kota") {
-      return {
-        garageToLoad: straightLineKm(BUSINESS.garage, routePoints[0]),
-        loadToUnload: mainKm,
-        unloadToGarage: straightLineKm(
-          routePoints[routePoints.length - 1],
-          BUSINESS.garage,
-        ),
-      };
-    }
     return { loadToUnload: mainKm };
-  }, [allStopsSet, routePoints, service]);
+  }, [allStopsSet, routePoints]);
 
   const routeDistances = useMemo(() => {
-    if (routeStatus !== "ready" || !plan) return straightDistances;
-    const mainKm = plan.main.reduce((total, leg) => total + leg.distanceKm, 0);
-    if (service === "luar-kota") {
-      return {
-        garageToLoad: plan.garageToFirst?.distanceKm ?? 0,
-        loadToUnload: mainKm,
-        unloadToGarage: plan.lastToGarage?.distanceKm ?? 0,
-      };
+    if (plan && plan.main.length > 0) {
+      const mainKm = plan.main.reduce((total, leg) => total + leg.distanceKm, 0);
+      return { loadToUnload: mainKm };
     }
-    return { loadToUnload: mainKm };
-  }, [plan, routeStatus, service, straightDistances]);
+    return straightDistances;
+  }, [plan, straightDistances]);
 
   const quote = useMemo(() => {
     if (!allStopsSet || !routeDistances) return null;
@@ -1558,18 +1530,10 @@ export default function Home() {
 
   const fallbackLine = useMemo<Array<[number, number]>>(() => {
     if (!allStopsSet || routePoints.length < 2) return [];
-    const points = routePoints.map(
+    return routePoints.map(
       (point) => [point.lat, point.lng] as [number, number],
     );
-    if (service === "luar-kota") {
-      return [
-        [BUSINESS.garage.lat, BUSINESS.garage.lng],
-        ...points,
-        [BUSINESS.garage.lat, BUSINESS.garage.lng],
-      ];
-    }
-    return points;
-  }, [allStopsSet, routePoints, service]);
+  }, [allStopsSet, routePoints]);
 
   const routeLine = useMemo<Array<[number, number]>>(() => {
     if (routeStatus === "ready") return mainRouteLine;
@@ -1577,43 +1541,23 @@ export default function Home() {
     return [];
   }, [routeStatus, mainRouteLine, fallbackLine]);
 
-  const garageToFirstLine = useMemo<Array<[number, number]>>(
-    () =>
-      routeStatus === "ready" && service === "luar-kota"
-        ? (plan?.garageToFirst?.coordinates ?? [])
-        : [],
-    [routeStatus, service, plan],
-  );
-
-  const lastToGarageLine = useMemo<Array<[number, number]>>(
-    () =>
-      routeStatus === "ready" && service === "luar-kota"
-        ? (plan?.lastToGarage?.coordinates ?? [])
-        : [],
-    [routeStatus, service, plan],
-  );
+  const garageToFirstLine = useMemo<Array<[number, number]>>(() => [], []);
+  const lastToGarageLine = useMemo<Array<[number, number]>>(() => [], []);
 
   const fitPositions = useMemo<Array<[number, number]>>(
     () => [
-      ...garageToFirstLine,
       ...routeLine,
-      ...lastToGarageLine,
       ...routePoints.map((point) => [point.lat, point.lng] as [number, number]),
       ...(draft ? [[draft.lat, draft.lng] as [number, number]] : []),
     ],
-    [garageToFirstLine, routeLine, lastToGarageLine, routePoints, draft],
+    [routeLine, routePoints, draft],
   );
 
   const routeSummary = useMemo(() => {
     if (routeStatus !== "ready" || !plan) return null;
-    const legs = [
-      ...(plan.garageToFirst ? [plan.garageToFirst] : []),
-      ...plan.main,
-      ...(plan.lastToGarage ? [plan.lastToGarage] : []),
-    ];
     return {
-      km: legs.reduce((total, leg) => total + leg.distanceKm, 0),
-      minutes: legs.reduce((total, leg) => total + leg.durationMin, 0),
+      km: plan.main.reduce((total, leg) => total + leg.distanceKm, 0),
+      minutes: plan.main.reduce((total, leg) => total + leg.durationMin, 0),
     };
   }, [plan, routeStatus]);
 
@@ -3351,6 +3295,9 @@ export default function Home() {
                         </span>
                         <span className="choice-copy">
                           <span className="choice-title">Dalam Kota</span>
+                          <span className="choice-meta" style={{ fontSize: "0.75rem", color: "var(--ink-soft)", display: "block" }}>
+                            Demak &amp; Semarang
+                          </span>
                         </span>
                         <span className="choice-check">
                           <IconCheck size={12} />
@@ -3369,6 +3316,9 @@ export default function Home() {
                         </span>
                         <span className="choice-copy">
                           <span className="choice-title">Luar Kota</span>
+                          <span className="choice-meta" style={{ fontSize: "0.75rem", color: "var(--ink-soft)", display: "block" }}>
+                            Antar kota (+50% ongkos)
+                          </span>
                         </span>
                         <span className="choice-check">
                           <IconCheck size={12} />
@@ -3789,12 +3739,29 @@ export default function Home() {
                               <dt>Jarak</dt>
                               <dd>{quote.billableKm} km</dd>
                             </div>
-                            <div className="quote-line">
-                              <dt>Ongkos angkut</dt>
-                              <dd>
-                                Rp {quote.transport.toLocaleString("id-ID")}
-                              </dd>
-                            </div>
+                            {quote.outOfTownSurcharge > 0 ? (
+                              <>
+                                <div className="quote-line">
+                                  <dt>Ongkos angkut dasar</dt>
+                                  <dd>
+                                    Rp {quote.baseTransport.toLocaleString("id-ID")}
+                                  </dd>
+                                </div>
+                                <div className="quote-line">
+                                  <dt>Tambahan luar kota (+50%)</dt>
+                                  <dd>
+                                    +Rp {quote.outOfTownSurcharge.toLocaleString("id-ID")}
+                                  </dd>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="quote-line">
+                                <dt>Ongkos angkut</dt>
+                                <dd>
+                                  Rp {quote.transport.toLocaleString("id-ID")}
+                                </dd>
+                              </div>
+                            )}
                             {quote.helper > 0 && (
                               <div className="quote-line">
                                 <dt>Bantuan bongkar muat</dt>
