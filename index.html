@@ -15,7 +15,7 @@
     <meta name="author" content="Jasa Angkut Slamet" />
     <meta
       name="keywords"
-      content="jasa angkut Demak, jasa angkut Semarang, jasa angkut Kabupaten Semarang, jasa angkut Ungaran, angkutan barang, pindahan rumah, jasa pindahan Demak, jasa pindahan Semarang, angkut barang Mranggen, angkut barang Ambarawa, Jasa Angkut Slamet"
+      content="jasa angkut Demak, jasa angkut Semarang, jasa angkut Kabupaten Semarang, jasa angkut Ungaran, sewa pick up Demak, sewa pick up Semarang, angkutan barang, pindahan rumah, jasa pindahan kos Semarang, jasa pindahan Demak, angkut barang Mranggen, mobil pick up terdekat, Jasa Angkut Slamet"
     />
     <meta name="geo.region" content="ID-JT" />
     <meta
@@ -25,13 +25,28 @@
     <meta name="geo.position" content="-7.05698;110.49681" />
     <meta name="ICBM" content="-7.05698, 110.49681" />
 
-    <!-- Mobile & PWA -->
-    <meta name="theme-color" content="#173F32" />
+    <!-- Mobile & PWA Responsive Optimization -->
+    <meta name="theme-color" content="#005d42" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#064e3b" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Angkut Slamet" />
     <meta name="format-detection" content="telephone=yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
+
+    <!-- Google Fonts & Material Symbols (Google Stitch Style) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
 
     <!-- Fonts (self-hosted, preloaded) -->
     <link
@@ -220,7 +235,7 @@
           "Kecamatan Ungaran Timur, Kabupaten Semarang"
         ],
         "hasMap": "https://maps.google.com/?cid=13625126307393437331",
-        "priceRange": "Rp 6.500 per km + setoran Rp 50.000",
+        "priceRange": "Rp 6.500 per km + jasa sopir Rp 50.000",
         "openingHoursSpecification": [
           {
             "@type": "OpeningHoursSpecification",
@@ -354,6 +369,64 @@
       }
     </script>
 
+    <!-- Structured Data: SiteNavigationElement (Google Sitelinks) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "Menu Navigasi Jasa Angkut Slamet",
+            "itemListElement": [
+              {
+                "@type": "SiteNavigationElement",
+                "position": 1,
+                "name": "Beranda",
+                "description": "Layanan armada angkut & pindahan Demak Semarang terpercaya",
+                "url": "https://jasa-angkut-slamet.vercel.app/#beranda"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 2,
+                "name": "Layanan Kami",
+                "description": "Pindahan rumah, kos, kontrakan, kantor dan distribusi barang dagangan",
+                "url": "https://jasa-angkut-slamet.vercel.app/#layanan"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 3,
+                "name": "Kalkulator Tarif",
+                "description": "Kalkulator estimasi ongkir otomatis transparan langsung di rute peta",
+                "url": "https://jasa-angkut-slamet.vercel.app/#pesan"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 4,
+                "name": "Galeri Armada",
+                "description": "Foto armada pick up dan dokumentasi penataan muatan",
+                "url": "https://jasa-angkut-slamet.vercel.app/#galeri"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 5,
+                "name": "Area Layanan",
+                "description": "Cakupan pengiriman Demak, Kota Semarang, dan Kab. Semarang",
+                "url": "https://jasa-angkut-slamet.vercel.app/#area-layanan"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 6,
+                "name": "FAQ",
+                "description": "Tanya jawab seputar tarif per km, tenaga bantuan, dan rute perjalanan",
+                "url": "https://jasa-angkut-slamet.vercel.app/#faq"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
     <!-- Structured Data: FAQ -->
     <script type="application/ld+json">
       {
@@ -365,7 +438,7 @@
             "name": "Berapa tarif jasa angkut Jasa Angkut Slamet?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Tarif dihitung berdasarkan jarak (Rp 6.500/km), setoran armada Rp 50.000, dan biaya tambahan untuk bantuan bongkar muat atau angkut barang ke lantai atas. Gunakan kalkulator di website ini untuk estimasi instan."
+              "text": "Tarif dihitung berdasarkan jarak (Rp 6.500/km), jasa sopir Rp 50.000, dan biaya tambahan untuk bantuan bongkar muat atau angkut barang ke lantai atas. Gunakan kalkulator di website ini untuk estimasi instan."
             }
           },
           {

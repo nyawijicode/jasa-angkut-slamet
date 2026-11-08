@@ -10,56 +10,58 @@
   /* Core palette (exact DESIGN.md values) */
   --paper: #ffffff;
   --surface: #ffffff;
-  --surface-sunken: #edefe8;
-  --ink: #26312c;
-  --ink-soft: #4f5d55;
-  --ink-faint: #66736b;
-  --line: #e4e9e3;
-  --line-strong: #cbd5c8;
-  --forest: #173f32;
-  --forest-ink: #102d24;
-  --forest-deep: #102d24;
-  --forest-wash: #edf2ee;
-  --brand-light: #b7c8ae;
-  --truck: #a8742c;
-  --truck-bright: #d99a42;
-  --truck-wash: #f7eedf;
-  --accent: #d99a42;
-  --accent-strong: #c2832c;
-  --accent-ink: #17251e;
-  --accent-wash: #f8f1e5;
-  --danger: #a92a21;
-  --danger-wash: #fbecea;
-  --focus: #1a5f9e;
+  --surface-sunken: #f1f5f9;
+  --ink: #0b1c30;
+  --ink-soft: #3e4943;
+  --ink-faint: #6e7a73;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --forest: #005d42;
+  --forest-ink: #064e3b;
+  --forest-deep: #047857;
+  --forest-wash: #ecfdf5;
+  --brand-emerald-surface: #ecfdf5;
+  --brand-light: #9ffdd3;
+  --whatsapp: #25d366;
+  --truck: #904d00;
+  --truck-bright: #fe932c;
+  --truck-wash: #fef3c7;
+  --accent: #f59e0b;
+  --accent-strong: #d97706;
+  --accent-ink: #2f1500;
+  --accent-wash: #fef3c7;
+  --danger: #ba1a1a;
+  --danger-wash: #ffdad6;
+  --focus: #005d42;
 
   /* Warm neutral scale derived from the same palette. */
-  --gray-25: #fbfcfa;
-  --gray-50: #f6f7f4;
-  --gray-100: #eef0eb;
-  --gray-200: #e4e9e3;
-  --gray-300: #d3dbd4;
-  --gray-400: #a3aea6;
-  --gray-500: #66736b;
-  --gray-600: #55625a;
-  --gray-700: #3b4841;
-  --gray-800: #2c3831;
-  --gray-900: #26312c;
+  --gray-25: #f8f9ff;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0b1c30;
 
-  --brand-25: #fafcf9;
-  --brand-50: #f1f5ef;
-  --brand-100: #e4ece0;
-  --brand-200: #c8d7c1;
+  --brand-25: #f0fdf4;
+  --brand-50: #ecfdf5;
+  --brand-100: #d1fae5;
+  --brand-200: #a7f3d0;
   --brand-500: var(--forest);
-  --brand-600: #102d24;
-  --brand-700: #0b211a;
+  --brand-600: var(--forest-ink);
+  --brand-700: #022c22;
 
-  /* Radii: buttons 10px, cards 12px, large sections 16px. */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 16px;
-  --radius-3xl: 16px;
+  /* Radii: modern Stitch rounded aesthetic */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
 
   /* 8px spacing system. */
   --space-1: 4px;
@@ -73,10 +75,9 @@
   --space-9: 64px;
   --space-10: 96px;
 
-  /* Manrope headings, Inter body. */
-  --font-heading: "Manrope", "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", sans-serif;
+  /* Stitch typography: Plus Jakarta Sans headings, Inter body */
+  --font-heading: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   --text-display: clamp(2rem, 4.6vw, 3.25rem);
   --text-h2: clamp(1.75rem, 2.6vw, 2.125rem);
