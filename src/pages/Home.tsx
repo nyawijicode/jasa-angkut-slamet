@@ -4162,7 +4162,28 @@ export default function Home() {
                     aria-label={`Kecamatan di ${area.title}`}
                   >
                     {area.districts.map((district) => (
-                      <li className="hero-point" key={district}>
+                      <li
+                        className="hero-point"
+                        key={district}
+                        role="button"
+                        tabIndex={0}
+                        title={`Layanan jasa angkut & pindahan area ${district} — Klik untuk hitung tarif`}
+                        onClick={() => {
+                          const el = document.getElementById("pesan");
+                          if (el) {
+                            el.scrollIntoView({ behavior: "smooth" });
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            const el = document.getElementById("pesan");
+                            if (el) {
+                              el.scrollIntoView({ behavior: "smooth" });
+                            }
+                          }
+                        }}
+                      >
                         <IconCheck size={16} />
                         {district}
                       </li>
