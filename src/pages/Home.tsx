@@ -4435,98 +4435,110 @@ export default function Home() {
 
       <footer className="site-footer" id="kontak">
         <div className="container">
-          <div className="footer-main">
-            <div className="footer-content">
-              <div className="footer-brand">
-                <div className="brand">
-                  <span className="brand-mark">
-                    <IconTruck size={23} />
-                  </span>
-                  <span>
-                    <span className="brand-name">Jasa Angkut Slamet</span>
-                    <span className="brand-meta">
-                      Angkutan barang &amp; pindahan
-                    </span>
-                  </span>
-                </div>
-                <p>
-                  Melayani angkutan barang, pindahan rumah, dan kiriman usaha di
-                  Kabupaten Demak, Kota Semarang, Kabupaten Semarang, dan
-                  sekitarnya.
-                </p>
-                <p className="footer-address">
-                  <IconMapPin size={15} />
+          <div className="footer-grid">
+            <div className="footer-brand-col">
+              <a className="brand" href="#beranda" aria-label="Jasa Angkut Slamet — beranda">
+                <span className="brand-mark">
+                  <IconTruck size={23} />
+                </span>
+                <span>
+                  <span className="brand-name">Jasa Angkut Slamet</span>
+                  <span className="brand-meta">Armada Pindahan &amp; Logistik</span>
+                </span>
+              </a>
+              <p className="footer-desc">
+                Solusi armada pick up terpercaya untuk angkutan barang, pindahan
+                rumah, kos, kantor, dan distribusi logistik di Demak, Kota
+                Semarang, dan Kab. Semarang.
+              </p>
+              <div className="footer-info-list">
+                <div className="footer-info-item">
+                  <IconMapPin size={16} />
                   <span>{BUSINESS.garage.address}</span>
-                </p>
-              </div>
-
-              <div className="footer-columns">
-                <div className="footer-col">
-                  <h3>Navigasi</h3>
-                  <a href="#beranda">Beranda</a>
-                  <a href="#layanan">Layanan Kami</a>
-                  <a href="#pesan">Kalkulator Tarif</a>
-                  <a href="#galeri">Galeri Armada</a>
-                  <a href="#area-layanan">Area Layanan</a>
-                  <a href="#faq">Tanya Jawab (FAQ)</a>
                 </div>
-                <div className="footer-col">
-                  <h3>Kontak</h3>
-                  <a href={`tel:+${BUSINESS.whatsapp}`}>
-                    <IconPhone size={15} />
-                    {BUSINESS.phoneDisplay}
-                  </a>
-                  <a href={waChatUrl} target="_blank" rel="noopener noreferrer">
-                    <IconWhatsApp size={15} />
-                    WhatsApp
-                  </a>
-                  <span className="footer-hours">
-                    <IconClock size={15} />
-                    Setiap hari 06.00–22.00 WIB
-                  </span>
-                </div>
-                <div className="footer-col">
-                  <h3>Area layanan</h3>
-                  <a href="#area-layanan">Kabupaten Demak</a>
-                  <a href="#area-layanan">Kota Semarang</a>
-                  <a href="#area-layanan">Kabupaten Semarang</a>
-                </div>
-                <div className="footer-col">
-                  <h3>Sosial</h3>
-                  <a
-                    href={BUSINESS.social.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <IconInstagram size={15} />
-                    Instagram
-                  </a>
-                  <a
-                    href={BUSINESS.social.tiktok}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <IconTikTok size={15} />
-                    TikTok
-                  </a>
-                  <a
-                    href={BUSINESS.social.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <IconFacebook size={15} />
-                    Facebook
-                  </a>
+                <div className="footer-info-item">
+                  <IconClock size={16} />
+                  <span>Buka Setiap Hari: 06.00 – 22.00 WIB</span>
                 </div>
               </div>
             </div>
 
-            <div className="footer-map-side">
+            <div className="footer-nav-col">
+              <h3 className="footer-col-title">Navigasi</h3>
+              <ul className="footer-links-list">
+                <li><a href="#beranda">Beranda</a></li>
+                <li><a href="#layanan">Layanan Kami</a></li>
+                <li><a href="#pesan">Kalkulator Tarif</a></li>
+                <li><a href="#galeri">Galeri Armada</a></li>
+                <li><a href="#area-layanan">Area Layanan</a></li>
+                <li><a href="#faq">Tanya Jawab (FAQ)</a></li>
+              </ul>
+            </div>
+
+            <div className="footer-area-col">
+              <h3 className="footer-col-title">Area Layanan</h3>
+              <ul className="footer-links-list">
+                <li><a href="#area-layanan">Kabupaten Demak (14 Kec.)</a></li>
+                <li><a href="#area-layanan">Kota Semarang (16 Kec.)</a></li>
+                <li><a href="#area-layanan">Kab. Semarang (19 Kec.)</a></li>
+                <li><a href="#area-layanan">Ungaran &amp; Mranggen</a></li>
+                <li><a href="#hubungi">Kirim Antar Kota &amp; Provinsi</a></li>
+              </ul>
+            </div>
+
+            <div className="footer-contact-col">
+              <h3 className="footer-col-title">Kontak &amp; Sosial</h3>
+              <div className="footer-contact-actions">
+                <a
+                  className="footer-btn-wa"
+                  href={waChatUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Chat WhatsApp Admin Jasa Angkut Slamet"
+                >
+                  <IconWhatsApp size={16} />
+                  <span>0813-2762-3942</span>
+                </a>
+                <a
+                  className="footer-btn-phone"
+                  href={`tel:+${BUSINESS.whatsapp}`}
+                  aria-label="Telepon Langsung Admin Jasa Angkut Slamet"
+                >
+                  <IconPhone size={15} />
+                  <span>{BUSINESS.phoneDisplay}</span>
+                </a>
+              </div>
+              <div className="footer-social-links" aria-label="Media Sosial">
+                <a
+                  href={BUSINESS.social.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Kunjungi Instagram Jasa Angkut Slamet"
+                >
+                  <IconInstagram size={18} />
+                </a>
+                <a
+                  href={BUSINESS.social.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Kunjungi TikTok Jasa Angkut Slamet"
+                >
+                  <IconTikTok size={18} />
+                </a>
+                <a
+                  href={BUSINESS.social.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Kunjungi Facebook Jasa Angkut Slamet"
+                >
+                  <IconFacebook size={18} />
+                </a>
+              </div>
+            </div>
+
+            <div className="footer-map-col">
+              <h3 className="footer-col-title">Peta Garasi</h3>
               <div className="footer-map-card">
-                <div className="footer-map-head">
-                  <IconMapPin size={15} />
-                  <span>Lokasi Garasi (Google Maps)</span>
-                </div>
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.59330813383!2d110.49680869999999!3d-7.056979600000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e708f76075bb581%3A0xbd15ea2a7eccde93!2sJasa%20Angkut%20Slamet!5e0!3m2!1sid!2sid!4v1793548236364!5m2!1sid!2sid"
                   className="footer-map-iframe"
@@ -4544,20 +4556,22 @@ export default function Home() {
                   aria-label="Buka petunjuk arah ke Garasi Jasa Angkut Slamet di Google Maps"
                 >
                   <IconMapPin size={14} />
-                  <span>Buka di Google Maps</span>
+                  <span>Petunjuk Arah Maps</span>
                 </a>
               </div>
             </div>
           </div>
 
           <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} Jasa Angkut Slamet</span>
+            <span>© {new Date().getFullYear()} Jasa Angkut Slamet. Seluruh hak cipta dilindungi.</span>
             <span>
               <a className="footer-legal-link" href="/privasi.html">
-                Kebijakan privasi &amp; ketentuan
+                Kebijakan Privasi &amp; Ketentuan Layanan
               </a>
             </span>
-            <span>Ini estimasi. Harga final dikonfirmasi lewat WhatsApp.</span>
+            <span className="footer-disclaimer">
+              Perhitungan tarif bersifat transparan. Harga final dikonfirmasi via WhatsApp.
+            </span>
           </div>
         </div>
       </footer>
