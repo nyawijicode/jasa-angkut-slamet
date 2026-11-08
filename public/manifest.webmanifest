@@ -1,22 +1,35 @@
 {
   "name": "Jasa Angkut Slamet",
   "short_name": "Jasa Angkut Slamet",
-  "start_url": "/",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#F5F7F3",
-  "theme_color": "#0D4A34",
+  "orientation": "portrait-primary",
+  "background_color": "#F8F9FF",
+  "theme_color": "#005D42",
+  "description": "Layanan armada pick up cepat, tarif transparan, dan terpercaya di Kebonbatur, Mranggen, Demak, Kota Semarang, dan Kab. Semarang.",
+  "categories": ["business", "utilities", "travel"],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "/manifest.webmanifest",
+      "id": "/"
+    }
+  ],
+  "prefer_related_applications": false
 }

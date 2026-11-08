@@ -8,6 +8,29 @@ import './styles/ui.css'
 import './styles/refresh.css'
 import './styles/design.css'
 
+// Register Service Worker for PWA installability & offline caching
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => {
+        reg.addEventListener('updatefound', () => {
+          const installingWorker = reg.installing;
+          if (installingWorker) {
+            installingWorker.addEventListener('statechange', () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('Jasa Angkut Slamet PWA content updated.');
+              }
+            });
+          }
+        });
+      })
+      .catch((err) => {
+        console.warn('PWA Service Worker registration:', err);
+      });
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
