@@ -17,6 +17,7 @@ export interface QuoteInput {
   unloadFloor: number;
   loadFloors?: number[];
   unloadFloors?: number[];
+  priority?: boolean;
 }
 
 export interface Quote {
@@ -25,6 +26,7 @@ export interface Quote {
   helper: number;
   loadFloor: number;
   unloadFloor: number;
+  priority: number;
   total: number;
 }
 
@@ -58,12 +60,14 @@ export function calculateQuote(i: QuoteInput): Quote {
     i.unloadFloors && i.unloadFloors.length > 0
       ? i.unloadFloors.reduce((total, floor) => total + floorFee(floor), 0)
       : floorFee(i.unloadFloor);
+  const priorityFee = i.priority ? 50000 : 0;
   return {
     billableKm: km,
     transport,
     helper: h,
     loadFloor: lf,
     unloadFloor: uf,
-    total: transport + h + lf + uf,
+    priority: priorityFee,
+    total: transport + h + lf + uf + priorityFee,
   };
 }

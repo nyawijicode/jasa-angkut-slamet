@@ -36,8 +36,9 @@ type MapCanvasProps = {
   lastToGarageLine: Array<[number, number]>;
   fitPositions: Array<[number, number]>;
   fitSignal: number;
-  onPick: (lat: number, lng: number) => void;
-  onDraftMove: (lat: number, lng: number) => void;
+  onPick?: (lat: number, lng: number) => void;
+  onDraftMove?: (lat: number, lng: number) => void;
+  readOnly?: boolean;
 };
 
 const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
@@ -249,11 +250,13 @@ export default function MapCanvas({
   fitSignal,
   onPick,
   onDraftMove,
+  readOnly = false,
 }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const callbacksRef = useRef({ onPick, onDraftMove });
+  const readOnlyRef = useRef(readOnly);
   const fitPositionsRef = useRef(fitPositions);
   const skipFlyRef = useRef<string | null>(null);
   const lastDraftRef = useRef<string | null>(null);
@@ -264,6 +267,7 @@ export default function MapCanvas({
   const [is3d, setIs3d] = useState(false);
 
   callbacksRef.current = { onPick, onDraftMove };
+  readOnlyRef.current = readOnly;
   fitPositionsRef.current = fitPositions;
   is3dRef.current = is3d;
 
@@ -336,7 +340,8 @@ export default function MapCanvas({
 
     map.on("load", onLoad);
     map.on("click", (event) => {
-      callbacksRef.current.onPick(event.lngLat.lat, event.lngLat.lng);
+      if (readOnlyRef.current) return;
+      callbacksRef.current.onPick?.(event.lngLat.lat, event.lngLat.lng);
     });
 
     const observer = new ResizeObserver(() => map.resize());
@@ -486,7 +491,7 @@ export default function MapCanvas({
     stops.forEach((stop) => {
       if (stop.lat === null || stop.lng === null) return;
       const index = ++counts[stop.kind];
-      if (stop.id === activeId) return;
+      if (!readOnly && stop.id === activeId) return;
       const color = stop.kind === "load" ? LOAD_COLOR : UNLOAD_COLOR;
       const marker = new Marker({
         element: pinElement(
@@ -501,7 +506,7 @@ export default function MapCanvas({
       markersRef.current.push(marker);
     });
 
-    if (!draft) return;
+    if (readOnly || !draft) return;
     const active = stops.find((stop) => stop.id === activeId) ?? stops[0];
     const color = active?.kind === "unload" ? UNLOAD_COLOR : LOAD_COLOR;
     const label = active
@@ -515,20 +520,21 @@ export default function MapCanvas({
     const marker = new Marker({
       element: pinElement(color, label, true),
       anchor: "bottom",
-      draggable: true,
+      draggable: !readOnly,
     })
       .setLngLat([draft.lng, draft.lat])
       .addTo(map);
 
     marker.on("dragend", () => {
+      if (readOnlyRef.current) return;
       const position = marker.getLngLat();
       skipFlyRef.current = `${position.lat},${position.lng}`;
       lastDraftRef.current = null;
-      callbacksRef.current.onDraftMove(position.lat, position.lng);
+      callbacksRef.current.onDraftMove?.(position.lat, position.lng);
     });
 
     markersRef.current.push(marker);
-  }, [stops, activeId, draft]);
+  }, [stops, activeId, draft, readOnly]);
 
   return (
     <div className="map-libre">

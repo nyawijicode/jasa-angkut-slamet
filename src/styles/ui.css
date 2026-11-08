@@ -3845,3 +3845,421 @@
   }
 }
 
+
+
+/* ===========================
+   Enhanced Animations & Hover Effects
+   =========================== */
+
+/* Buttons - scale on hover/active */
+.btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+.btn:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Primary button pulse glow on hover */
+.btn-primary:not(:disabled):hover {
+  box-shadow: 0 4px 16px rgba(31, 77, 58, 0.35);
+}
+
+/* Service cards lift animation */
+.service-card {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(31, 77, 58, 0.14);
+}
+
+/* Hero points subtle float */
+.hero-point {
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+/* FAB pulse animation */
+.fab-order {
+  animation: fab-pulse 3s ease-in-out infinite;
+}
+@keyframes fab-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(31, 77, 58, 0.4); }
+  50% { box-shadow: 0 4px 24px rgba(31, 77, 58, 0.6); }
+}
+
+/* Why cards hover */
+.why-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.why-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.1);
+}
+
+/* How steps hover */
+.how-step {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.how-step:hover {
+  transform: translateY(-1px);
+}
+
+/* Area coverage cards */
+.area-coverage-card {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.area-coverage-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Input fields - focus glow */
+.field-input:focus,
+.field-textarea:focus {
+  transform: none;
+}
+
+/* Labels animate color on input focus */
+.field:focus-within .field-label,
+.field:focus-within .field-sublabel {
+  color: var(--forest);
+  transition: color 0.16s ease;
+}
+
+/* Step badge pulse when active */
+.wizard-step.is-active .wizard-step-marker {
+  animation: step-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes step-pop {
+  0% { transform: scale(0.8); }
+  100% { transform: scale(1); }
+}
+
+/* Choice cards checked animation */
+.choice-card.is-selected .choice-check {
+  animation: check-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes check-pop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1.08); }
+}
+
+/* Option rows checked animation */
+.option-row.is-selected .option-check {
+  animation: check-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Progress fill smooth */
+.progress-fill {
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Wizard body slide animation */
+.wizard-body {
+  animation: slide-in-right 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.wizard-body.is-back {
+  animation: slide-in-left 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Brand mark hover */
+.brand:hover .brand-mark {
+  transform: rotate(-3deg) scale(1.05);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.brand-mark {
+  transition: transform 0.2s ease;
+}
+
+/* Eyebrow dot pulse */
+.eyebrow-dot {
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--brand-100); }
+  50% { box-shadow: 0 0 0 5px var(--brand-100); }
+}
+
+/* Map close button */
+.map-close:hover {
+  transform: rotate(90deg) scale(1.05);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.map-close {
+  transition: transform 0.2s ease, background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+/* Gallery nav arrows */
+.gallery-nav {
+  transition: background-color 0.16s ease, opacity 0.16s ease, transform 0.16s ease;
+}
+.gallery-nav:hover {
+  transform: translateY(-50%) scale(1.08);
+}
+
+/* Nav links underline animation */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--forest);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.18s ease;
+}
+.nav-link.is-active::after {
+  transform: scaleX(1);
+}
+.nav-link:hover::after {
+  transform: scaleX(0.6);
+}
+
+/* Mobile menu links slide */
+.mobile-menu-link {
+  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+.mobile-menu-link:hover {
+  transform: translateX(4px);
+}
+
+/* Scroll top button */
+.scroll-top:hover {
+  transform: translateY(-2px) scale(1);
+}
+
+/* Quote card reveal */
+.quote-card {
+  animation: fade-up 0.3s ease;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Time chips */
+.time-chip {
+  transition: all 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.time-chip:hover {
+  transform: translateY(-1px);
+}
+
+/* Quick suggestion buttons */
+.quick-suggestion-btn {
+  transition: all 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.quick-suggestion-btn:hover {
+  transform: translateY(-1px);
+  border-style: solid;
+}
+
+/* Stepper buttons */
+.stepper-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+.stepper-btn {
+  transition: background-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+/* FAQ items */
+.faq-item {
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+}
+.faq-item:hover {
+  transform: translateY(-1px);
+}
+
+/* CTA section buttons */
+.btn-accent,
+.btn-outline {
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+.btn-accent:hover,
+.btn-outline:hover {
+  transform: translateY(-2px);
+}
+
+/* Footer links */
+.footer-col a {
+  transition: color 0.14s ease, transform 0.14s ease;
+}
+.footer-col a:hover {
+  transform: translateX(2px);
+}
+
+/* Map preview pick buttons */
+.map-preview-pick {
+  transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+}
+.map-preview-pick:hover {
+  transform: translateY(-1px);
+}
+
+/* Map preview add button */
+.map-preview-add {
+  transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.14s ease;
+}
+.map-preview-add:hover {
+  transform: translateY(-1px);
+}
+
+/* Segment buttons */
+.segment {
+  transition: all 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Review edit button */
+.review-edit-btn {
+  transition: color 0.14s ease, transform 0.14s ease;
+}
+.review-edit-btn:hover {
+  transform: translateX(2px);
+}
+
+/* Panel route button */
+.panel-route-btn {
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.14s ease;
+}
+.panel-route-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Topbar CTA */
+.topbar-cta {
+  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+.topbar-cta:hover {
+  transform: translateX(2px);
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .btn, .service-card, .hero-point, .why-card, .how-step,
+  .area-coverage-card, .wizard-body, .brand-mark, .gallery-nav,
+  .nav-link::after, .mobile-menu-link, .time-chip, .quick-suggestion-btn,
+  .stepper-btn, .faq-item, .btn-accent, .btn-outline, .footer-col a,
+  .map-preview-pick, .map-preview-add, .segment, .review-edit-btn,
+  .panel-route-btn, .topbar-cta, .scroll-top, .quote-card, .fab-order,
+  .eyebrow-dot {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ===========================
+   Priority Toggle Switch
+   =========================== */
+
+.priority-field {
+  padding: 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 12px;
+  background: var(--gray-25);
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.priority-field:has(.toggle-switch.is-on) {
+  border-color: var(--forest);
+  background: var(--brand-25);
+  box-shadow: 0 0 0 3px rgb(31 77 58 / 0.08);
+}
+
+.priority-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.priority-toggle-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.priority-toggle-info .field-label {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.priority-toggle-info .field-hint {
+  margin: 0;
+}
+
+.toggle-switch {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid var(--gray-300);
+  border-radius: 999px;
+  background: var(--gray-200);
+  cursor: pointer;
+  transition: background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.toggle-switch:hover:not(.is-on) {
+  border-color: var(--gray-400);
+  background: var(--gray-300);
+}
+
+.toggle-switch.is-on {
+  background: var(--forest);
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px rgb(31 77 58 / 0.2);
+}
+
+.toggle-switch.is-on:hover {
+  background: var(--forest-ink);
+  border-color: var(--forest-ink);
+}
+
+.toggle-switch:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.18);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toggle-switch.is-on .toggle-knob {
+  transform: translateX(20px);
+}
+
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--brand-100);
+  color: var(--forest-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  animation: fade-up 0.2s ease;
+}

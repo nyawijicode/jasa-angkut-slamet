@@ -75,4 +75,17 @@ describe('pricing', () => {
     });
     expect((q as unknown as Record<string, unknown>).setoran).toBeUndefined();
   });
+
+  it('adds priority fee 50000 when priority is true', () => {
+    const q = calculateQuote({
+      service: 'dalam-kota',
+      distances: { loadToUnload: 10 },
+      helper: 'none',
+      loadFloor: 1,
+      unloadFloor: 1,
+      priority: true,
+    });
+    expect(q.priority).toBe(50000);
+    expect(q.total).toBe(115000 + 50000);
+  });
 });

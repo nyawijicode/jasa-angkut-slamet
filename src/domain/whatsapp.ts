@@ -64,6 +64,9 @@ export function buildWhatsAppMessage(p: WaPayload): string {
   if (p.quote.unloadFloor > 0) {
     lines.push(`Lantai bongkar: Rp ${p.quote.unloadFloor.toLocaleString('id-ID')}`);
   }
+  if (p.quote.priority > 0) {
+    lines.push(`Prioritas langsung: Rp ${p.quote.priority.toLocaleString('id-ID')}`);
+  }
   lines.push(`*TOTAL: Rp ${p.quote.total.toLocaleString('id-ID')}*`);
   lines.push('');
   lines.push('Mohon konfirmasi ketersediaan dan jadwal. Terima kasih.');

@@ -1,11 +1,4 @@
-﻿import {
-  lazy,
-  Suspense,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BUSINESS } from "../config/business";
 import { validateCustomer } from "../domain/customer";
 import { calculateQuote, floorFee } from "../domain/pricing";
@@ -647,9 +640,7 @@ function MapSearchControl({
           aria-controls="map-search-results"
           aria-expanded={results.length > 0}
           aria-busy={loading}
-          aria-describedby={
-            status === "idle" ? undefined : "map-search-status"
-          }
+          aria-describedby={status === "idle" ? undefined : "map-search-status"}
           aria-activedescendant={
             activeIndex >= 0 ? `map-result-${activeIndex}` : undefined
           }
@@ -953,6 +944,8 @@ export default function Home() {
   const [service, setService] = useState<Service>("dalam-kota");
   const [helper, setHelper] = useState<Helper>("none");
   const [note, setNote] = useState("");
+  const [priority, setPriority] = useState(false);
+  const [mapReadOnly, setMapReadOnly] = useState(false);
 
   const [step, setStep] = useState(1);
   const [furthest, setFurthest] = useState(1);
@@ -1270,8 +1263,7 @@ export default function Home() {
   );
   const nameError = customerAttempted && customerCheck.nameMissing;
   const phoneError =
-    customerCheck.phoneInvalid &&
-    (phone.trim() !== "" || customerAttempted);
+    customerCheck.phoneInvalid && (phone.trim() !== "" || customerAttempted);
   const waChatUrl = `https://wa.me/${BUSINESS.whatsapp}`;
 
   const loadStops = useMemo(
@@ -1432,6 +1424,7 @@ export default function Home() {
         unloadFloor: unloadFloorList[0] ?? 1,
         loadFloors: loadFloorList,
         unloadFloors: unloadFloorList,
+        priority,
       });
     } catch {
       return null;
@@ -1444,6 +1437,7 @@ export default function Home() {
     floors,
     loadStops,
     unloadStops,
+    priority,
   ]);
 
   const waUrl = useMemo(() => {
@@ -1478,7 +1472,7 @@ export default function Home() {
             ? "Sopir ikut bongkar muat"
             : "Sopir + Kenek",
       distanceKm: quote.billableKm,
-      note,
+      note: priority ? `[PRIORITAS] Sopir tiba ASAP (+Rp 50.000). ${note}`.trim() : note,
       quote,
     });
   }, [
@@ -1495,6 +1489,7 @@ export default function Home() {
     helper,
     floors,
     note,
+    priority,
   ]);
 
   useEffect(() => {
@@ -1854,7 +1849,7 @@ export default function Home() {
     scrollToPanel();
   }
 
-  function openMap(stopId?: string) {
+  function openMap(stopId?: string, readOnly = false) {
     const target = stopId
       ? stops.find((stop) => stop.id === stopId)
       : (activeStop ?? stops[0]);
@@ -1871,6 +1866,7 @@ export default function Home() {
     );
     setLocateStatus(null);
     setFitTick((tick) => tick + 1);
+    setMapReadOnly(readOnly);
     setMapOpen(true);
     track("map_opened", { kind: target.kind });
   }
@@ -1879,7 +1875,7 @@ export default function Home() {
     const target =
       stops.find((stop) => stop.kind === mode && stop.lat === null) ??
       stops.find((stop) => stop.kind === mode);
-    openMap(target?.id);
+    openMap(target?.id, true);
   }
 
   function openRouteMap() {
@@ -1890,7 +1886,7 @@ export default function Home() {
 
   function handleRouteShortcut() {
     if (allStopsSet) {
-      openRouteMap();
+      openMap(undefined, true);
       return;
     }
     if (step !== 1) {
@@ -2078,8 +2074,7 @@ export default function Home() {
                 Jasa angkut &amp; pindahan · Demak, Semarang, Kab. Semarang
               </span>
               <h1 className="hero-title" id="hero-title">
-                Pindahan lebih tenang.{" "}
-                <span>Barang sampai dengan aman.</span>
+                Pindahan lebih tenang. <span>Barang sampai dengan aman.</span>
               </h1>
               <p className="hero-lead">
                 Jasa angkut barang dan pindahan untuk rumah, kos, toko, maupun
@@ -2153,7 +2148,7 @@ export default function Home() {
                 <p className="hero-visual-price">
                   Mulai <strong>Rp 6.500</strong>
                   <small>/km</small>
-                  <span>+ setoran Rp 50.000</span>
+                  <span>+ jasa sopir Rp 50.000</span>
                 </p>
                 <p className="hero-visual-note">
                   Estimasi gratis. Harga final dikonfirmasi lewat WhatsApp
@@ -2267,13 +2262,20 @@ export default function Home() {
                 <div className="map-card-head">
                   <div className="map-card-title">
                     <h2 id="map-modal-title">
-                      Pilih titik{" "}
-                      {activeStop ? stopLabel(activeStop, stops) : ""}
+                      {mapReadOnly
+                        ? "Lihat Rute Perjalanan"
+                        : `Pilih titik ${activeStop ? stopLabel(activeStop, stops) : ""}`}
                     </h2>
                     <p>
-                      Klik peta, cari alamat, atau pakai lokasi saya. Tekan{" "}
-                      <strong>Simpan titik</strong> untuk menyimpan{" "}
-                      {activeStop ? stopLabel(activeStop, stops) : "titik"}.
+                      {mapReadOnly
+                        ? "Posisi titik muat dan bongkar terkunci agar tidak berubah. Tutup untuk kembali ke formulir."
+                        : `Klik peta, cari alamat, atau pakai lokasi saya. Tekan `}
+                      {!mapReadOnly && (
+                        <>
+                          <strong>Simpan titik</strong> untuk menyimpan{" "}
+                          {activeStop ? stopLabel(activeStop, stops) : "titik"}.
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className="map-card-head-actions">
@@ -2300,43 +2302,46 @@ export default function Home() {
                   >
                     <MapErrorBoundary
                       key={mapBoundaryKey}
-                      onRetry={() =>
-                        setMapBoundaryKey((key) => key + 1)
-                      }
+                      onRetry={() => setMapBoundaryKey((key) => key + 1)}
                     >
                       <MapCanvas
                         stops={stops}
                         activeId={activeId}
-                        draft={draft}
+                        draft={mapReadOnly ? null : draft}
                         routeLine={routeLine}
                         garageToFirstLine={garageToFirstLine}
                         lastToGarageLine={lastToGarageLine}
                         fitPositions={fitPositions}
                         fitSignal={fitTick}
-                        onPick={pick}
-                        onDraftMove={pick}
+                        onPick={mapReadOnly ? undefined : pick}
+                        onDraftMove={mapReadOnly ? undefined : pick}
+                        readOnly={mapReadOnly}
                       />
                     </MapErrorBoundary>
                   </Suspense>
-                  <MapSearchControl
-                    active={activeStop?.kind ?? "load"}
-                    activeLabel={
-                      activeStop ? stopLabel(activeStop, stops) : "M1"
-                    }
-                    onSelect={selectPoint}
-                  />
-                  <button
-                    type="button"
-                    className="map-locate"
-                    onClick={useMyLocation}
-                  >
-                    <IconTarget size={17} />
-                    <span>Lokasi saya</span>
-                  </button>
+                  {!mapReadOnly && (
+                    <>
+                      <MapSearchControl
+                        active={activeStop?.kind ?? "load"}
+                        activeLabel={
+                          activeStop ? stopLabel(activeStop, stops) : "M1"
+                        }
+                        onSelect={selectPoint}
+                      />
+                      <button
+                        type="button"
+                        className="map-locate"
+                        onClick={useMyLocation}
+                      >
+                        <IconTarget size={17} />
+                        <span>Lokasi saya</span>
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 <div className="map-modal-foot">
-                  {locateStatus && (
+                  {locateStatus && !mapReadOnly && (
                     <p
                       className={`map-status is-${locateStatus.tone}`}
                       role="status"
@@ -2345,44 +2350,83 @@ export default function Home() {
                       {locateStatus.text}
                     </p>
                   )}
-                  <div
-                    className={`map-draft${draft ? "" : " is-empty"}`}
-                    aria-live="polite"
-                  >
-                    <span
-                      className={`segment-dot ${activeStop?.kind ?? "load"}`}
-                      aria-hidden="true"
-                    />
-                    <div className="map-draft-text">
-                      <span className="map-draft-label">
-                        {activeStop
-                          ? `${stopLabel(activeStop, stops)} · Titik ${STOP_KIND_LABEL[activeStop.kind]}`
-                          : "Titik"}
-                      </span>
-                      <p>
-                        {draft
-                          ? draft.address
-                          : "Belum ada titik. Klik peta, cari alamat, atau pakai lokasi saya."}
-                      </p>
+                  {mapReadOnly ? (
+                    <div className="map-draft" aria-live="polite">
+                      <IconRoute
+                        size={20}
+                        style={{ color: "var(--forest)", flex: "none" }}
+                      />
+                      <div className="map-draft-text">
+                        <span className="map-draft-label">
+                          Rute Tersimpan (Terkunci)
+                        </span>
+                        <p>
+                          {routeSummaryLabel} · Semua titik muat dan bongkar
+                          tetap pada posisinya.
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div
+                      className={`map-draft${draft ? "" : " is-empty"}`}
+                      aria-live="polite"
+                    >
+                      <span
+                        className={`segment-dot ${activeStop?.kind ?? "load"}`}
+                        aria-hidden="true"
+                      />
+                      <div className="map-draft-text">
+                        <span className="map-draft-label">
+                          {activeStop
+                            ? `${stopLabel(activeStop, stops)} · Titik ${STOP_KIND_LABEL[activeStop.kind]}`
+                            : "Titik"}
+                        </span>
+                        <p>
+                          {draft
+                            ? draft.address
+                            : "Belum ada titik. Klik peta, cari alamat, atau pakai lokasi saya."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   <div className="map-modal-actions">
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => setMapOpen(false)}
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={saveDraft}
-                      disabled={!draft}
-                    >
-                      <IconMapPin size={15} />
-                      Simpan titik
-                    </button>
+                    {mapReadOnly ? (
+                      <>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setMapReadOnly(false)}
+                        >
+                          Ubah Titik
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => setMapOpen(false)}
+                        >
+                          Tutup Peta
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setMapOpen(false)}
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={saveDraft}
+                          disabled={!draft}
+                        >
+                          <IconMapPin size={15} />
+                          Simpan titik
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2517,10 +2561,14 @@ export default function Home() {
                           type="button"
                           id="route-open-map"
                           className="btn btn-primary btn-sm"
-                          onClick={openRouteMap}
+                          onClick={() =>
+                            allStopsSet
+                              ? openMap(undefined, true)
+                              : openRouteMap()
+                          }
                         >
                           <IconMapPin size={15} />
-                          {allStopsSet ? "Ubah rute" : "Buka peta"}
+                          {allStopsSet ? "Lihat rute di peta" : "Buka peta"}
                         </button>
                       </div>
 
@@ -2577,10 +2625,7 @@ export default function Home() {
                             const hasPoint =
                               stop.lat !== null && stop.lng !== null;
                             return (
-                              <li
-                                className="route-sequence-item"
-                                key={stop.id}
-                              >
+                              <li className="route-sequence-item" key={stop.id}>
                                 {index > 0 && (
                                   <IconArrowRight
                                     size={13}
@@ -2608,89 +2653,89 @@ export default function Home() {
                         className={`route-timeline${routeStatus === "ready" ? " is-ready" : ""}`}
                       >
                         {(
-                        [
-                          { kind: "load", items: loadStops },
-                          { kind: "unload", items: unloadStops },
-                        ] as Array<{ kind: StopKind; items: Stop[] }>
-                      ).map(({ kind, items }) => (
-                        <div
-                          className={`map-preview-group is-${kind}`}
-                          key={kind}
-                        >
-                          <div className="map-preview-group-head">
-                            <span className="map-preview-group-title">
-                              <span
-                                className={`segment-dot ${kind}`}
-                                aria-hidden="true"
-                              />
-                              Titik {STOP_KIND_LABEL[kind]}
-                            </span>
-                            <button
-                              type="button"
-                              className="map-preview-add"
-                              onClick={() => addStop(kind)}
-                            >
-                              <IconPlus size={13} />
-                              Tambah
-                            </button>
-                          </div>
-                          <ul className="map-preview-rows">
-                            {items.map((stop, index) => {
-                              const hasPoint =
-                                stop.lat !== null && stop.lng !== null;
-                              const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
-                              const coords = hasPoint
-                                ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
-                                : "Belum ditandai";
-                              return (
-                                <li
-                                  key={stop.id}
-                                  className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
-                                >
-                                  <div className="map-preview-main">
-                                    <button
-                                      type="button"
-                                      className="map-preview-pick"
-                                      onClick={() => openMap(stop.id)}
-                                      aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
-                                    >
-                                      <span
-                                        className={`map-preview-label is-${kind}`}
+                          [
+                            { kind: "load", items: loadStops },
+                            { kind: "unload", items: unloadStops },
+                          ] as Array<{ kind: StopKind; items: Stop[] }>
+                        ).map(({ kind, items }) => (
+                          <div
+                            className={`map-preview-group is-${kind}`}
+                            key={kind}
+                          >
+                            <div className="map-preview-group-head">
+                              <span className="map-preview-group-title">
+                                <span
+                                  className={`segment-dot ${kind}`}
+                                  aria-hidden="true"
+                                />
+                                Titik {STOP_KIND_LABEL[kind]}
+                              </span>
+                              <button
+                                type="button"
+                                className="map-preview-add"
+                                onClick={() => addStop(kind)}
+                              >
+                                <IconPlus size={13} />
+                                Tambah
+                              </button>
+                            </div>
+                            <ul className="map-preview-rows">
+                              {items.map((stop, index) => {
+                                const hasPoint =
+                                  stop.lat !== null && stop.lng !== null;
+                                const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
+                                const coords = hasPoint
+                                  ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
+                                  : "Belum ditandai";
+                                return (
+                                  <li
+                                    key={stop.id}
+                                    className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
+                                  >
+                                    <div className="map-preview-main">
+                                      <button
+                                        type="button"
+                                        className="map-preview-pick"
+                                        onClick={() => openMap(stop.id)}
+                                        aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
                                       >
-                                        {label}
-                                      </span>
-                                      <span className="map-preview-coords">
-                                        {coords}
-                                      </span>
-                                      <span className="map-preview-action">
-                                        {hasPoint ? "Ubah" : "Pilih"}
-                                      </span>
-                                    </button>
-                                    {hasPoint && (
-                                      <span
-                                        className="map-preview-address"
-                                        title={stop.address}
+                                        <span
+                                          className={`map-preview-label is-${kind}`}
+                                        >
+                                          {label}
+                                        </span>
+                                        <span className="map-preview-coords">
+                                          {coords}
+                                        </span>
+                                        <span className="map-preview-action">
+                                          {hasPoint ? "Ubah" : "Pilih"}
+                                        </span>
+                                      </button>
+                                      {hasPoint && (
+                                        <span
+                                          className="map-preview-address"
+                                          title={stop.address}
+                                        >
+                                          {stop.address}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {(items.length > 1 || hasPoint) && (
+                                      <button
+                                        type="button"
+                                        className="map-preview-remove"
+                                        aria-label={`Hapus titik ${label}`}
+                                        onClick={() => removeStop(stop.id)}
                                       >
-                                        {stop.address}
-                                      </span>
+                                        Hapus
+                                      </button>
                                     )}
-                                  </div>
-                                  {(items.length > 1 || hasPoint) && (
-                                    <button
-                                      type="button"
-                                      className="map-preview-remove"
-                                      aria-label={`Hapus titik ${label}`}
-                                      onClick={() => removeStop(stop.id)}
-                                    >
-                                      Hapus
-                                    </button>
-                                  )}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      ))}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        ))}
                       </div>
 
                       {routeError && !allStopsSet && (
@@ -2698,6 +2743,35 @@ export default function Home() {
                           <IconAlert size={15} />
                           Tandai titik muat dan bongkar dulu sebelum lanjut.
                         </p>
+                      )}
+                    </div>
+
+                    <div className="field priority-field" style={{ marginTop: 16 }}>
+                      <div className="priority-toggle-row">
+                        <div className="priority-toggle-info">
+                          <span className="field-label">Prioritas pengiriman langsung</span>
+                          <p className="field-hint">
+                            {priority
+                              ? "Aktif: Pengiriman langsung secepatnya (ASAP). +Rp 50.000"
+                              : "Tidak aktif: Maksimal tiba di lokasi muat 4 jam setelah konfirmasi."}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={priority}
+                          className={`toggle-switch${priority ? " is-on" : ""}`}
+                          onClick={() => setPriority((v) => !v)}
+                          aria-label="Toggle prioritas pengiriman langsung"
+                        >
+                          <span className="toggle-knob" />
+                        </button>
+                      </div>
+                      {priority && (
+                        <div className="priority-badge">
+                          <IconCheck size={14} />
+                          <span>Prioritas langsung aktif · +Rp 50.000</span>
+                        </div>
                       )}
                     </div>
 
@@ -2722,7 +2796,10 @@ export default function Home() {
                         <h3 id="wizard-step-title" tabIndex={-1}>
                           Data pemesan
                         </h3>
-                        <p>Nama dan nomor HP wajib diisi agar pesanan bisa dikirim lewat WhatsApp.</p>
+                        <p>
+                          Nama dan nomor HP wajib diisi agar pesanan bisa
+                          dikirim lewat WhatsApp.
+                        </p>
                       </div>
                     </div>
 
@@ -2762,7 +2839,11 @@ export default function Home() {
                           />
                         </div>
                         {nameError && (
-                          <p className="field-error" id="name-error" role="alert">
+                          <p
+                            className="field-error"
+                            id="name-error"
+                            role="alert"
+                          >
                             <IconAlert size={15} />
                             Nama belum diisi.
                           </p>
@@ -2804,7 +2885,11 @@ export default function Home() {
                           />
                         </div>
                         {phoneError ? (
-                          <p className="field-error" id="phone-error" role="alert">
+                          <p
+                            className="field-error"
+                            id="phone-error"
+                            role="alert"
+                          >
                             <IconAlert size={15} />
                             {phone.trim().length > 0
                               ? "Nomor HP belum benar. Contoh: 0813 2762 3942"
@@ -3348,6 +3433,14 @@ export default function Home() {
                               <dd>{quote.billableKm} km</dd>
                             </div>
                           )}
+                          <div className="review-row">
+                            <dt>Pengiriman</dt>
+                            <dd>
+                              {priority
+                                ? "Prioritas Langsung (ASAP, +Rp 50.000)"
+                                : "Reguler (Tiba maks. 4 jam)"}
+                            </dd>
+                          </div>
                         </dl>
                       </div>
 
@@ -3460,6 +3553,12 @@ export default function Home() {
                                 <dd>
                                   Rp {quote.unloadFloor.toLocaleString("id-ID")}
                                 </dd>
+                              </div>
+                            )}
+                            {quote.priority > 0 && (
+                              <div className="quote-line">
+                                <dt>Prioritas pengiriman</dt>
+                                <dd>Rp {quote.priority.toLocaleString("id-ID")}</dd>
                               </div>
                             )}
                           </dl>
@@ -3582,7 +3681,7 @@ export default function Home() {
                 <span className="how-num">3</span>
                 <h3>Periksa estimasi tarif</h3>
                 <p>
-                  Jarak, setoran armada, bantuan bongkar muat, dan biaya lantai
+                  Jarak, jasa sopir, bantuan bongkar muat, dan biaya lantai
                   terlihat sebelum pesanan dikirim.
                 </p>
               </li>
@@ -3622,7 +3721,7 @@ export default function Home() {
                 <div className="why-body">
                   <h3>Informasi tarif yang jelas</h3>
                   <p>
-                    Tarif per kilometer dan setoran armada ditampilkan sebelum
+                    Tarif per kilometer dan jasa sopir ditampilkan sebelum
                     Anda mengirim pesanan.
                   </p>
                 </div>
@@ -3646,8 +3745,8 @@ export default function Home() {
                 <div className="why-body">
                   <h3>Area pelayanan yang terdefinisi</h3>
                   <p>
-                    49 kecamatan di Kabupaten Demak, Kota Semarang, dan Kabupaten
-                    Semarang.
+                    49 kecamatan di Kabupaten Demak, Kota Semarang, dan
+                    Kabupaten Semarang.
                   </p>
                 </div>
               </article>
@@ -3968,7 +4067,7 @@ export default function Home() {
                 <div className="faq-answer">
                   <p>
                     Tarif dihitung otomatis dan transparan. Estimasi tarif dasar
-                    jarak <strong>Rp 6.500/km</strong> ditambah setoran armada{" "}
+                    jarak <strong>Rp 6.500/km</strong> ditambah jasa sopir{" "}
                     <strong>Rp 50.000</strong>. Anda juga bisa menambahkan opsi
                     bantuan tenaga bongkar muat serta tambahan lantai jika
                     barang perlu dinaikkan/diturunkan lewat tangga.
@@ -4123,8 +4222,7 @@ export default function Home() {
                 </h2>
                 <p className="cta-lead">
                   Hubungi kami untuk membicarakan kebutuhan angkut dan pindahan
-                  Anda. Tim Jasa Angkut Slamet membalas langsung lewat
-                  WhatsApp.
+                  Anda. Tim Jasa Angkut Slamet membalas langsung lewat WhatsApp.
                 </p>
                 <ul className="cta-points">
                   <li>
@@ -4342,7 +4440,7 @@ export default function Home() {
                 <strong className="mobile-bar-value">
                   Rp 6.500<small>/km</small>
                 </strong>
-                <span className="mobile-bar-note">+ setoran Rp 50.000</span>
+                <span className="mobile-bar-note">+ jasa sopir Rp 50.000</span>
               </>
             )}
           </div>
