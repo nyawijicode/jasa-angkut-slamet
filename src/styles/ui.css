@@ -468,6 +468,11 @@
   background: var(--surface-sunken);
 }
 
+.gallery-link picture,
+.gallery-modal-item picture {
+  display: block;
+}
+
 .gallery-link img {
   width: 100%;
   height: auto;
@@ -1504,6 +1509,61 @@
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.map-search-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  color: var(--gray-700);
+  font-size: 0.78125rem;
+  line-height: 1.45;
+}
+
+.map-search-note.is-error {
+  border-color: rgb(179 38 30 / 0.28);
+  background: var(--danger-wash);
+  color: var(--danger);
+}
+
+.map-search-note button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.map-search-note button:hover {
+  background: rgb(255 255 255 / 0.55);
+}
+
+.map-status {
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--gray-50);
+  color: var(--gray-700);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.map-status.is-error {
+  background: var(--danger-wash);
+  color: var(--danger);
 }
 
 .map-locate {
@@ -2829,6 +2889,19 @@
   color: var(--gray-500);
   font-size: 0.71875rem;
   line-height: 1.5;
+}
+
+.footer-legal-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-legal-link:hover {
+  color: var(--ink-soft);
 }
 
 /* Mobile price bar */

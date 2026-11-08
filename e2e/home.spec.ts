@@ -62,6 +62,7 @@ test("menjaga target sentuh minimal 44px", async ({ page }) => {
 });
 
 test("menu mobile tertutup dengan Escape dan klik luar", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
   const burger = page.locator(".nav-burger");
 
   await burger.click();
@@ -83,10 +84,27 @@ test("menu mobile tertutup dengan Escape dan klik luar", async ({ page }) => {
   await expect(page.locator("#mobile-menu")).toHaveCount(0);
 });
 
+test("halaman privasi terbuka dari footer tanpa overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+
+  const link = page.locator(".footer-legal-link");
+  await expect(link).toBeVisible();
+  await link.click();
+
+  await expect(page).toHaveURL(/\/privasi\.html$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Kebijakan privasi",
+  );
+
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
 test("modal galeri mengunci fokus dan menutup dengan Escape", async ({
   page,
-}) => {
-  const trigger = page.locator(".gallery-open");
+}) => {  const trigger = page.locator(".gallery-open");
   const modal = page.locator(".gallery-modal");
 
   await expect(page.locator(".gallery-track > li")).toHaveCount(6);

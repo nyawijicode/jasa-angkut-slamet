@@ -5,7 +5,7 @@
 >
   <url>
     <loc>https://jasa-angkut-slamet.vercel.app/</loc>
-    <lastmod>2026-11-05</lastmod>
+    <lastmod>2026-11-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
@@ -38,5 +38,11 @@
       <image:title>Muatan tertata di bak armada</image:title>
       <image:caption>Dokumentasi muatan angkutan Jasa Angkut Slamet.</image:caption>
     </image:image>
+  </url>
+  <url>
+    <loc>https://jasa-angkut-slamet.vercel.app/privasi.html</loc>
+    <lastmod>2026-11-07</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
   </url>
 </urlset>

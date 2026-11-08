@@ -14,6 +14,8 @@ import { buildWhatsAppUrl, type WaStop } from "../domain/whatsapp";
 import type { Helper, Service } from "../domain/types";
 import { searchAddress, type GeocodeResult } from "../services/geocoding";
 import { fetchRoute, type RouteResult } from "../services/routing";
+import { track } from "../services/analytics";
+import MapErrorBoundary from "../components/MapErrorBoundary";
 
 const MapCanvas = lazy(() => import("../components/MapCanvas"));
 
@@ -609,23 +611,32 @@ function MapSearchControl({
   const [results, setResults] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [status, setStatus] = useState<"idle" | "empty" | "error">("idle");
+  const [retryTick, setRetryTick] = useState(0);
 
   useEffect(() => {
     const q = query.trim();
     if (q.length < 3) {
       setResults([]);
       setActiveIndex(-1);
+      setStatus("idle");
       return;
     }
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       setLoading(true);
+      setStatus("idle");
       try {
         const found = await searchAddress(q, controller.signal);
+        if (controller.signal.aborted) return;
         setResults(found);
         setActiveIndex(-1);
+        setStatus(found.length > 0 ? "idle" : "empty");
       } catch {
-        if (!controller.signal.aborted) setResults([]);
+        if (!controller.signal.aborted) {
+          setResults([]);
+          setStatus("error");
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -635,13 +646,14 @@ function MapSearchControl({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, retryTick]);
 
   function pick(result: GeocodeResult) {
     onSelect(result.lat, result.lon, result.display_name);
     setQuery(result.display_name);
     setResults([]);
     setActiveIndex(-1);
+    setStatus("idle");
   }
 
   return (
@@ -682,6 +694,10 @@ function MapSearchControl({
           aria-autocomplete="list"
           aria-controls="map-search-results"
           aria-expanded={results.length > 0}
+          aria-busy={loading}
+          aria-describedby={
+            status === "idle" ? undefined : "map-search-status"
+          }
           aria-activedescendant={
             activeIndex >= 0 ? `map-result-${activeIndex}` : undefined
           }
@@ -713,6 +729,30 @@ function MapSearchControl({
               <span>{result.display_name}</span>
             </button>
           ))}
+        </div>
+      )}
+      {status === "empty" && (
+        <p className="map-search-note" id="map-search-status" role="status">
+          Alamat tidak ditemukan. Coba kata kunci lain, ketuk peta, atau pakai
+          lokasi saya.
+        </p>
+      )}
+      {status === "error" && (
+        <div
+          className="map-search-note is-error"
+          id="map-search-status"
+          role="status"
+        >
+          <span>
+            Pencarian alamat sedang tidak tersedia. Anda masih bisa mengetuk
+            peta atau memakai lokasi saya.
+          </span>
+          <button
+            type="button"
+            onClick={() => setRetryTick((tick) => tick + 1)}
+          >
+            Coba lagi
+          </button>
         </div>
       )}
     </div>
@@ -901,6 +941,9 @@ const SERVICE_AREAS = [
 
 export default function Home() {
   const nextStopId = useRef(3);
+  const analyticsStarted = useRef(false);
+  const analyticsEstimate = useRef(false);
+  const analyticsCompleted = useRef(false);
   const [stops, setStops] = useState<Stop[]>(() => [
     { id: "stop-1", kind: "load", lat: null, lng: null, address: "" },
     { id: "stop-2", kind: "unload", lat: null, lng: null, address: "" },
@@ -910,6 +953,11 @@ export default function Home() {
   const [fitTick, setFitTick] = useState(0);
   const [mapOpen, setMapOpen] = useState(false);
   const [draft, setDraft] = useState<MapPoint | null>(null);
+  const [locateStatus, setLocateStatus] = useState<{
+    tone: "info" | "error";
+    text: string;
+  } | null>(null);
+  const [mapBoundaryKey, setMapBoundaryKey] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [customerAttempted, setCustomerAttempted] = useState(false);
@@ -1463,6 +1511,51 @@ export default function Home() {
     note,
   ]);
 
+  useEffect(() => {
+    if (step < 2 || analyticsStarted.current) return;
+    analyticsStarted.current = true;
+    track("wizard_started");
+  }, [step]);
+
+  useEffect(() => {
+    if (!quote || analyticsEstimate.current) return;
+    analyticsEstimate.current = true;
+    track("estimate_ready", {
+      service,
+      billableKm: quote.billableKm,
+    });
+  }, [quote, service]);
+
+  useEffect(() => {
+    if (step !== 6 || !waUrl || analyticsCompleted.current) return;
+    analyticsCompleted.current = true;
+    track("wizard_completed", { service });
+  }, [step, waUrl, service]);
+
+  useEffect(() => {
+    function onClick(event: MouseEvent) {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest<HTMLAnchorElement>(
+        'a[href^="https://wa.me/"]',
+      );
+      if (!link) return;
+      const placement = link.closest(".mobile-bar")
+        ? "mobile_bar"
+        : link.closest(".hero")
+          ? "hero"
+          : link.closest(".topbar")
+            ? "topbar"
+            : link.closest(".fab-dock")
+              ? "quick_actions"
+              : "inline";
+      track("whatsapp_click", { placement });
+    }
+
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
   const mainRouteLine = useMemo<Array<[number, number]>>(() => {
     if (routeStatus !== "ready" || !plan) return [];
     return plan.main.flatMap((leg) => leg.coordinates);
@@ -1607,21 +1700,34 @@ export default function Home() {
 
   function useMyLocation() {
     if (!navigator.geolocation) {
-      alert(
-        "Peramban ini belum mendukung deteksi lokasi. silahkan cari alamat atau ketuk peta.",
-      );
+      setLocateStatus({
+        tone: "error",
+        text: "Peramban ini belum mendukung deteksi lokasi. Silakan cari alamat atau ketuk peta.",
+      });
       return;
     }
+    setLocateStatus({
+      tone: "info",
+      text: "Mencari lokasi Anda. Izinkan akses lokasi jika diminta.",
+    });
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         const address = `Lokasi saat ini (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
         setDraft({ lat: latitude, lng: longitude, address });
+        setLocateStatus({
+          tone: "info",
+          text: "Lokasi ditemukan. Tekan Simpan titik untuk memakai titik ini.",
+        });
       },
-      () => {
-        alert(
-          "Izin lokasi ditolak. Anda masih bisa mencari alamat atau mengetuk peta.",
-        );
+      (error) => {
+        setLocateStatus({
+          tone: "error",
+          text:
+            error.code === error.PERMISSION_DENIED
+              ? "Izin lokasi ditolak. Anda masih bisa mencari alamat atau mengetuk peta."
+              : "Lokasi tidak dapat ditemukan. Coba lagi, cari alamat, atau ketuk peta.",
+        });
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
     );
@@ -1777,8 +1883,10 @@ export default function Home() {
         ? { lat: target.lat, lng: target.lng, address: target.address }
         : null,
     );
+    setLocateStatus(null);
     setFitTick((tick) => tick + 1);
     setMapOpen(true);
+    track("map_opened", { kind: target.kind });
   }
 
   function showRoute(mode: StopKind) {
@@ -2239,18 +2347,25 @@ export default function Home() {
                       </div>
                     }
                   >
-                    <MapCanvas
-                      stops={stops}
-                      activeId={activeId}
-                      draft={draft}
-                      routeLine={routeLine}
-                      garageToFirstLine={garageToFirstLine}
-                      lastToGarageLine={lastToGarageLine}
-                      fitPositions={fitPositions}
-                      fitSignal={fitTick}
-                      onPick={pick}
-                      onDraftMove={pick}
-                    />
+                    <MapErrorBoundary
+                      key={mapBoundaryKey}
+                      onRetry={() =>
+                        setMapBoundaryKey((key) => key + 1)
+                      }
+                    >
+                      <MapCanvas
+                        stops={stops}
+                        activeId={activeId}
+                        draft={draft}
+                        routeLine={routeLine}
+                        garageToFirstLine={garageToFirstLine}
+                        lastToGarageLine={lastToGarageLine}
+                        fitPositions={fitPositions}
+                        fitSignal={fitTick}
+                        onPick={pick}
+                        onDraftMove={pick}
+                      />
+                    </MapErrorBoundary>
                   </Suspense>
                   <MapSearchControl
                     active={activeStop?.kind ?? "load"}
@@ -2270,6 +2385,15 @@ export default function Home() {
                 </div>
 
                 <div className="map-modal-foot">
+                  {locateStatus && (
+                    <p
+                      className={`map-status is-${locateStatus.tone}`}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {locateStatus.text}
+                    </p>
+                  )}
                   <div
                     className={`map-draft${draft ? "" : " is-empty"}`}
                     aria-live="polite"
@@ -3666,16 +3790,28 @@ export default function Home() {
                         rel="noopener noreferrer"
                         aria-label={`Buka foto: ${item.caption}`}
                       >
-                        <img
-                          src={`/${item.base}-800.jpg`}
-                          srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w, /${item.base}-1200.jpg 1200w`}
-                          sizes="(min-width: 640px) 560px, 100vw"
-                          alt={item.alt}
-                          width={item.width}
-                          height={item.height}
-                          loading={index === 0 ? "eager" : "lazy"}
-                          decoding="async"
-                        />
+                        <picture>
+                          <source
+                            type="image/avif"
+                            srcSet={`/${item.base}-480.avif 480w, /${item.base}-800.avif 800w, /${item.base}-1200.avif 1200w`}
+                            sizes="(min-width: 640px) 560px, 100vw"
+                          />
+                          <source
+                            type="image/webp"
+                            srcSet={`/${item.base}-480.webp 480w, /${item.base}-800.webp 800w, /${item.base}-1200.webp 1200w`}
+                            sizes="(min-width: 640px) 560px, 100vw"
+                          />
+                          <img
+                            src={`/${item.base}-800.jpg`}
+                            srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w, /${item.base}-1200.jpg 1200w`}
+                            sizes="(min-width: 640px) 560px, 100vw"
+                            alt={item.alt}
+                            width={item.width}
+                            height={item.height}
+                            loading={index === 0 ? "eager" : "lazy"}
+                            decoding="async"
+                          />
+                        </picture>
                       </a>
                     </div>
                   </li>
@@ -3768,16 +3904,28 @@ export default function Home() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <img
-                            src={`/${item.base}-480.jpg`}
-                            srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w`}
-                            sizes="(min-width: 900px) 280px, 45vw"
-                            alt={item.alt}
-                            width={item.width}
-                            height={item.height}
-                            loading="lazy"
-                            decoding="async"
-                          />
+                          <picture>
+                            <source
+                              type="image/avif"
+                              srcSet={`/${item.base}-480.avif 480w, /${item.base}-800.avif 800w`}
+                              sizes="(min-width: 900px) 280px, 45vw"
+                            />
+                            <source
+                              type="image/webp"
+                              srcSet={`/${item.base}-480.webp 480w, /${item.base}-800.webp 800w`}
+                              sizes="(min-width: 900px) 280px, 45vw"
+                            />
+                            <img
+                              src={`/${item.base}-480.jpg`}
+                              srcSet={`/${item.base}-480.jpg 480w, /${item.base}-800.jpg 800w`}
+                              sizes="(min-width: 900px) 280px, 45vw"
+                              alt={item.alt}
+                              width={item.width}
+                              height={item.height}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </picture>
                           <span className="gallery-modal-caption">
                             {item.caption}
                           </span>
@@ -4179,6 +4327,11 @@ export default function Home() {
 
           <div className="footer-bottom">
             <span>© {new Date().getFullYear()} Jasa Angkut Slamet</span>
+            <span>
+              <a className="footer-legal-link" href="/privasi.html">
+                Kebijakan privasi &amp; ketentuan
+              </a>
+            </span>
             <span>Ini estimasi. Harga final dikonfirmasi lewat WhatsApp.</span>
           </div>
         </div>

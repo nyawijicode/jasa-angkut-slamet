@@ -254,6 +254,7 @@ export default function MapCanvas({
   const lastDraftRef = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   callbacksRef.current = { onPick, onDraftMove };
   fitPositionsRef.current = fitPositions;
@@ -262,19 +263,27 @@ export default function MapCanvas({
     const container = containerRef.current;
     if (!container) return;
 
-    const map = new MapLibreMap({
-      container,
-      style: STYLE_URL,
-      center: [BUSINESS.garage.lng, BUSINESS.garage.lat],
-      zoom: 12,
-      maxPitch: 55,
-      attributionControl: false,
-      scrollZoom: false,
-      dragRotate: false,
-      pitchWithRotate: false,
-      touchPitch: false,
-    });
+    let map: MapLibreMap;
+    try {
+      map = new MapLibreMap({
+        container,
+        style: STYLE_URL,
+        center: [BUSINESS.garage.lng, BUSINESS.garage.lat],
+        zoom: 12,
+        maxPitch: 55,
+        attributionControl: false,
+        scrollZoom: false,
+        dragRotate: false,
+        pitchWithRotate: false,
+        touchPitch: false,
+      });
+    } catch (error) {
+      console.error("MapLibre failed to initialize", error);
+      setFailed(true);
+      return;
+    }
     mapRef.current = map;
+    setFailed(false);
 
     map.addControl(
       new NavigationControl({ showCompass: false }),
@@ -285,6 +294,14 @@ export default function MapCanvas({
       "bottom-right",
     );
     map.touchZoomRotate.disableRotation();
+
+    const canvas = map.getCanvas();
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      setReady(false);
+      setFailed(true);
+    };
+    canvas.addEventListener("webglcontextlost", onContextLost);
 
     const applyPitch = () => {
       const target = map.getZoom() >= 15 ? 42 : 0;
@@ -319,11 +336,12 @@ export default function MapCanvas({
 
     return () => {
       window.clearTimeout(failTimer);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
       observer.disconnect();
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [attempt]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -503,6 +521,17 @@ export default function MapCanvas({
             Peta tidak dapat dimuat. Anda masih bisa mencari alamat atau memakai
             lokasi saya.
           </span>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => {
+              setReady(false);
+              setFailed(false);
+              setAttempt((value) => value + 1);
+            }}
+          >
+            Coba muat ulang
+          </button>
         </div>
       )}
     </div>

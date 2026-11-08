@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0D4A34" />
+    <title>Kebijakan Privasi &amp; Ketentuan | Jasa Angkut Slamet</title>
+    <meta
+      name="description"
+      content="Kebijakan privasi dan ketentuan layanan Jasa Angkut Slamet: data pemesanan, peta pihak ketiga, analitik anonim, estimasi harga, dan pembatalan."
+    />
+    <link rel="canonical" href="https://jasa-angkut-slamet.vercel.app/privasi.html" />
+    <meta name="robots" content="index, follow" />
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f5f7f3;
+        --surface: #ffffff;
+        --ink: #0c1f18;
+        --ink-soft: #40534a;
+        --ink-faint: #61756c;
+        --line: #dde5de;
+        --forest: #0d4a34;
+        --forest-deep: #05291c;
+        --forest-wash: #e6f0e9;
+        --truck-wash: #fbebdd;
+        --accent-ink: #5c3706;
+        --accent-wash: #fff6e6;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--forest);
+        text-underline-offset: 3px;
+      }
+
+      a:hover {
+        color: var(--forest-deep);
+      }
+
+      .shell {
+        width: min(760px, 100% - 32px);
+        margin-inline: auto;
+        padding-block: 32px 56px;
+      }
+
+      .back {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--forest);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .back:hover {
+        background: var(--forest-wash);
+      }
+
+      header {
+        margin-block: 28px 24px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 10px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--forest-wash);
+        color: var(--forest);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      .lead {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 1.0625rem;
+      }
+
+      .updated {
+        margin-top: 14px;
+        color: var(--ink-faint);
+        font-size: 0.8125rem;
+      }
+
+      nav.toc {
+        margin-block: 24px;
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+      }
+
+      nav.toc strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--ink-faint);
+      }
+
+      nav.toc ol {
+        margin: 0;
+        padding-left: 20px;
+        columns: 2;
+        column-gap: 28px;
+      }
+
+      nav.toc li {
+        margin-block: 3px;
+        break-inside: avoid;
+      }
+
+      section {
+        margin-top: 26px;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+
+      h2 {
+        margin: 0 0 10px;
+        font-size: 1.125rem;
+        line-height: 1.35;
+      }
+
+      h3 {
+        margin: 18px 0 6px;
+        font-size: 0.9375rem;
+      }
+
+      p,
+      ul,
+      ol {
+        margin: 0 0 10px;
+      }
+
+      ul,
+      ol {
+        padding-left: 20px;
+      }
+
+      li + li {
+        margin-top: 4px;
+      }
+
+      .note {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: var(--accent-wash);
+        color: var(--accent-ink);
+        font-size: 0.875rem;
+      }
+
+      .contact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .contact a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 10px;
+        background: var(--forest);
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .contact a.secondary {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--forest);
+      }
+
+      footer {
+        margin-top: 28px;
+        color: var(--ink-faint);
+        font-size: 0.8125rem;
+        text-align: center;
+      }
+
+      @media (max-width: 560px) {
+        nav.toc ol {
+          columns: 1;
+        }
+
+        section {
+          padding: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <a class="back" href="/">← Kembali ke kalkulator tarif</a>
+
+      <header>
+        <span class="eyebrow">Privasi &amp; Ketentuan</span>
+        <h1>Kebijakan privasi dan ketentuan layanan</h1>
+        <p class="lead">
+          Halaman ini menjelaskan data apa yang diproses saat Anda memakai
+          kalkulator tarif Jasa Angkut Slamet, layanan pihak ketiga yang
+          membantu peta dan pencarian alamat, serta ketentuan pemesanan.
+        </p>
+        <p class="updated">Terakhir diperbarui: 7 November 2026</p>
+      </header>
+
+      <nav class="toc" aria-label="Daftar isi">
+        <strong>Daftar isi</strong>
+        <ol>
+          <li><a href="#data">Data yang Anda isi</a></li>
+          <li><a href="#whatsapp">Pengiriman lewat WhatsApp</a></li>
+          <li><a href="#peta">Peta dan pencarian alamat</a></li>
+          <li><a href="#analitik">Analitik anonim</a></li>
+          <li><a href="#penyimpanan">Penyimpanan dan hosting</a></li>
+          <li><a href="#hak">Hak Anda</a></li>
+          <li><a href="#ketentuan">Ketentuan pemesanan</a></li>
+          <li><a href="#kontak">Kontak</a></li>
+        </ol>
+      </nav>
+
+      <section id="data">
+        <h2>1. Data yang Anda isi</h2>
+        <p>
+          Form pemesanan meminta nama, nomor HP/WhatsApp, jadwal angkut, titik
+          muat dan bongkar, lantai, pilihan bantuan, serta catatan tambahan.
+          Data ini dipakai hanya untuk menghitung estimasi dan menyusun pesan
+          pesanan.
+        </p>
+        <p>
+          Selama Anda belum menekan tombol kirim WhatsApp, data tersebut
+          berada di peramban Anda. Website ini tidak mengirim atau menyimpan
+          data pemesanan ke server Jasa Angkut Slamet.
+        </p>
+      </section>
+
+      <section id="whatsapp">
+        <h2>2. Pengiriman lewat WhatsApp</h2>
+        <p>
+          Saat Anda menekan tombol pesan, aplikasi membuka WhatsApp dengan
+          pesan yang sudah terisi. Pesan baru terkirim setelah Anda menekan
+          tombol kirim di WhatsApp. Setelah itu, data pesanan diproses melalui
+          layanan WhatsApp/Meta dan tunduk pada kebijakan privasi mereka.
+        </p>
+        <p class="note">
+          Jangan mencantumkan informasi sensitif (misalnya data kesehatan atau
+          nomor rekening) di kolom catatan. Catatan hanya untuk kebutuhan
+          angkut seperti akses gang, terpal, atau barang pecah belah.
+        </p>
+      </section>
+
+      <section id="peta">
+        <h2>3. Peta dan pencarian alamat</h2>
+        <p>
+          Untuk menampilkan peta, mencari alamat, dan menghitung rute, website
+          memakai layanan pihak ketiga:
+        </p>
+        <ul>
+          <li>
+            <strong>OpenFreeMap</strong> untuk tampilan peta dan
+            <strong>OpenStreetMap</strong> untuk data peta.
+          </li>
+          <li>
+            <strong>Nominatim OpenStreetMap</strong> untuk pencarian alamat.
+            Kata kunci yang Anda ketik dikirim ke layanan ini.
+          </li>
+          <li>
+            <strong>OSRM</strong> untuk menghitung rute berkendara. Koordinat
+            titik muat dan bongkar dikirim ke layanan ini.
+          </li>
+          <li>
+            <strong>Google Maps</strong> untuk peta lokasi garasi di bagian
+            footer.
+          </li>
+        </ul>
+        <p>
+          Layanan tersebut dapat menerima alamat IP, jenis peramban, dan data
+          permintaan sesuai kebijakan privasi masing-masing. Deteksi “Lokasi
+          saya” memakai fitur geolokasi peramban dan hanya berjalan setelah
+          Anda memberi izin.
+        </p>
+      </section>
+
+      <section id="analitik">
+        <h2>4. Analitik anonim</h2>
+        <p>
+          Website dapat mencatat peristiwa produk tanpa identitas, seperti
+          “mulai mengisi pesanan”, “estimasi siap”, “peta dibuka”, dan “klik
+          WhatsApp”, beserta alamat halaman. Nama, nomor HP, alamat, dan
+          koordinat tidak pernah dimasukkan ke peristiwa analitik.
+        </p>
+        <p>
+          Saat ini pengiriman analitik nonaktif secara bawaan. Pengiriman hanya
+          aktif jika endpoint analitik dikonfigurasi saat build. Website tidak
+          memakai cookie, local storage, atau sidik jari peramban untuk
+          analitik.
+        </p>
+      </section>
+
+      <section id="penyimpanan">
+        <h2>5. Penyimpanan dan hosting</h2>
+        <p>
+          Website di-hosting di Vercel. Seperti layanan hosting umum, penyedia
+          dapat menyimpan log teknis (alamat IP, waktu akses, jenis peramban)
+          untuk keamanan dan pemantauan layanan. Kami tidak membuat profil
+          iklan dari data tersebut.
+        </p>
+        <p>
+          Riwayat pesanan yang sudah dikirim lewat WhatsApp tersimpan di
+          percakapan WhatsApp Jasa Angkut Slamet sesuai kebutuhan operasional
+          dan ketentuan layanan WhatsApp.
+        </p>
+      </section>
+
+      <section id="hak">
+        <h2>6. Hak Anda</h2>
+        <p>
+          Anda dapat meminta informasi, koreksi, atau penghapusan data pesanan
+          yang Anda kirim melalui WhatsApp. Karena data pesanan tidak disimpan
+          di server website, permintaan dilakukan langsung ke kanal WhatsApp
+          Jasa Angkut Slamet.
+        </p>
+        <p>
+          Anda juga dapat menolak izin lokasi, memakai mode privat, atau
+          memblokir analitik melalui pengaturan peramban tanpa kehilangan
+          fungsi utama kalkulator tarif.
+        </p>
+      </section>
+
+      <section id="ketentuan">
+        <h2>7. Ketentuan pemesanan</h2>
+        <h3>Estimasi, bukan harga final</h3>
+        <p>
+          Tarif yang muncul adalah estimasi berdasarkan jarak rute, setoran
+          armada, bantuan bongkar muat, dan lantai. Harga final dikonfirmasi
+          oleh Jasa Angkut Slamet lewat WhatsApp sebelum armada berangkat.
+        </p>
+        <h3>Ketersediaan dan jadwal</h3>
+        <p>
+          Jadwal yang Anda pilih adalah permintaan, bukan konfirmasi. Armada
+          dan sopir tersedia setelah tim kami membalas dan menyetujui jadwal.
+        </p>
+        <h3>Muatan dan tanggung jawab</h3>
+        <p>
+          Anda bertanggung jawab memastikan muatan sudah dikemas dengan aman
+          dan memberi tahu tim jika ada barang pecah belah, barang berharga,
+          atau akses yang sulit. Barang berharga sebaiknya dibawa sendiri atau
+          dinyatakan terpisah sebelum pemesanan.
+        </p>
+        <h3>Pembatalan dan perubahan</h3>
+        <p>
+          Perubahan titik, jadwal, atau bantuan dapat mengubah estimasi.
+          Pembatalan sebaiknya diberitahukan seawal mungkin lewat WhatsApp agar
+          jadwal armada dapat dialokasikan ke pelanggan lain.
+        </p>
+        <h3>Keadaan di luar kendali</h3>
+        <p>
+          Cuaca ekstrem, kemacetan, banjir, penutupan jalan, atau keadaan
+          darurat dapat memengaruhi waktu tempuh. Kami akan menginformasikan
+          perubahan secepat mungkin.
+        </p>
+        <p>
+          Ketentuan ini mengikuti hukum yang berlaku di Indonesia. Jika ada
+          perbedaan penafsiran, kedua pihak akan menyelesaikannya secara
+          musyawarah terlebih dahulu.
+        </p>
+      </section>
+
+      <section id="kontak">
+        <h2>8. Kontak</h2>
+        <p>
+          Pertanyaan tentang privasi, data pesanan, atau ketentuan layanan bisa
+          disampaikan langsung ke Jasa Angkut Slamet.
+        </p>
+        <div class="contact">
+          <a
+            href="https://wa.me/6281327623942"
+            target="_blank"
+            rel="noopener noreferrer"
+            >WhatsApp 0813-2762-3942</a
+          >
+          <a class="secondary" href="tel:+6281327623942">Telepon</a>
+          <a class="secondary" href="/">Kembali ke beranda</a>
+        </div>
+      </section>
+
+      <footer>
+        © 2026 Jasa Angkut Slamet · Melayani Demak, Semarang, dan sekitarnya
+      </footer>
+    </div>
+  </body>
+</html>

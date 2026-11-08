@@ -3,14 +3,22 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test",
-    "lint": "eslint . && tsc --noEmit"
+    "e2e": "playwright test --project=mobile-chrome --project=desktop-chrome",
+    "e2e:all": "playwright test",
+    "images": "node scripts/optimize-images.mjs",
+    "validate:seo": "node scripts/validate-jsonld.mjs",
+    "perf": "playwright test --config=playwright.perf.config.ts",
+    "lint": "eslint . && tsc --noEmit",
+    "check": "npm run lint && npm test && npm run validate:seo && npm run build"
   },
   "dependencies": {
     "maplibre-gl": "^6.16.0",
@@ -29,7 +37,8 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^14.0.0",
     "jsdom": "^24.1.1",
-    "playwright": "^1.46.0",
+    "playwright": "^1.64.1",
+    "sharp": "^0.35.5",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.6",

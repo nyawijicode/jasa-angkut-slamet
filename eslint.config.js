@@ -26,6 +26,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ["playwright*.config.ts", "e2e/**/*.ts", "perf/**/*.ts"],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+  },
+  {
     files: ["**/*.mjs"],
     extends: [js.configs.recommended],
     languageOptions: {

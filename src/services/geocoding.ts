@@ -23,7 +23,9 @@ export async function searchAddress(query: string, signal?: AbortSignal): Promis
     },
     signal,
   });
-  if (!res.ok) return [];
+  if (!res.ok) {
+    throw new Error(`Geocoding failed with status ${res.status}`);
+  }
   const data = (await res.json()) as NominatimPlace[];
   return data
     .map((d) => ({

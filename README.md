@@ -27,11 +27,12 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
   - Rincian biaya transparan yang dapat dilihat langsung oleh pelanggan.
 
 - **📋 Form Pemesanan Bertahap (Multi-Step Wizard)**:
-  1. **Langkah 1 (Data Pemesan)**: Nama lengkap, nomor WhatsApp yang tervalidasi, serta pemilihan jadwal angkut (tanggal dan selektor jam & menit yang responsif dengan pengelompokan waktu Pagi, Siang, Sore, Malam).
-  2. **Langkah 2 (Layanan)**: Pilihan jangkauan wilayah (Dalam Kota vs Luar Kota).
-  3. **Langkah 3 (Bantuan & Lantai)**: Pilihan bantuan tenaga angkut dan pengaturan lantai untuk masing-masing titik muat dan bongkar.
-  4. **Langkah 4 (Catatan Tambahan)**: Keterangan khusus seputar muatan beserta saran catatan cepat (misal: _butuh terpal_, _gang sempit_, _barang pecah belah_).
-  5. **Langkah 5 (Ringkasan Estimasi)**: Tinjauan lengkap data pemesan, rute, rincian biaya estimasi, peringatan jika rute peta belum dipilih, dan tombol konfirmasi pesanan.
+  1. **Langkah 1 (Rute angkutan)**: Tandai titik muat dan bongkar di peta, cari alamat, atau pakai lokasi saat ini. Jarak dan rute mobil dihitung otomatis.
+  2. **Langkah 2 (Data pemesan)**: Nama lengkap, nomor WhatsApp yang tervalidasi, serta pemilihan jadwal angkut (tanggal dan selektor jam & menit yang responsif dengan pengelompokan waktu Pagi, Siang, Sore, Malam).
+  3. **Langkah 3 (Layanan)**: Pilihan jangkauan wilayah (Dalam Kota vs Luar Kota).
+  4. **Langkah 4 (Bantuan & Lantai)**: Pilihan bantuan tenaga angkut dan pengaturan lantai untuk masing-masing titik muat dan bongkar.
+  5. **Langkah 5 (Catatan Tambahan)**: Keterangan khusus seputar muatan beserta saran catatan cepat (misal: _butuh terpal_, _gang sempit_, _barang pecah belah_).
+  6. **Langkah 6 (Ringkasan Estimasi)**: Tinjauan lengkap data pemesan, rute, rincian biaya estimasi, peringatan jika rute peta belum dipilih, dan tombol konfirmasi pesanan.
 
 - **💬 Integrasi Direct WhatsApp**:
   - Menyusun format pesan WhatsApp yang rapi, profesional, dan lengkap secara otomatis sesuai data yang dimasukkan pelanggan.
@@ -57,7 +58,10 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 
 ### Prasyarat
 
-- Pastikan telah menginstal [Node.js](https://nodejs.org/) (versi 18 ke atas disarankan) dan `npm`.
+- Pastikan telah menginstal [Node.js](https://nodejs.org/) **20.19+ atau 22.12+** dan `npm`.
+  Vite 8 dan Playwright 1.64 tidak mendukung Node 18. Versi yang dipakai proyek
+  tercatat di `.nvmrc` dan `engines` pada `package.json`, jadi `nvm use` akan
+  memilih Node 22.
 
 ### Langkah Instalasi
 
@@ -84,15 +88,20 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 
 ## 📜 Perintah yang Tersedia (NPM Scripts)
 
-| Perintah             | Deskripsi                                                                         |
-| -------------------- | --------------------------------------------------------------------------------- |
-| `npm run dev`        | Menjalankan server pengembangan Vite secara lokal                                 |
-| `npm run build`      | Menjalankan type-checking TypeScript dan membuat build produksi di folder `dist/` |
-| `npm run preview`    | Meninjau hasil build produksi secara lokal                                        |
-| `npm test`           | Menjalankan seluruh pengujian unit menggunakan Vitest                             |
-| `npm run test:watch` | Menjalankan Vitest dalam mode watch                                               |
-| `npm run e2e`        | Menjalankan pengujian end-to-end dengan Playwright                                |
-| `npm run lint`       | Menjalankan linter ESLint dan type-checking TypeScript                            |
+| Perintah               | Deskripsi                                                                         |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| `npm run dev`          | Menjalankan server pengembangan Vite secara lokal                                 |
+| `npm run build`        | Menjalankan type-checking TypeScript dan membuat build produksi di folder `dist/` |
+| `npm run preview`      | Meninjau hasil build produksi secara lokal                                        |
+| `npm test`             | Menjalankan seluruh pengujian unit menggunakan Vitest                             |
+| `npm run test:watch`   | Menjalankan Vitest dalam mode watch                                               |
+| `npm run e2e`          | E2E Chromium mobile + desktop (memakai Chrome lokal)                              |
+| `npm run e2e:all`      | E2E semua project, termasuk WebKit mobile Safari                                  |
+| `npm run images`       | Membuat varian WebP dan AVIF dari JPG galeri (butuh `sharp`)                      |
+| `npm run validate:seo` | Memvalidasi JSON-LD, FAQ, galeri, dan tarif di `index.html`                       |
+| `npm run perf`         | Mengukur LCP/CLS build produksi di desktop dan mobile                             |
+| `npm run lint`         | Menjalankan linter ESLint dan type-checking TypeScript                            |
+| `npm run check`        | Rangkaian lengkap: lint, unit test, validasi SEO, dan build                       |
 
 ---
 
@@ -147,21 +156,73 @@ validasi data pemesan, dan isi pesan WhatsApp:
 npm test
 ```
 
-**Smoke test end-to-end (Playwright)** memeriksa tampilan mobile 320px, tidak ada
-overflow horizontal, target sentuh minimal 44px, menu mobile, dan modal galeri:
+**E2E (Playwright)** menjalankan alur nyata di Chromium mobile dan desktop:
+tampilan 320px tanpa overflow, target sentuh 44px, menu mobile, modal galeri,
+pencarian alamat dengan keyboard, status kosong/gagal pencarian, pesan lokasi
+inline, serta wizard lengkap sampai tautan WhatsApp. Peta, OSRM, dan Nominatim
+distub pada level network agar tes tetap cepat dan tidak bergantung layanan
+pihak ketiga.
 
 ```bash
-npm run e2e
+npm run e2e        # Chromium mobile + desktop, memakai Chrome lokal
+npm run e2e:all    # termasuk WebKit (iPhone 13), perlu npx playwright install webkit
 ```
 
-Playwright memakai Google Chrome (`channel: "chrome"`), jadi tidak perlu mengunduh
-browser tambahan. Jika server dev belum berjalan, Playwright otomatis menjalankan
-`npm run dev -- --port 5199`; bila sudah ada, server tersebut dipakai ulang.
+Di CI semua browser yang dibutuhkan dipasang otomatis. Di lokal, `npm run e2e`
+memakai Google Chrome sehingga tidak perlu unduh browser tambahan. Playwright
+menjalankan `npm run dev -- --port 5199` bila server belum aktif.
 
-Nama dan nomor HP wajib valid sebelum pesanan bisa dikirim ke WhatsApp. Aturan ini
-diuji di `src/domain/customer.test.ts` dan dipakai langsung oleh wizard di
-`src/pages/Home.tsx`, sehingga tombol WhatsApp tidak pernah menghasilkan pesan tanpa
-identitas pemesan.
+**Baseline performa produksi** diukur dari `vite preview`, bukan dev server:
+
+```bash
+npm run build
+npm run perf
+```
+
+Baseline lokal saat ini: LCP desktop sekitar 1,2–1,3 detik dan mobile sekitar
+0,5–0,7 detik; CLS desktop sekitar 0,002 dan mobile sekitar 0,018 (di bawah
+ambang 0,1). Angka aktual di produksi tetap perlu dicek dengan Lighthouse/Web
+Vitals setelah deploy.
+
+**Validasi structured data** memastikan semua blok JSON-LD valid, tipe yang
+dibutuhkan ada, FAQ memiliki jawaban, galeri memiliki dimensi gambar, dan
+`priceRange` memakai tarif nyata (Rp 6.500/km + setoran Rp 50.000), bukan angka
+karangan:
+
+```bash
+npm run validate:seo
+```
+
+Validasi ini bersifat struktural. Setelah deploy, jalankan URL publik melalui
+[Google Rich Results Test](https://search.google.com/test/rich-results) untuk
+memastikan tidak ada peringatan yang hanya muncul di lingkungan Google.
+
+---
+
+## 🖼️ Optimasi Gambar
+
+Galeri memakai `<picture>` dengan urutan AVIF, WebP, lalu JPG sebagai fallback.
+Varian modern dibuat dari JPG yang sudah ada, sehingga foto asli tidak berubah:
+
+```bash
+npm run images
+```
+
+Script hanya membuat ulang varian yang lebih lama dari JPG sumber. JPG tetap
+dipertahankan untuk browser lama, sitemap gambar, dan pratinjau sosial.
+
+---
+
+## 🔐 Privasi, Analitik, dan CI
+
+- Halaman `/privasi.html` menjelaskan data pemesanan, layanan peta pihak ketiga,
+  analitik anonim, dan ketentuan pemesanan. Tautannya ada di footer dan sitemap.
+- Event analitik (`wizard_started`, `estimate_ready`, `wizard_completed`,
+  `whatsapp_click`, `map_opened`) tidak pernah memuat nama, nomor HP, alamat,
+  atau koordinat. Secara bawaan event hanya dikirim ke `dataLayer`/CustomEvent.
+  Untuk mengaktifkan pengiriman, set `VITE_ANALYTICS_ENDPOINT` saat build.
+- CI di `.github/workflows/ci.yml` menjalankan lint, unit test, validasi JSON-LD,
+  build, lalu E2E Chromium + WebKit pada setiap push/PR ke `main`.
 
 ---
 
