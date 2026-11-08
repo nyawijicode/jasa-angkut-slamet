@@ -2244,7 +2244,7 @@ export default function Home() {
                 <h3 className="service-title">Pindahan Rumah &amp; Kost</h3>
                 <p className="service-desc">
                   Perabot, kasur, lemari, dan barang perabotan diangkut rapi
-                  dengan terpal waterproof dobel serta tali tambang kuat.
+                  dengan terpal serta tali tambang kuat.
                 </p>
                 <a className="service-link" href="#pesan">
                   Hitung tarif pindahan
@@ -2400,15 +2400,7 @@ export default function Home() {
                     loading="lazy"
                   />
                 </div>
-                <h3
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.125rem",
-                    fontWeight: 700,
-                    margin: "0 0 14px",
-                    color: "var(--ink)",
-                  }}
-                >
+                <h3 className="fleet-card-title">
                   Spesifikasi Standar Pick Up Bak Terbuka
                 </h3>
                 <ul className="fleet-specs-list">
@@ -4437,13 +4429,19 @@ export default function Home() {
         <div className="container">
           <div className="footer-grid">
             <div className="footer-brand-col">
-              <a className="brand" href="#beranda" aria-label="Jasa Angkut Slamet — beranda">
+              <a
+                className="brand"
+                href="#beranda"
+                aria-label="Jasa Angkut Slamet — beranda"
+              >
                 <span className="brand-mark">
                   <IconTruck size={23} />
                 </span>
                 <span>
                   <span className="brand-name">Jasa Angkut Slamet</span>
-                  <span className="brand-meta">Armada Pindahan &amp; Logistik</span>
+                  <span className="brand-meta">
+                    Armada Pindahan &amp; Logistik
+                  </span>
                 </span>
               </a>
               <p className="footer-desc">
@@ -4466,23 +4464,45 @@ export default function Home() {
             <div className="footer-nav-col">
               <h3 className="footer-col-title">Navigasi</h3>
               <ul className="footer-links-list">
-                <li><a href="#beranda">Beranda</a></li>
-                <li><a href="#layanan">Layanan Kami</a></li>
-                <li><a href="#pesan">Kalkulator Tarif</a></li>
-                <li><a href="#galeri">Galeri Armada</a></li>
-                <li><a href="#area-layanan">Area Layanan</a></li>
-                <li><a href="#faq">Tanya Jawab (FAQ)</a></li>
+                <li>
+                  <a href="#beranda">Beranda</a>
+                </li>
+                <li>
+                  <a href="#layanan">Layanan Kami</a>
+                </li>
+                <li>
+                  <a href="#pesan">Kalkulator Tarif</a>
+                </li>
+                <li>
+                  <a href="#galeri">Galeri Armada</a>
+                </li>
+                <li>
+                  <a href="#area-layanan">Area Layanan</a>
+                </li>
+                <li>
+                  <a href="#faq">Tanya Jawab (FAQ)</a>
+                </li>
               </ul>
             </div>
 
             <div className="footer-area-col">
               <h3 className="footer-col-title">Area Layanan</h3>
               <ul className="footer-links-list">
-                <li><a href="#area-layanan">Kabupaten Demak (14 Kec.)</a></li>
-                <li><a href="#area-layanan">Kota Semarang (16 Kec.)</a></li>
-                <li><a href="#area-layanan">Kab. Semarang (19 Kec.)</a></li>
-                <li><a href="#area-layanan">Ungaran &amp; Mranggen</a></li>
-                <li><a href="#hubungi">Kirim Antar Kota &amp; Provinsi</a></li>
+                <li>
+                  <a href="#area-layanan">Kabupaten Demak (14 Kec.)</a>
+                </li>
+                <li>
+                  <a href="#area-layanan">Kota Semarang (16 Kec.)</a>
+                </li>
+                <li>
+                  <a href="#area-layanan">Kab. Semarang (19 Kec.)</a>
+                </li>
+                <li>
+                  <a href="#area-layanan">Ungaran &amp; Mranggen</a>
+                </li>
+                <li>
+                  <a href="#hubungi">Kirim Antar Kota &amp; Provinsi</a>
+                </li>
               </ul>
             </div>
 
@@ -4563,14 +4583,18 @@ export default function Home() {
           </div>
 
           <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} Jasa Angkut Slamet. Seluruh hak cipta dilindungi.</span>
+            <span>
+              © {new Date().getFullYear()} Jasa Angkut Slamet. Seluruh hak cipta
+              dilindungi.
+            </span>
             <span>
               <a className="footer-legal-link" href="/privasi.html">
                 Kebijakan Privasi &amp; Ketentuan Layanan
               </a>
             </span>
             <span className="footer-disclaimer">
-              Perhitungan tarif bersifat transparan. Harga final dikonfirmasi via WhatsApp.
+              Perhitungan tarif bersifat transparan. Harga final dikonfirmasi
+              via WhatsApp.
             </span>
           </div>
         </div>
