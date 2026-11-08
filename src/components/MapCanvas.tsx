@@ -40,7 +40,7 @@ type MapCanvasProps = {
   onDraftMove: (lat: number, lng: number) => void;
 };
 
-const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 const LOAD_COLOR = "#1F4D3A";
 const UNLOAD_COLOR = "#E07A2E";
 const ROUTE_COLOR = "#1F4D3A";
@@ -122,6 +122,11 @@ function firstSymbolId(map: MapLibreMap): string | undefined {
 
 function addBuildingLayer(map: MapLibreMap) {
   if (map.getLayer("brand-building-3d")) return;
+  // Liberty already ships a styled 3D building layer. Only add our fallback
+  // when the base style has no extrusion layer of its own.
+  if (map.getStyle().layers?.some((layer) => layer.type === "fill-extrusion")) {
+    return;
+  }
   const sources = map.getStyle().sources;
   const sourceId = Object.entries(sources).find(
     ([, source]) => "type" in source && source.type === "vector",
@@ -252,12 +257,15 @@ export default function MapCanvas({
   const fitPositionsRef = useRef(fitPositions);
   const skipFlyRef = useRef<string | null>(null);
   const lastDraftRef = useRef<string | null>(null);
+  const is3dRef = useRef(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [is3d, setIs3d] = useState(false);
 
   callbacksRef.current = { onPick, onDraftMove };
   fitPositionsRef.current = fitPositions;
+  is3dRef.current = is3d;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -304,7 +312,7 @@ export default function MapCanvas({
     canvas.addEventListener("webglcontextlost", onContextLost);
 
     const applyPitch = () => {
-      const target = map.getZoom() >= 15 ? 42 : 0;
+      const target = is3dRef.current ? 50 : 0;
       if (Math.abs(map.getPitch() - target) < 1) return;
       if (reducedMotion()) {
         map.setPitch(target);
@@ -319,6 +327,7 @@ export default function MapCanvas({
       addBuildingLayer(map);
       addRouteLayers(map);
       setReady(true);
+      applyPitch();
     };
 
     const failTimer = window.setTimeout(() => {
@@ -326,7 +335,6 @@ export default function MapCanvas({
     }, 10000);
 
     map.on("load", onLoad);
-    map.on("zoomend", applyPitch);
     map.on("click", (event) => {
       callbacksRef.current.onPick(event.lngLat.lat, event.lngLat.lng);
     });
@@ -342,6 +350,22 @@ export default function MapCanvas({
       mapRef.current = null;
     };
   }, [attempt]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+
+    const duration = reducedMotion() ? 0 : 500;
+    const pitch = is3d ? 50 : 0;
+    const options: { pitch: number; duration: number; zoom?: number } = {
+      pitch,
+      duration,
+    };
+    // Flat by default so every label stays readable; entering 3D raises the
+    // camera just enough for the building extrusions to become visible.
+    if (is3d && map.getZoom() < 14.2) options.zoom = 15.5;
+    map.easeTo(options);
+  }, [is3d, ready]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -383,7 +407,7 @@ export default function MapCanvas({
     map.flyTo({
       center: [draft.lng, draft.lat],
       zoom: Math.max(map.getZoom(), 18),
-      pitch: 42,
+      pitch: is3dRef.current ? 50 : 0,
       duration: reducedMotion() ? 0 : 650,
       essential: true,
     });
@@ -533,6 +557,22 @@ export default function MapCanvas({
             Coba muat ulang
           </button>
         </div>
+      )}
+      {ready && !failed && (
+        <button
+          type="button"
+          className="map-mode"
+          aria-pressed={is3d}
+          aria-label="Tampilan 3D"
+          title={
+            is3d
+              ? "Kembali ke tampilan datar"
+              : "Tampilkan bangunan dan peta 3D"
+          }
+          onClick={() => setIs3d((value) => !value)}
+        >
+          <span aria-hidden="true">3D</span>
+        </button>
       )}
     </div>
   );

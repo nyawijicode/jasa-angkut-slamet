@@ -9,8 +9,8 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 ## 🌟 Fitur Utama
 
 - **🗺️ Peta Interaktif & Penentuan Rute**:
-  - Peta interaktif (MapLibre / OpenFreeMap) dibuka dalam modal per titik: pilih satu titik (misalnya **M1** atau **B1**), tandai di peta, lalu tekan **Simpan titik** dan modal otomatis tertutup.
-  - Tampilan peta memakai vektor tiles dengan bangunan 3D saat diperbesar, sehingga titik muat dan bongkar lebih mudah dikenali.
+  - Peta interaktif (MapLibre / OpenFreeMap Liberty) dibuka dalam modal per titik: pilih satu titik (misalnya **M1** atau **B1**), tandai di peta, lalu tekan **Simpan titik** dan modal otomatis tertutup.
+  - Tampilan bawaan datar (2D) memakai style **Liberty** sehingga seluruh label jalan, nama tempat, dan POI tetap terlihat. Tombol **3D** di peta mengubahnya menjadi perspektif dengan bangunan timbul, dan bisa dikembalikan ke tampilan datar kapan saja.
   - Penandaan banyak titik muat (jemput) dan bongkar (tujuan) langsung di peta, dengan label **M1, M2, B1, B2**, dan seterusnya.
   - Titik bisa dipilih lewat klik peta, pencarian alamat, atau deteksi lokasi; perubahan baru tersimpan setelah **Simpan titik** ditekan, dan tombol **Batal** membuang pilihan.
   - Default 1 titik muat dan 1 titik bongkar; titik tambahan bisa ditambah atau dihapus kapan saja dari daftar titik di halaman.
@@ -179,10 +179,10 @@ npm run build
 npm run perf
 ```
 
-Baseline lokal saat ini: LCP desktop sekitar 1,2–1,3 detik dan mobile sekitar
-0,5–0,7 detik; CLS desktop sekitar 0,002 dan mobile sekitar 0,018 (di bawah
-ambang 0,1). Angka aktual di produksi tetap perlu dicek dengan Lighthouse/Web
-Vitals setelah deploy.
+Baseline lokal berada di bawah ambang 2,5 detik (contoh pengukuran: LCP desktop
+1,2–1,9 detik, mobile 0,5–1,4 detik; CLS desktop sekitar 0,002 dan mobile
+sekitar 0,018, jauh di bawah ambang 0,1). Angka bervariasi sesuai beban mesin;
+angka produksi tetap perlu dicek dengan Lighthouse/Web Vitals setelah deploy.
 
 **Validasi structured data** memastikan semua blok JSON-LD valid, tipe yang
 dibutuhkan ada, FAQ memiliki jawaban, galeri memiliki dimensi gambar, dan

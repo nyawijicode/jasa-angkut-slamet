@@ -1,4 +1,5 @@
 import { expect, test } from "playwright/test";
+import { installMapStubs } from "./stubs";
 
 const MIN_TARGET = 44;
 
@@ -16,8 +17,9 @@ test("menampilkan tarif transparan tanpa overflow horizontal", async ({
   await expect(page.locator(".faq-answer").first()).toContainText("Rp 50.000");
   await expect(page.locator(".mobile-bar-note")).toContainText("Rp 50.000");
 
-  for (const width of [320, 390, 1280]) {
+  for (const width of [320, 360, 375, 390, 414, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(120);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
     );
@@ -27,6 +29,8 @@ test("menampilkan tarif transparan tanpa overflow horizontal", async ({
 
 test("menjaga target sentuh minimal 44px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
+  // Let the min-height transition finish after the viewport change.
+  await page.waitForTimeout(350);
 
   const tooSmall = await page.evaluate((min) => {
     const selector =
@@ -95,6 +99,23 @@ test("halaman privasi terbuka dari footer tanpa overflow", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Kebijakan privasi",
   );
+
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("modal peta responsif di 320px dengan toggle 3D", async ({ page }) => {
+  await installMapStubs(page);
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.locator("#route-open-map").click();
+
+  const modal = page.locator(".map-card.is-modal");
+  await expect(modal).toBeVisible();
+  await expect(page.getByRole("button", { name: "Tampilan 3D" })).toBeVisible();
+  await expect(page.locator(".map-search input")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Lokasi saya" })).toBeVisible();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,

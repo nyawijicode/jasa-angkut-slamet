@@ -1596,6 +1596,46 @@
   color: var(--forest);
 }
 
+.map-mode {
+  position: absolute;
+  z-index: 800;
+  right: 12px;
+  bottom: 100px;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--gray-300);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  color: var(--gray-700);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.map-mode:hover {
+  border-color: var(--forest);
+  background: var(--brand-25);
+  color: var(--forest);
+}
+
+.map-mode[aria-pressed="true"] {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: #fff;
+}
+
+.map-mode[aria-pressed="true"]:hover {
+  background: var(--forest-deep, #05291c);
+  color: #fff;
+}
+
 /* Form panel */
 
 .panel {

@@ -2629,6 +2629,10 @@
     bottom: 62px;
   }
 
+  .map-mode {
+    bottom: 114px;
+  }
+
   .footer-col a {
     margin-bottom: 0;
   }

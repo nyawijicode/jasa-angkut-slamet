@@ -82,6 +82,20 @@ test.describe("wizard pesanan", () => {
     expect(message).toContain("*TOTAL: Rp");
   });
 
+  test("peta bisa beralih dari tampilan datar ke 3D", async ({ page }) => {
+    await openMapFor(page, "M1");
+
+    const toggle = page.getByRole("button", { name: "Tampilan 3D" });
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await expect(toggle).toBeVisible();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  });
+
   test("menampilkan status kosong dan gagal pada pencarian alamat", async ({
     page,
   }) => {
