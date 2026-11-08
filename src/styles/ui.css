@@ -63,7 +63,7 @@
 
 .brand-name {
   display: block;
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.0625rem;
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -236,7 +236,7 @@
 
 .hero-title {
   margin: 16px 0 0;
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: var(--text-display);
   font-weight: 700;
   line-height: 1.06;
@@ -401,7 +401,7 @@
 .gallery-title {
   margin: 12px 0 0;
   color: var(--gray-900);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: var(--text-h2);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -638,7 +638,7 @@
 .gallery-modal-head h3 {
   margin: 0;
   color: var(--gray-900);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.0625rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -1210,7 +1210,7 @@
 .map-card-title h2 {
   margin: 0;
   color: var(--gray-900);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -1670,7 +1670,7 @@
 .panel-title {
   margin: 5px 0 0;
   color: var(--gray-900);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -2658,7 +2658,7 @@
 
 .quote-total strong {
   color: var(--forest-ink);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(1.5rem, 4.6vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.035em;
@@ -2976,7 +2976,7 @@
 
 .mobile-bar-value {
   color: var(--forest-ink);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -3350,7 +3350,7 @@
 .faq-title {
   margin: 12px 0 0;
   color: var(--gray-900);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: var(--text-h2);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -3554,7 +3554,7 @@
 .area-title {
   margin: 12px 0 0;
   color: var(--gray-900);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: var(--text-h2);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -3615,7 +3615,7 @@
 .area-coverage-title {
   margin: 0;
   color: var(--gray-900);
-  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.02em;

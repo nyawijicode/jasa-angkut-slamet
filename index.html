@@ -26,21 +26,29 @@
     <meta name="ICBM" content="-7.05698, 110.49681" />
 
     <!-- Mobile & PWA -->
-    <meta name="theme-color" content="#0D4A34" />
+    <meta name="theme-color" content="#173F32" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Angkut Slamet" />
     <meta name="format-detection" content="telephone=yes" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
+    <!-- Fonts (self-hosted, preloaded) -->
     <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap"
+      rel="preload"
+      href="/fonts/manrope-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
+    <link
+      rel="preload"
+      href="/fonts/inter-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
 
     <!-- Title & description -->
     <title>

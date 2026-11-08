@@ -11,9 +11,9 @@ test("menampilkan tarif transparan tanpa overflow horizontal", async ({
   page,
 }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Hitung ongkos angkut",
+    "Pindahan lebih tenang",
   );
-  await expect(page.locator(".hero-quote-note")).toContainText("Rp 50.000");
+  await expect(page.locator(".hero-visual-price")).toContainText("Rp 50.000");
   await expect(page.locator(".faq-answer").first()).toContainText("Rp 50.000");
   await expect(page.locator(".mobile-bar-note")).toContainText("Rp 50.000");
 
@@ -79,7 +79,7 @@ test("menu mobile tertutup dengan Escape dan klik luar", async ({ page }) => {
   await expect(burger).toBeFocused();
 
   await burger.click();
-  await page.locator("h1").click();
+  await page.locator(".topbar").click();
   await expect(burger).toHaveAttribute("aria-expanded", "false");
   await expect(page.locator("#mobile-menu")).toHaveCount(0);
 

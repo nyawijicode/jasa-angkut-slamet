@@ -114,6 +114,7 @@ jasa-angkut-slamet/
 ├── e2e/
 │   └── home.spec.ts        # Smoke test Playwright (copy, overflow, tap target, modal)
 ├── public/                 # Asset statis publik (gambar teroptimasi, ikon, manifest)
+│   └── fonts/              # Font Manrope & Inter (self-hosted, latin + latin-ext)
 ├── src/
 │   ├── components/
 │   │   └── MapCanvas.tsx   # Peta MapLibre, rute, dan marker
@@ -131,9 +132,11 @@ jasa-angkut-slamet/
 │   ├── services/
 │   │   └── geocoding.ts    # Layanan pencarian alamat OSM Nominatim
 │   ├── styles/
+│   │   ├── fonts.css       # Deklarasi @font-face font self-hosted
 │   │   ├── base.css        # Reset CSS dasar
 │   │   ├── tokens.css      # Variabel warna, tipografi, dan spasi
 │   │   ├── refresh.css     # Lapisan visual & responsif
+│   │   ├── design.css      # Penerapan DESIGN.md (layout, komponen, override)
 │   │   └── ui.css          # Desain komponen antarmuka aplikasi
 │   ├── App.tsx             # Root component
 │   └── main.tsx            # Entry point aplikasi
