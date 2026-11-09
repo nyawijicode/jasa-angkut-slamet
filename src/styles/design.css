@@ -156,10 +156,23 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-height: 44px;
+  min-width: 0;
+  overflow: hidden;
   color: inherit;
   text-decoration: none;
   flex-shrink: 0 !important;
+}
+
+.brand > span:last-child {
   min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .brand {
+    flex-shrink: 1 !important;
+  }
 }
 
 .brand-mark {
@@ -175,6 +188,9 @@ p {
 }
 
 .brand-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-family: var(--font-heading);
   font-size: 1.0625rem;
   font-weight: 700;
@@ -303,8 +319,8 @@ p {
 .nav-burger {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 9px;
   border: 1px solid var(--line);
   background: #ffffff;
@@ -1035,7 +1051,8 @@ p {
 .area-points .hero-point {
   display: inline-flex;
   align-items: center;
-  padding: 5px 11px;
+  min-height: 44px;
+  padding: 10px 12px;
   border: 1px solid var(--line, #e2e8f0);
   border-radius: 8px;
   background: var(--surface-sunken, #f8fafc);
@@ -1272,7 +1289,7 @@ p {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1120px) {
   .footer-grid {
     grid-template-columns: minmax(240px, 1.4fr) minmax(130px, 0.9fr) minmax(150px, 1fr) minmax(170px, 1.1fr) minmax(230px, 1.3fr);
     gap: 32px;
@@ -1371,6 +1388,7 @@ p {
 .footer-links-list li a {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 6px;
   color: #a3bfb2;
   font-size: 0.8125rem;
@@ -1394,9 +1412,10 @@ p {
 .footer-btn-wa {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 8px;
   padding: 10px 14px;
-  background: #059669;
+  background: #047857;
   color: #ffffff !important;
   font-size: 0.8125rem;
   font-weight: 700;
@@ -1407,7 +1426,7 @@ p {
 }
 
 .footer-btn-wa:hover {
-  background: #047857;
+  background: #036b4f;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
 }
@@ -1415,6 +1434,7 @@ p {
 .footer-btn-phone {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 8px;
   padding: 8px 14px;
   background: rgba(255, 255, 255, 0.06);
@@ -1442,8 +1462,8 @@ p {
 .footer-social-links a {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2459,7 +2479,7 @@ p {
 
 .btn-whatsapp-cta {
   background: var(--whatsapp) !important;
-  color: #ffffff !important;
+  color: #063a2a !important;
   border-color: var(--whatsapp) !important;
   font-family: var(--font-heading);
   font-weight: 700;
@@ -2493,6 +2513,11 @@ p {
   border: 1px solid var(--line);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   transition: all 200ms ease;
+}
+
+.priority-toggle-card:not(.is-active):hover {
+  border-color: #a7f3d0;
+  box-shadow: 0 4px 12px rgba(0, 93, 66, 0.06);
 }
 
 .priority-toggle-card.is-active {
@@ -2692,5 +2717,65 @@ p {
   .pwa-toast-app-icon {
     width: 40px;
     height: 40px;
+  }
+}
+
+/* ------------------------------------------------------------
+   Reduced motion: keep the layout, drop the movement
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .pulsing-dot,
+  .pwa-toast-banner,
+  .priority-badge-chip {
+    animation: none !important;
+  }
+
+  .btn,
+  .nav-link,
+  .hero-point,
+  .service-card,
+  .area-coverage-card,
+  .area-points .hero-point,
+  .area-points .hero-point::before,
+  .footer-links-list li a,
+  .footer-btn-wa,
+  .footer-btn-phone,
+  .footer-social-links a,
+  .footer-map-btn,
+  .footer-legal-link,
+  .topbar-phone,
+  .topbar-cta,
+  .trust-card,
+  .hero-visual-media img,
+  .how-step,
+  .fleet-spec-row,
+  .why-bento-card,
+  .district-pill,
+  .btn-whatsapp-cta,
+  .btn-phone-cta,
+  .priority-toggle-card,
+  .pwa-toast-close,
+  .pwa-btn-install,
+  .pwa-btn-dismiss {
+    transition: none !important;
+  }
+
+  .area-points .hero-point:hover,
+  .area-points .hero-point:hover::before,
+  .area-points .hero-point:active,
+  .footer-links-list li a:hover,
+  .footer-btn-wa:hover,
+  .footer-social-links a:hover,
+  .trust-card:hover,
+  .hero-visual-card:hover .hero-visual-media img,
+  .service-card:hover,
+  .how-step:hover,
+  .fleet-spec-row:hover,
+  .why-bento-card:hover,
+  .btn-whatsapp-cta:hover,
+  .btn-phone-cta:hover,
+  .pwa-btn-install:hover {
+    transform: none !important;
   }
 }

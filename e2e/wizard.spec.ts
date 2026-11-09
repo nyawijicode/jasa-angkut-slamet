@@ -82,6 +82,89 @@ test.describe("wizard pesanan", () => {
     expect(message).toContain("*TOTAL: Rp");
   });
 
+  test("toggle prioritas menambah Rp 50.000 dan teks WhatsApp", async ({
+    page,
+  }) => {
+    await pickAddress(page, "M1", "Mranggen");
+    await pickAddress(page, "B1", "Semarang");
+
+    const toggle = page.getByRole("switch", {
+      name: "Toggle prioritas pengiriman langsung",
+    });
+    const card = page.locator(".priority-toggle-card");
+
+    await expect(toggle).toHaveAttribute("aria-checked", "false");
+    await expect(card).toContainText("maksimal 4 jam");
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-checked", "true");
+    await expect(card).toContainText("+Rp 50.000");
+    await expect(card.locator(".priority-badge")).toContainText("Rp");
+
+    await page
+      .getByRole("button", { name: /Lanjut ke Data Pemesan/ })
+      .click();
+    await page.locator("#customer-name").fill("Siti Aminah");
+    await page.locator("#customer-phone").fill("081234567890");
+    await page.getByRole("button", { name: /Lanjut ke Layanan/ }).click();
+    await page
+      .getByRole("button", { name: /Lanjut ke Bantuan & Lantai/ })
+      .click();
+    await page.getByRole("button", { name: /Lanjut ke Catatan/ }).click();
+    await page
+      .getByRole("button", { name: /Lihat Ringkasan Estimasi/ })
+      .click();
+
+    await expect(page.locator(".order-review-card")).toContainText(
+      "Prioritas Langsung",
+    );
+    await expect(
+      page.locator(".quote-line").filter({ hasText: "Prioritas pengiriman" }),
+    ).toContainText("Rp 50.000");
+
+    const waLink = page.getByRole("link", {
+      name: /Kirim pesanan ke WhatsApp/,
+    });
+    const href = await waLink.getAttribute("href");
+    const message = decodeURIComponent(href!.split("text=")[1]);
+    expect(message).toContain("[PRIORITAS]");
+    expect(message).toContain("Rp 50.000");
+  });
+
+  test("rute tersimpan terkunci sampai Ubah Titik ditekan", async ({
+    page,
+  }) => {
+    await pickAddress(page, "M1", "Mranggen");
+    await pickAddress(page, "B1", "Semarang");
+
+    await page.locator(".panel-route-btn").click();
+    const modal = page.locator(".map-card.is-modal");
+    await expect(modal).toBeVisible();
+    await expect(
+      modal.getByRole("heading", { name: "Lihat Rute Perjalanan" }),
+    ).toBeVisible();
+    await expect(modal).toContainText("Rute Tersimpan (Terkunci)");
+    await expect(modal.locator(".map-search")).toHaveCount(0);
+    await expect(
+      modal.getByRole("button", { name: "Lokasi saya" }),
+    ).toHaveCount(0);
+    await expect(
+      modal.getByRole("button", { name: "Ubah Titik" }),
+    ).toBeVisible();
+
+    const lockedText = await page.locator(".map-draft").textContent();
+    await page
+      .locator(".map-libre-canvas")
+      .click({ position: { x: 140, y: 160 }, force: true });
+    await expect(page.locator(".map-draft")).toHaveText(lockedText!);
+
+    await modal.getByRole("button", { name: "Ubah Titik" }).click();
+    await expect(modal.locator(".map-search input")).toBeVisible();
+    await expect(
+      modal.getByRole("button", { name: "Simpan titik" }),
+    ).toBeVisible();
+  });
+
   test("peta bisa beralih dari tampilan datar ke 3D", async ({ page }) => {
     await openMapFor(page, "M1");
 

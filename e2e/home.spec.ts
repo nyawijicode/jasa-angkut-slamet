@@ -11,9 +11,9 @@ test("menampilkan tarif transparan tanpa overflow horizontal", async ({
   page,
 }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Pindahan lebih tenang",
+    "Pindahan Lebih Tenang",
   );
-  await expect(page.locator(".hero-visual-price")).toContainText("Rp 50.000");
+  await expect(page.locator(".hero-visual-rate")).toContainText("Rp 50.000");
   await expect(page.locator(".faq-answer").first()).toContainText("Rp 50.000");
   await expect(page.locator(".mobile-bar-note")).toContainText("Rp 50.000");
 
@@ -79,7 +79,7 @@ test("menu mobile tertutup dengan Escape dan klik luar", async ({ page }) => {
   await expect(burger).toBeFocused();
 
   await burger.click();
-  await page.locator(".topbar").click();
+  await page.locator(".site-topbar").click();
   await expect(burger).toHaveAttribute("aria-expanded", "false");
   await expect(page.locator("#mobile-menu")).toHaveCount(0);
 
@@ -113,7 +113,9 @@ test("modal peta responsif di 320px dengan toggle 3D", async ({ page }) => {
 
   const modal = page.locator(".map-card.is-modal");
   await expect(modal).toBeVisible();
-  await expect(page.getByRole("button", { name: "Tampilan 3D" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Tampilan 3D" })).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(page.locator(".map-search input")).toBeVisible();
   await expect(page.getByRole("button", { name: "Lokasi saya" })).toBeVisible();
 

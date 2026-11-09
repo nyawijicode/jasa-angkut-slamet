@@ -225,7 +225,9 @@ function progressGradient(
   color: string,
   progress: number,
 ): ExpressionSpecification {
-  const stop = Math.min(1, Math.max(0.0001, progress));
+  if (progress >= 1) return solidGradient(color);
+  const stop = Math.min(0.9999, Math.max(0.0001, progress));
+  const tail = Math.min(1, stop + 0.0001);
   return [
     "interpolate",
     ["linear"],
@@ -234,7 +236,7 @@ function progressGradient(
     color,
     stop,
     color,
-    Math.min(1, stop + 0.0001),
+    tail,
     "rgba(255,255,255,0)",
   ];
 }

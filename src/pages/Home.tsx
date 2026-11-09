@@ -1830,10 +1830,11 @@ export default function Home() {
   }
 
   function showRoute(mode: StopKind) {
-    const target =
-      stops.find((stop) => stop.kind === mode && stop.lat === null) ??
-      stops.find((stop) => stop.kind === mode);
-    openMap(target?.id, true);
+    const missing = stops.find(
+      (stop) => stop.kind === mode && stop.lat === null,
+    );
+    const target = missing ?? stops.find((stop) => stop.kind === mode);
+    openMap(target?.id, !missing);
   }
 
   function openRouteMap() {
@@ -2123,7 +2124,7 @@ export default function Home() {
                         width={1200}
                         height={1800}
                         loading="eager"
-                        fetchPriority="high"
+                        {...({ fetchpriority: "high" } as Record<string, string>)}
                         decoding="async"
                       />
                     </picture>
@@ -4129,30 +4130,21 @@ export default function Home() {
                     aria-label={`Kecamatan di ${area.title}`}
                   >
                     {area.districts.map((district) => (
-                      <li
-                        className="hero-point"
-                        key={district}
-                        role="button"
-                        tabIndex={0}
-                        title={`Layanan jasa angkut & pindahan area ${district} — Klik untuk hitung tarif`}
-                        onClick={() => {
-                          const el = document.getElementById("pesan");
-                          if (el) {
-                            el.scrollIntoView({ behavior: "smooth" });
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
+                      <li key={district}>
+                        <button
+                          type="button"
+                          className="hero-point"
+                          title={`Layanan jasa angkut & pindahan area ${district} — Klik untuk hitung tarif`}
+                          onClick={() => {
                             const el = document.getElementById("pesan");
                             if (el) {
                               el.scrollIntoView({ behavior: "smooth" });
                             }
-                          }
-                        }}
-                      >
-                        <IconCheck size={16} />
-                        {district}
+                          }}
+                        >
+                          <IconCheck size={16} />
+                          {district}
+                        </button>
                       </li>
                     ))}
                   </ul>

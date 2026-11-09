@@ -1126,7 +1126,7 @@
 
 .map-preview-label.is-unload {
   background: rgb(224 122 46 / 0.14);
-  color: #b54708;
+  color: #9a3f06;
 }
 
 .map-preview-coords {
@@ -4203,27 +4203,36 @@
   position: relative;
   flex: none;
   width: 48px;
-  height: 28px;
+  height: 44px;
   padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.toggle-switch::before {
+  content: "";
+  position: absolute;
+  inset: 8px 0;
   border: 2px solid var(--gray-300);
   border-radius: 999px;
   background: var(--gray-200);
-  cursor: pointer;
+  box-sizing: border-box;
   transition: background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
-.toggle-switch:hover:not(.is-on) {
+.toggle-switch:hover:not(.is-on)::before {
   border-color: var(--gray-400);
   background: var(--gray-300);
 }
 
-.toggle-switch.is-on {
+.toggle-switch.is-on::before {
   background: var(--forest);
   border-color: var(--forest);
   box-shadow: 0 0 0 3px rgb(31 77 58 / 0.2);
 }
 
-.toggle-switch.is-on:hover {
+.toggle-switch.is-on:hover::before {
   background: var(--forest-ink);
   border-color: var(--forest-ink);
 }
@@ -4231,12 +4240,13 @@
 .toggle-switch:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+  border-radius: 999px;
 }
 
 .toggle-knob {
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 10px;
+  left: 4px;
   width: 20px;
   height: 20px;
   border-radius: 50%;
