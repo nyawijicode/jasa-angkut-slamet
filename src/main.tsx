@@ -1,6 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+
+// Ekspos React ke global agar terdeteksi oleh Wappalyzer/tech profiler
+if (typeof window !== 'undefined') {
+  (window as unknown as { React?: unknown }).React = React
+}
 import './styles/fonts.css'
 import './styles/tokens.css'
 import './styles/base.css'
