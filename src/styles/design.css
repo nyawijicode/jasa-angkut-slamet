@@ -1960,7 +1960,6 @@ p {
 
 .hero-container {
   position: relative;
-  z-index: 1;
 }
 
 .hero-pill-badge {
