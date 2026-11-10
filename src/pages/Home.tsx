@@ -2724,7 +2724,7 @@ export default function Home() {
 
                             <div
                               className={`priority-toggle-card${priority ? " is-active" : ""}`}
-                              style={{ marginTop: 16 }}
+                              style={{ marginTop: 10 }}
                             >
                               <div className="priority-toggle-row">
                                 <div className="priority-toggle-info">

@@ -595,8 +595,8 @@
 
 .route-preview {
   display: grid;
-  gap: 16px;
-  padding: 18px;
+  gap: 12px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
   background: linear-gradient(180deg, #fbfdfb 0%, #ffffff 100%);
@@ -853,6 +853,14 @@
   box-shadow: var(--shadow-md);
 }
 
+.wizard-body {
+  min-height: 300px;
+  max-height: min(46vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
 .map-card.is-modal {
   animation: map-modal-rise 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -897,7 +905,7 @@
 }
 
 .panel-head {
-  padding: 22px;
+  padding: 16px 18px;
   border-bottom-color: var(--line);
   background: linear-gradient(180deg, #fbfdfb 0%, #ffffff 100%);
 }
@@ -988,13 +996,13 @@
 }
 
 .panel-body {
-  padding: 0 22px 22px;
+  padding: 0 18px 16px;
 }
 
 .wizard-nav {
   display: block;
-  margin: 0 -22px;
-  padding: 12px 22px;
+  margin: 0 -18px;
+  padding: 8px 18px;
   border-bottom-color: var(--line);
   background: var(--gray-50);
 }
@@ -1143,7 +1151,7 @@
 }
 
 .form-section {
-  padding-top: 24px;
+  padding-top: 12px;
 }
 
 .section-copy h3 {
