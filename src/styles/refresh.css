@@ -861,33 +861,19 @@
   z-index: 1251;
   width: min(1080px, calc(100vw - 32px));
   max-height: min(92vh, 900px);
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border-color: var(--line);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-}
-
-.booking-modal > .workspace {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  max-width: 100%;
-}
-
-.booking-modal .panel {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: 100%;
 }
 
 @media (max-width: 900px) {
   .booking-modal {
     inset: max(16px, env(safe-area-inset-top)) 16px
       max(16px, env(safe-area-inset-bottom));
+    top: auto;
+    left: auto;
     transform: none;
     width: auto;
     max-height: none;
@@ -895,8 +881,11 @@
 }
 
 .wizard-body {
-  /* Tidak ada max-height/scroll sendiri; seluruh modal yang menggulir */
-  min-height: 0;
+  min-height: 300px;
+  max-height: min(46vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
 }
 
 .map-card.is-modal {
@@ -946,7 +935,6 @@
   padding: 16px 18px;
   border-bottom-color: var(--line);
   background: linear-gradient(180deg, #fbfdfb 0%, #ffffff 100%);
-  flex: 0 0 auto;
 }
 
 .panel-title {
@@ -1036,10 +1024,6 @@
 
 .panel-body {
   padding: 0 18px 16px;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 .wizard-nav {
@@ -1267,10 +1251,15 @@
 
 .wizard-actions {
   border-top-color: var(--line);
-  flex: 0 0 auto;
-  background: #ffffff;
-  padding-top: 12px;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 28%);
   padding-bottom: 4px;
+  z-index: 2;
+  margin-left: -4px;
+  margin-right: -4px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .choice-card {

@@ -3751,6 +3751,16 @@ export default function Home() {
           )}
           </div>
           
+          <div className="wizard-actions">
+          <button
+          type="button"
+          className="btn btn-primary btn-lg wizard-actions-right"
+          onClick={advance}
+          >
+          <span>Lanjut ke Data Pemesan</span>
+          <IconArrowRight size={18} />
+          </button>
+          </div>
           </section>
           )}
           
@@ -4015,6 +4025,24 @@ export default function Home() {
           </div>
           </div>
           
+          <div className="wizard-actions">
+          <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={goBack}
+          >
+          <IconArrowLeft size={18} />
+          <span>Kembali ke Rute</span>
+          </button>
+          <button
+          type="button"
+          className="btn btn-primary btn-lg"
+          onClick={advance}
+          >
+          <span>Lanjut ke Layanan</span>
+          <IconArrowRight size={18} />
+          </button>
+          </div>
           </section>
           )}
           
@@ -4096,6 +4124,24 @@ export default function Home() {
           </button>
           </div>
           
+          <div className="wizard-actions">
+          <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={goBack}
+          >
+          <IconArrowLeft size={18} />
+          <span>Kembali</span>
+          </button>
+          <button
+          type="button"
+          className="btn btn-primary"
+          onClick={advance}
+          >
+          <span>Lanjut ke Bantuan &amp; Lantai</span>
+          <IconArrowRight size={18} />
+          </button>
+          </div>
           </section>
           )}
           
@@ -4208,6 +4254,24 @@ export default function Home() {
           bongkar.
           </p>
           
+          <div className="wizard-actions">
+          <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={goBack}
+          >
+          <IconArrowLeft size={18} />
+          <span>Kembali</span>
+          </button>
+          <button
+          type="button"
+          className="btn btn-primary"
+          onClick={advance}
+          >
+          <span>Lanjut ke Catatan</span>
+          <IconArrowRight size={18} />
+          </button>
+          </div>
           </section>
           )}
           
@@ -4270,6 +4334,24 @@ export default function Home() {
           </div>
           </div>
           
+          <div className="wizard-actions">
+          <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={goBack}
+          >
+          <IconArrowLeft size={18} />
+          <span>Kembali</span>
+          </button>
+          <button
+          type="button"
+          className="btn btn-primary"
+          onClick={advance}
+          >
+          <span>Lihat Ringkasan Estimasi</span>
+          <IconArrowRight size={18} />
+          </button>
+          </div>
           </section>
           )}
           
@@ -4635,72 +4717,20 @@ export default function Home() {
           )}
           </div>
           
+          <div className="wizard-actions">
+          <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={goBack}
+          >
+          <IconArrowLeft size={18} />
+          <span>Kembali ke Catatan</span>
+          </button>
+          </div>
           </section>
           )}
           </div>
           </div>
-            <div className="wizard-actions">
-              {step === 1 && (
-                <button type="button" className="btn btn-primary btn-lg wizard-actions-right" onClick={advance}>
-                  <span>Lanjut ke Data Pemesan</span>
-                  <IconArrowRight size={18} />
-                </button>
-              )}
-              {step === 2 && (
-                <>
-                  <button type="button" className="btn btn-secondary" onClick={goBack}>
-                    <IconArrowLeft size={18} />
-                    <span>Kembali ke Rute</span>
-                  </button>
-                  <button type="button" className="btn btn-primary btn-lg" onClick={advance}>
-                    <span>Lanjut ke Layanan</span>
-                    <IconArrowRight size={18} />
-                  </button>
-                </>
-              )}
-              {step === 3 && (
-                <>
-                  <button type="button" className="btn btn-secondary" onClick={goBack}>
-                    <IconArrowLeft size={18} />
-                    <span>Kembali</span>
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={advance}>
-                    <span>Lanjut ke Bantuan &amp; Lantai</span>
-                    <IconArrowRight size={18} />
-                  </button>
-                </>
-              )}
-              {step === 4 && (
-                <>
-                  <button type="button" className="btn btn-secondary" onClick={goBack}>
-                    <IconArrowLeft size={18} />
-                    <span>Kembali</span>
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={advance}>
-                    <span>Lanjut ke Catatan</span>
-                    <IconArrowRight size={18} />
-                  </button>
-                </>
-              )}
-              {step === 5 && (
-                <>
-                  <button type="button" className="btn btn-secondary" onClick={goBack}>
-                    <IconArrowLeft size={18} />
-                    <span>Kembali</span>
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={advance}>
-                    <span>Lihat Ringkasan Estimasi</span>
-                    <IconArrowRight size={18} />
-                  </button>
-                </>
-              )}
-              {step === 6 && (
-                <button type="button" className="btn btn-secondary" onClick={goBack}>
-                  <IconArrowLeft size={18} />
-                  <span>Kembali ke Catatan</span>
-                </button>
-              )}
-            </div>
           </section>
           </section>
           </section>
