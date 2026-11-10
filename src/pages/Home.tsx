@@ -909,13 +909,13 @@ const ANCHOR_IDS = [...SECTION_IDS, "pesan"];
 const NAV_LINKS = [
   { id: "beranda", label: "Beranda", shortLabel: "Beranda" },
   { id: "layanan", label: "Layanan Kami", shortLabel: "Layanan" },
-  { id: "pesan", label: "Kalkulator Tarif", shortLabel: "Kalkulator" },
   { id: "galeri", label: "Galeri Armada", shortLabel: "Galeri" },
   { id: "area-layanan", label: "Area Layanan", shortLabel: "Area" },
   { id: "faq", label: "FAQ", shortLabel: "FAQ" },
 ] as const;
 
 function getNavActiveKey(currentId: string): string {
+  if (currentId === "pesan") return "beranda";
   if (currentId === "cara-pesan" || currentId === "kenapa") return "layanan";
   if (currentId === "hubungi" || currentId === "kontak") return "faq";
   return currentId;
