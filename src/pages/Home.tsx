@@ -996,7 +996,17 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(() => typeof window !== "undefined" && window.location.hash === "#pesan");
+  useEffect(() => {
+    if (!bookingOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setBookingOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [bookingOpen]);
+
   const [activeNav, setActiveNav] = useState<string>(() => {
+
     if (typeof window !== "undefined" && window.location.hash) {
       const h = window.location.hash.replace("#", "");
       if (ANCHOR_IDS.includes(h)) return h;
@@ -3422,6 +3432,15 @@ export default function Home() {
           </button>
           </div>
           </div>
+          <button
+            type="button"
+            className="map-close"
+            onClick={() => setBookingOpen(false)}
+            aria-label="Tutup pemesanan"
+            style={{ alignSelf: "flex-start" }}
+          >
+            <IconX size={18} />
+          </button>
           </div>
           
           <div className="panel-body">
@@ -4640,6 +4659,14 @@ export default function Home() {
           </div>
           </div>
             <div className="wizard-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setBookingOpen(false)}
+              >
+                <IconX size={18} />
+                <span>Batal</span>
+              </button>
               {step === 1 && (
                 <button type="button" className="btn btn-primary btn-lg wizard-actions-right" onClick={advance}>
                   <span>Lanjut ke Data Pemesan</span>
