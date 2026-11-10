@@ -1224,6 +1224,15 @@
 
 .wizard-actions {
   border-top-color: var(--line);
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 28%);
+  padding-bottom: 4px;
+  z-index: 2;
+  margin-left: -4px;
+  margin-right: -4px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .choice-card {
