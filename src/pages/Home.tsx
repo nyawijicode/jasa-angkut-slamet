@@ -2510,6 +2510,99 @@ export default function Home() {
                             </div>
 
                             <div className="route-preview">
+
+                              <div
+                                className={`route-timeline${routeStatus === "ready" ? " is-ready" : ""}`}
+                              >
+                                {(
+                                  [
+                                    { kind: "load", items: loadStops },
+                                    { kind: "unload", items: unloadStops },
+                                  ] as Array<{ kind: StopKind; items: Stop[] }>
+                                ).map(({ kind, items }) => (
+                                  <div
+                                    className={`map-preview-group is-${kind}`}
+                                    key={kind}
+                                  >
+                                    <div className="map-preview-group-head">
+                                      <span className="map-preview-group-title">
+                                        <span
+                                          className={`segment-dot ${kind}`}
+                                          aria-hidden="true"
+                                        />
+                                        Titik {STOP_KIND_LABEL[kind]}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className="map-preview-add"
+                                        onClick={() => addStop(kind)}
+                                      >
+                                        <IconPlus size={13} />
+                                        Tambah
+                                      </button>
+                                    </div>
+                                    <ul className="map-preview-rows">
+                                      {items.map((stop, index) => {
+                                        const hasPoint =
+                                          stop.lat !== null &&
+                                          stop.lng !== null;
+                                        const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
+                                        const coords = hasPoint
+                                          ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
+                                          : "Belum ditandai";
+                                        return (
+                                          <li
+                                            key={stop.id}
+                                            className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
+                                          >
+                                            <div className="map-preview-main">
+                                              <button
+                                                type="button"
+                                                className="map-preview-pick"
+                                                onClick={() => openMap(stop.id)}
+                                                aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
+                                              >
+                                                <span
+                                                  className={`map-preview-label is-${kind}`}
+                                                >
+                                                  {label}
+                                                </span>
+                                                <span className="map-preview-coords">
+                                                  {coords}
+                                                </span>
+                                                <span className="map-preview-action">
+                                                  {hasPoint ? "Ubah" : "Pilih"}
+                                                </span>
+                                              </button>
+                                              {hasPoint && (
+                                                <span
+                                                  className="map-preview-address"
+                                                  title={stop.address}
+                                                >
+                                                  {stop.address}
+                                                </span>
+                                              )}
+                                            </div>
+                                            {(items.length > 1 || hasPoint) && (
+                                              <button
+                                                type="button"
+                                                className="map-preview-remove"
+                                                aria-label={`Hapus titik ${label}`}
+                                                onClick={() =>
+                                                  removeStop(stop.id)
+                                                }
+                                              >
+                                                Hapus
+                                              </button>
+                                            )}
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
+                                  </div>
+                                ))}
+                              </div>
+
                               <div className="route-preview-head">
                                 <div>
                                   <span className="route-preview-label">
@@ -2621,98 +2714,6 @@ export default function Home() {
                                 </ol>
                               </div>
 
-                              <div
-                                className={`route-timeline${routeStatus === "ready" ? " is-ready" : ""}`}
-                              >
-                                {(
-                                  [
-                                    { kind: "load", items: loadStops },
-                                    { kind: "unload", items: unloadStops },
-                                  ] as Array<{ kind: StopKind; items: Stop[] }>
-                                ).map(({ kind, items }) => (
-                                  <div
-                                    className={`map-preview-group is-${kind}`}
-                                    key={kind}
-                                  >
-                                    <div className="map-preview-group-head">
-                                      <span className="map-preview-group-title">
-                                        <span
-                                          className={`segment-dot ${kind}`}
-                                          aria-hidden="true"
-                                        />
-                                        Titik {STOP_KIND_LABEL[kind]}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        className="map-preview-add"
-                                        onClick={() => addStop(kind)}
-                                      >
-                                        <IconPlus size={13} />
-                                        Tambah
-                                      </button>
-                                    </div>
-                                    <ul className="map-preview-rows">
-                                      {items.map((stop, index) => {
-                                        const hasPoint =
-                                          stop.lat !== null &&
-                                          stop.lng !== null;
-                                        const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
-                                        const coords = hasPoint
-                                          ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
-                                          : "Belum ditandai";
-                                        return (
-                                          <li
-                                            key={stop.id}
-                                            className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
-                                          >
-                                            <div className="map-preview-main">
-                                              <button
-                                                type="button"
-                                                className="map-preview-pick"
-                                                onClick={() => openMap(stop.id)}
-                                                aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
-                                              >
-                                                <span
-                                                  className={`map-preview-label is-${kind}`}
-                                                >
-                                                  {label}
-                                                </span>
-                                                <span className="map-preview-coords">
-                                                  {coords}
-                                                </span>
-                                                <span className="map-preview-action">
-                                                  {hasPoint ? "Ubah" : "Pilih"}
-                                                </span>
-                                              </button>
-                                              {hasPoint && (
-                                                <span
-                                                  className="map-preview-address"
-                                                  title={stop.address}
-                                                >
-                                                  {stop.address}
-                                                </span>
-                                              )}
-                                            </div>
-                                            {(items.length > 1 || hasPoint) && (
-                                              <button
-                                                type="button"
-                                                className="map-preview-remove"
-                                                aria-label={`Hapus titik ${label}`}
-                                                onClick={() =>
-                                                  removeStop(stop.id)
-                                                }
-                                              >
-                                                Hapus
-                                              </button>
-                                            )}
-                                          </li>
-                                        );
-                                      })}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </div>
-
                               {routeError && !allStopsSet && (
                                 <p className="field-error" role="alert">
                                   <IconAlert size={15} />
@@ -2720,6 +2721,7 @@ export default function Home() {
                                   lanjut.
                                 </p>
                               )}
+
                             </div>
 
                             <div
