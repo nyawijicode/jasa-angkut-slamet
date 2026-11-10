@@ -1034,7 +1034,7 @@
 .wizard-step {
   position: relative;
   z-index: 1;
-  min-height: 34px;
+  min-height: 44px;
   padding: 7px 13px;
   border-color: var(--line);
   font-size: 0.75rem;

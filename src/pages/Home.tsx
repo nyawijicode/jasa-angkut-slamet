@@ -895,13 +895,16 @@ const SECTION_IDS = [
   "layanan",
   "cara-pesan",
   "kenapa",
-  "pesan",
   "galeri",
   "area-layanan",
   "faq",
   "hubungi",
   "kontak",
 ];
+
+// Anchor yang tetap bisa dituju langsung (termasuk #pesan yang kini
+// bersarang di dalam #beranda), meskipun tidak ikut scroll-spy.
+const ANCHOR_IDS = [...SECTION_IDS, "pesan"];
 
 const NAV_LINKS = [
   { id: "beranda", label: "Beranda", shortLabel: "Beranda" },
@@ -995,7 +998,7 @@ export default function Home() {
   const [activeNav, setActiveNav] = useState<string>(() => {
     if (typeof window !== "undefined" && window.location.hash) {
       const h = window.location.hash.replace("#", "");
-      if (SECTION_IDS.includes(h)) return h;
+      if (ANCHOR_IDS.includes(h)) return h;
     }
     return "beranda";
   });
@@ -1208,7 +1211,7 @@ export default function Home() {
 
     function onHashChange() {
       const h = window.location.hash.replace("#", "");
-      if (sectionIds.includes(h)) {
+      if (ANCHOR_IDS.includes(h)) {
         setActiveNav(h);
       }
     }
@@ -2189,422 +2192,9 @@ export default function Home() {
           <div className="hero-ambient-glow hero-glow-2" aria-hidden="true" />
 
           <div className="container hero-container">
-            <div className="hero-grid">
-              <div className="hero-content">
-                <div className="hero-pill-badge">
-                  <span className="hero-pill-star">★</span>
-                  <span>
-                    Jasa Angkut Slamet Kebonbatur, Mranggen, Demak, Kota
-                    Semarang, Kab. Semarang
-                  </span>
-                </div>
-                <h1 className="hero-title" id="hero-title">
-                  Pindahan Lebih Tenang,{" "}
-                  <span>Barang Sampai dengan Aman &amp; Tepat Waktu.</span>
-                </h1>
-                <p className="hero-lead">
-                  Layanan armada pick up handal untuk pindahan rumah, kos,
-                  kantor, hingga distribusi barang dagangan se-Demak, Semarang,
-                  dan sekitarnya. Tarif transparan di awal, respon cepat &lt; 5
-                  menit!
-                </p>
-
-                <div className="hero-cta">
-                  <a
-                    className="btn btn-primary btn-lg"
-                    href={waChatUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <IconWhatsApp size={18} />
-                    <span>Pesan via WhatsApp</span>
-                  </a>
-                  <a className="btn btn-secondary btn-lg" href="#pesan">
-                    <span>Hitung Tarif Sekarang</span>
-                    <IconArrowRight size={18} />
-                  </a>
-                </div>
-
-                <div className="hero-trust-cards" aria-label="Keunggulan Utama">
-                  <div className="trust-card">
-                    <div className="trust-icon">
-                      <IconReceipt size={18} />
-                    </div>
-                    <div>
-                      <div className="trust-title">Tarif Jelas di Awal</div>
-                      <div className="trust-desc">Tanpa biaya siluman</div>
-                    </div>
-                  </div>
-                  <div className="trust-card">
-                    <div className="trust-icon">
-                      <IconUsers size={18} />
-                    </div>
-                    <div>
-                      <div className="trust-title">Bantu Angkat Muat</div>
-                      <div className="trust-desc">
-                        Opsi sopir / kenek angkut
-                      </div>
-                    </div>
-                  </div>
-                  <div className="trust-card">
-                    <div className="trust-icon">
-                      <IconClock size={18} />
-                    </div>
-                    <div>
-                      <div className="trust-title">Respon &lt; 5 Menit</div>
-                      <div className="trust-desc">
-                        Admin siaga &amp; solutif
-                      </div>
-                    </div>
-                  </div>
-                  <div className="trust-card">
-                    <div className="trust-icon">
-                      <IconCheck size={18} />
-                    </div>
-                    <div>
-                      <div className="trust-title">Terpal &amp; Tali Aman</div>
-                      <div className="trust-desc">Standar cuaca hujan</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="hero-visual-col">
-                <figure className="hero-visual-card">
-                  <div className="hero-visual-media">
-                    <picture>
-                      <source
-                        type="image/avif"
-                        srcSet="/galeri-jasa-angkut-slamet-1-800.avif 800w, /galeri-jasa-angkut-slamet-1-1200.avif 1200w"
-                        sizes="(min-width: 900px) 440px, 100vw"
-                      />
-                      <source
-                        type="image/webp"
-                        srcSet="/galeri-jasa-angkut-slamet-1-800.webp 800w, /galeri-jasa-angkut-slamet-1-1200.webp 1200w"
-                        sizes="(min-width: 900px) 440px, 100vw"
-                      />
-                      <img
-                        src="/galeri-jasa-angkut-slamet-1-800.jpg"
-                        srcSet="/galeri-jasa-angkut-slamet-1-800.jpg 800w, /galeri-jasa-angkut-slamet-1-1200.jpg 1200w"
-                        sizes="(min-width: 900px) 440px, 100vw"
-                        alt="Armada Jasa Angkut Slamet untuk angkutan barang dan pindahan di Demak dan Semarang"
-                        width={1200}
-                        height={1800}
-                        loading="eager"
-                        {...({ fetchpriority: "high" } as Record<
-                          string,
-                          string
-                        >)}
-                        decoding="async"
-                      />
-                    </picture>
-                    <div className="hero-chip-floating">
-                      <span className="hero-chip-star">⭐</span>
-                      <span className="hero-chip-divider">·</span>
-                      <span>100+ Trip Sukses</span>
-                    </div>
-                  </div>
-                  <figcaption className="hero-visual-footer">
-                    <div className="hero-visual-tag">
-                      <IconTruck size={15} />
-                      <span>Armada Siaga Hari Ini</span>
-                    </div>
-                    <div className="hero-visual-rate">
-                      <div className="rate-num">
-                        Rp 6.500 <span className="rate-unit">/km</span>
-                      </div>
-                      <div className="rate-driver">
-                        + Jasa Sopir Tetap Rp 50.000
-                      </div>
-                    </div>
-                    <p className="hero-visual-subnote">
-                      Perhitungan tarif otomatis transparan langsung di rute
-                      peta. Konfirmasi via WhatsApp sebelum berangkat.
-                    </p>
-                  </figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="services"
-          id="layanan"
-          aria-labelledby="layanan-title"
-        >
-          <div className="container">
-            <div className="section-intro">
-              <span className="eyebrow">
-                <span className="eyebrow-dot" />
-                Layanan
-              </span>
-              <h2 className="section-title" id="layanan-title">
-                Satu tim untuk kebutuhan angkut dan pindahan
-              </h2>
-              <p className="section-lead">
-                Pilih layanan yang paling dekat dengan kebutuhan Anda. Armada,
-                sopir, dan bantuan bongkar muat disiapkan sesuai muatan.
-              </p>
-            </div>
-
-            <div className="service-grid">
-              <article className="service-card">
-                <div>
-                  <span className="service-pill">Paling Diminati</span>
-                </div>
-                <span className="service-icon">
-                  <IconBuilding size={22} />
-                </span>
-                <h3 className="service-title">Pindahan Rumah &amp; Kost</h3>
-                <p className="service-desc">
-                  Perabot, kasur, lemari, dan barang perabotan diangkut rapi
-                  dengan terpal serta tali tambang kuat.
-                </p>
-                <a className="service-link" href="#pesan">
-                  Hitung tarif pindahan
-                  <IconArrowRight size={16} />
-                </a>
-              </article>
-
-              <article className="service-card">
-                <div>
-                  <span className="service-pill">Hemat Mahasiswa</span>
-                </div>
-                <span className="service-icon">
-                  <IconGrid size={22} />
-                </span>
-                <h3 className="service-title">Pindahan Kos &amp; Kontrakan</h3>
-                <p className="service-desc">
-                  Pindahan kos praktis dan hemat untuk mahasiswa/karyawan. Rute
-                  fleksibel dengan tenaga sopir siap bantu angkat.
-                </p>
-                <a className="service-link" href="#pesan">
-                  Hitung tarif kos
-                  <IconArrowRight size={16} />
-                </a>
-              </article>
-
-              <article className="service-card">
-                <div>
-                  <span className="service-pill">Distribusi Cepat</span>
-                </div>
-                <span className="service-icon">
-                  <IconBox size={22} />
-                </span>
-                <h3 className="service-title">Angkut Barang Dagangan</h3>
-                <p className="service-desc">
-                  Stok toko, etalase, bahan baku, suplai berkala antar cabang di
-                  Demak, Semarang, dan sekitarnya tepat waktu.
-                </p>
-                <a className="service-link" href="#pesan">
-                  Hitung tarif dagangan
-                  <IconArrowRight size={16} />
-                </a>
-              </article>
-
-              <article className="service-card">
-                <div>
-                  <span className="service-pill">Kapasitas Besar</span>
-                </div>
-                <span className="service-icon">
-                  <IconUsers size={22} />
-                </span>
-                <h3 className="service-title">Kargo, Event &amp; Mesin</h3>
-                <p className="service-desc">
-                  Perlengkapan pameran, genset, material bangunan, hingga mesin
-                  produksi ringan dengan daya angkut hingga 1.5 ton.
-                </p>
-                <a className="service-link" href="#pesan">
-                  Hitung tarif kargo
-                  <IconArrowRight size={16} />
-                </a>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        {/* Google Stitch: Alur Pemesanan */}
-        <section
-          className="how-section"
-          id="cara-pesan"
-          aria-labelledby="how-title"
-        >
-          <div className="container">
-            <div className="section-intro">
-              <span className="eyebrow">
-                <span className="eyebrow-dot" />
-                Alur Pemesanan Praktis
-              </span>
-              <h2 className="section-title" id="how-title">
-                Empat Langkah, Armada Langsung Berangkat
-              </h2>
-              <p className="section-lead">
-                Tanpa perlu instal aplikasi rumit atau buat akun. Semua proses
-                transparan, mudah diakses, dan dikonfirmasi langsung via
-                WhatsApp.
-              </p>
-            </div>
-
-            <ol className="how-grid">
-              <li className="how-step">
-                <span className="how-num">1</span>
-                <h3>Tentukan Lokasi di Peta</h3>
-                <p>
-                  Tandai titik jemput muat &amp; alamat bongkar di peta
-                  interaktif, atau ketik alamat tujuan Anda.
-                </p>
-              </li>
-              <li className="how-step">
-                <span className="how-num">2</span>
-                <h3>Pilih Kebutuhan Layanan</h3>
-                <p>
-                  Tentukan jenis muatan, opsi tenaga angkut (sopir/kenek), dan
-                  info lantai bila ada tangga bertingkat.
-                </p>
-              </li>
-              <li className="how-step">
-                <span className="how-num">3</span>
-                <h3>Kalkulasi Tarif Pasti</h3>
-                <p>
-                  Tarif jarak km, jasa sopir tetap, dan tenaga bantuan terhitung
-                  otomatis dan transparan tanpa biaya siluman.
-                </p>
-              </li>
-              <li className="how-step">
-                <span className="how-num">4</span>
-                <h3>Deal &amp; Armada Meluncur</h3>
-                <p>
-                  Kirim ringkasan otomatis ke WhatsApp. Admin langsung
-                  mengonfirmasi dan armada meluncur tepat waktu.
-                </p>
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        {/* Google Stitch: Spesifikasi Armada & Keunggulan Bento */}
-        <section
-          className="fleet-section"
-          id="kenapa"
-          aria-labelledby="why-title"
-        >
-          <div className="container">
-            <div className="section-intro">
-              <span className="eyebrow">
-                <span className="eyebrow-dot" />
-                Armada &amp; Keunggulan
-              </span>
-              <h2 className="section-title" id="why-title">
-                Spesifikasi Armada Pick Up &amp; Layanan Terpercaya
-              </h2>
-              <p className="section-lead">
-                Armada pick up prima, bersih, dan dilengkapi perlengkapan
-                pengamanan lengkap untuk menjamin barang Anda sampai dengan aman
-                dan utuh.
-              </p>
-            </div>
-
-            <div className="fleet-bento-grid">
-              {/* Left Column: Fleet Specs Bento Card */}
-              <div className="fleet-card">
-                <div className="fleet-image-wrap">
-                  <img
-                    src="/galeri-jasa-angkut-slamet-1-800.jpg"
-                    alt="Armada Pick Up Jasa Angkut Slamet"
-                    loading="lazy"
-                  />
-                </div>
-                <h3 className="fleet-card-title">
-                  Spesifikasi Standar Pick Up Bak Terbuka
-                </h3>
-                <ul className="fleet-specs-list">
-                  <li className="fleet-spec-row">
-                    <span className="fleet-spec-label">
-                      <IconTruck size={16} />
-                      Dimensi Bak Muatan
-                    </span>
-                    <span className="fleet-spec-value">
-                      2,45m (P) × 1,55m (L) × 1,30m (T)
-                    </span>
-                  </li>
-                  <li className="fleet-spec-row">
-                    <span className="fleet-spec-label">
-                      <IconBox size={16} />
-                      Kapasitas Muat Maksimal
-                    </span>
-                    <span className="fleet-spec-value">
-                      1.200 – 1.500 kg (Aman)
-                    </span>
-                  </li>
-                  <li className="fleet-spec-row">
-                    <span className="fleet-spec-label">
-                      <IconCheck size={16} />
-                      Proteksi Cuaca &amp; Hujan
-                    </span>
-                    <span className="fleet-spec-value">Terpal</span>
-                  </li>
-                  <li className="fleet-spec-row">
-                    <span className="fleet-spec-label">
-                      <IconRoute size={16} />
-                      Standar Pengikat Muatan
-                    </span>
-                    <span className="fleet-spec-value">Tali Tambang</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Right Column: 4 Key Advantages */}
-              <div className="why-bento-grid">
-                <article className="why-bento-card">
-                  <span className="why-bento-icon">
-                    <IconReceipt size={20} />
-                  </span>
-                  <h3>Tarif Transparan Tanpa Siluman</h3>
-                  <p>
-                    Biaya per kilometer jelas, jasa sopir tetap Rp 50.000, tanpa
-                    pungutan liar tak terduga di jalan.
-                  </p>
-                </article>
-
-                <article className="why-bento-card">
-                  <span className="why-bento-icon">
-                    <IconClock size={20} />
-                  </span>
-                  <h3>100% On-Time &amp; Paham Rute</h3>
-                  <p>
-                    Sopir berpengalaman hafal jalur arteri maupun alternatif di
-                    Demak, Semarang Kota, hingga Ungaran.
-                  </p>
-                </article>
-
-                <article className="why-bento-card">
-                  <span className="why-bento-icon">
-                    <IconUsers size={20} />
-                  </span>
-                  <h3>Tenaga Bantuan Siaga</h3>
-                  <p>
-                    Pilihan bantuan bongkar muat fleksibel: sopir ikut angkut
-                    atau sopir + kenek untuk perabot berat.
-                  </p>
-                </article>
-
-                <article className="why-bento-card">
-                  <span className="why-bento-icon">
-                    <IconWhatsApp size={20} />
-                  </span>
-                  <h3>Respon Kilat Setiap Hari</h3>
-                  <p>
-                    Buka setiap hari 06.00 – 22.00 WIB. Chat WhatsApp dibalas
-                    langsung di bawah 5 menit.
-                  </p>
-                </article>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="container workspace" id="pesan">
+            <div className="hero-top-row">
+              <div className="hero-booking-col">
+        <section className="workspace" id="pesan">
           {mapOpen && (
             <>
               <div
@@ -4073,6 +3663,421 @@ export default function Home() {
             </div>
           </section>
         </section>
+              </div>
+              <div className="hero-visual-col">
+                <figure className="hero-visual-card">
+                  <div className="hero-visual-media">
+                    <picture>
+                      <source
+                        type="image/avif"
+                        srcSet="/galeri-jasa-angkut-slamet-1-800.avif 800w, /galeri-jasa-angkut-slamet-1-1200.avif 1200w"
+                        sizes="(min-width: 900px) 440px, 100vw"
+                      />
+                      <source
+                        type="image/webp"
+                        srcSet="/galeri-jasa-angkut-slamet-1-800.webp 800w, /galeri-jasa-angkut-slamet-1-1200.webp 1200w"
+                        sizes="(min-width: 900px) 440px, 100vw"
+                      />
+                      <img
+                        src="/galeri-jasa-angkut-slamet-1-800.jpg"
+                        srcSet="/galeri-jasa-angkut-slamet-1-800.jpg 800w, /galeri-jasa-angkut-slamet-1-1200.jpg 1200w"
+                        sizes="(min-width: 900px) 440px, 100vw"
+                        alt="Armada Jasa Angkut Slamet untuk angkutan barang dan pindahan di Demak dan Semarang"
+                        width={1200}
+                        height={1800}
+                        loading="eager"
+                        {...({ fetchpriority: "high" } as Record<
+                          string,
+                          string
+                        >)}
+                        decoding="async"
+                      />
+                    </picture>
+                    <div className="hero-chip-floating">
+                      <span className="hero-chip-star">⭐</span>
+                      <span className="hero-chip-divider">·</span>
+                      <span>100+ Trip Sukses</span>
+                    </div>
+                  </div>
+                  <figcaption className="hero-visual-footer">
+                    <div className="hero-visual-tag">
+                      <IconTruck size={15} />
+                      <span>Armada Siaga Hari Ini</span>
+                    </div>
+                    <div className="hero-visual-rate">
+                      <div className="rate-num">
+                        Rp 6.500 <span className="rate-unit">/km</span>
+                      </div>
+                      <div className="rate-driver">
+                        + Jasa Sopir Tetap Rp 50.000
+                      </div>
+                    </div>
+                    <p className="hero-visual-subnote">
+                      Perhitungan tarif otomatis transparan langsung di rute
+                      peta. Konfirmasi via WhatsApp sebelum berangkat.
+                    </p>
+                  </figcaption>
+                </figure>
+              </div>
+            </div>
+
+              <div className="hero-content hero-content-centered">
+                <div className="hero-pill-badge">
+                  <span className="hero-pill-star">★</span>
+                  <span>
+                    Jasa Angkut Slamet Kebonbatur, Mranggen, Demak, Kota
+                    Semarang, Kab. Semarang
+                  </span>
+                </div>
+                <h1 className="hero-title" id="hero-title">
+                  Pindahan Lebih Tenang,{" "}
+                  <span>Barang Sampai dengan Aman &amp; Tepat Waktu.</span>
+                </h1>
+                <p className="hero-lead">
+                  Layanan armada pick up handal untuk pindahan rumah, kos,
+                  kantor, hingga distribusi barang dagangan se-Demak, Semarang,
+                  dan sekitarnya. Tarif transparan di awal, respon cepat &lt; 5
+                  menit!
+                </p>
+
+                <div className="hero-cta">
+                  <a
+                    className="btn btn-primary btn-lg"
+                    href={waChatUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <IconWhatsApp size={18} />
+                    <span>Pesan via WhatsApp</span>
+                  </a>
+                  <a className="btn btn-secondary btn-lg" href="#pesan">
+                    <span>Hitung Tarif Sekarang</span>
+                    <IconArrowRight size={18} />
+                  </a>
+                </div>
+
+                <div className="hero-trust-cards" aria-label="Keunggulan Utama">
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconReceipt size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Tarif Jelas di Awal</div>
+                      <div className="trust-desc">Tanpa biaya siluman</div>
+                    </div>
+                  </div>
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconUsers size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Bantu Angkat Muat</div>
+                      <div className="trust-desc">
+                        Opsi sopir / kenek angkut
+                      </div>
+                    </div>
+                  </div>
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconClock size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Respon &lt; 5 Menit</div>
+                      <div className="trust-desc">
+                        Admin siaga &amp; solutif
+                      </div>
+                    </div>
+                  </div>
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconCheck size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Terpal &amp; Tali Aman</div>
+                      <div className="trust-desc">Standar cuaca hujan</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+        </section>
+
+        <section
+          className="services"
+          id="layanan"
+          aria-labelledby="layanan-title"
+        >
+          <div className="container">
+            <div className="section-intro">
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                Layanan
+              </span>
+              <h2 className="section-title" id="layanan-title">
+                Satu tim untuk kebutuhan angkut dan pindahan
+              </h2>
+              <p className="section-lead">
+                Pilih layanan yang paling dekat dengan kebutuhan Anda. Armada,
+                sopir, dan bantuan bongkar muat disiapkan sesuai muatan.
+              </p>
+            </div>
+
+            <div className="service-grid">
+              <article className="service-card">
+                <div>
+                  <span className="service-pill">Paling Diminati</span>
+                </div>
+                <span className="service-icon">
+                  <IconBuilding size={22} />
+                </span>
+                <h3 className="service-title">Pindahan Rumah &amp; Kost</h3>
+                <p className="service-desc">
+                  Perabot, kasur, lemari, dan barang perabotan diangkut rapi
+                  dengan terpal serta tali tambang kuat.
+                </p>
+                <a className="service-link" href="#pesan">
+                  Hitung tarif pindahan
+                  <IconArrowRight size={16} />
+                </a>
+              </article>
+
+              <article className="service-card">
+                <div>
+                  <span className="service-pill">Hemat Mahasiswa</span>
+                </div>
+                <span className="service-icon">
+                  <IconGrid size={22} />
+                </span>
+                <h3 className="service-title">Pindahan Kos &amp; Kontrakan</h3>
+                <p className="service-desc">
+                  Pindahan kos praktis dan hemat untuk mahasiswa/karyawan. Rute
+                  fleksibel dengan tenaga sopir siap bantu angkat.
+                </p>
+                <a className="service-link" href="#pesan">
+                  Hitung tarif kos
+                  <IconArrowRight size={16} />
+                </a>
+              </article>
+
+              <article className="service-card">
+                <div>
+                  <span className="service-pill">Distribusi Cepat</span>
+                </div>
+                <span className="service-icon">
+                  <IconBox size={22} />
+                </span>
+                <h3 className="service-title">Angkut Barang Dagangan</h3>
+                <p className="service-desc">
+                  Stok toko, etalase, bahan baku, suplai berkala antar cabang di
+                  Demak, Semarang, dan sekitarnya tepat waktu.
+                </p>
+                <a className="service-link" href="#pesan">
+                  Hitung tarif dagangan
+                  <IconArrowRight size={16} />
+                </a>
+              </article>
+
+              <article className="service-card">
+                <div>
+                  <span className="service-pill">Kapasitas Besar</span>
+                </div>
+                <span className="service-icon">
+                  <IconUsers size={22} />
+                </span>
+                <h3 className="service-title">Kargo, Event &amp; Mesin</h3>
+                <p className="service-desc">
+                  Perlengkapan pameran, genset, material bangunan, hingga mesin
+                  produksi ringan dengan daya angkut hingga 1.5 ton.
+                </p>
+                <a className="service-link" href="#pesan">
+                  Hitung tarif kargo
+                  <IconArrowRight size={16} />
+                </a>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        {/* Google Stitch: Alur Pemesanan */}
+        <section
+          className="how-section"
+          id="cara-pesan"
+          aria-labelledby="how-title"
+        >
+          <div className="container">
+            <div className="section-intro">
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                Alur Pemesanan Praktis
+              </span>
+              <h2 className="section-title" id="how-title">
+                Empat Langkah, Armada Langsung Berangkat
+              </h2>
+              <p className="section-lead">
+                Tanpa perlu instal aplikasi rumit atau buat akun. Semua proses
+                transparan, mudah diakses, dan dikonfirmasi langsung via
+                WhatsApp.
+              </p>
+            </div>
+
+            <ol className="how-grid">
+              <li className="how-step">
+                <span className="how-num">1</span>
+                <h3>Tentukan Lokasi di Peta</h3>
+                <p>
+                  Tandai titik jemput muat &amp; alamat bongkar di peta
+                  interaktif, atau ketik alamat tujuan Anda.
+                </p>
+              </li>
+              <li className="how-step">
+                <span className="how-num">2</span>
+                <h3>Pilih Kebutuhan Layanan</h3>
+                <p>
+                  Tentukan jenis muatan, opsi tenaga angkut (sopir/kenek), dan
+                  info lantai bila ada tangga bertingkat.
+                </p>
+              </li>
+              <li className="how-step">
+                <span className="how-num">3</span>
+                <h3>Kalkulasi Tarif Pasti</h3>
+                <p>
+                  Tarif jarak km, jasa sopir tetap, dan tenaga bantuan terhitung
+                  otomatis dan transparan tanpa biaya siluman.
+                </p>
+              </li>
+              <li className="how-step">
+                <span className="how-num">4</span>
+                <h3>Deal &amp; Armada Meluncur</h3>
+                <p>
+                  Kirim ringkasan otomatis ke WhatsApp. Admin langsung
+                  mengonfirmasi dan armada meluncur tepat waktu.
+                </p>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        {/* Google Stitch: Spesifikasi Armada & Keunggulan Bento */}
+        <section
+          className="fleet-section"
+          id="kenapa"
+          aria-labelledby="why-title"
+        >
+          <div className="container">
+            <div className="section-intro">
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                Armada &amp; Keunggulan
+              </span>
+              <h2 className="section-title" id="why-title">
+                Spesifikasi Armada Pick Up &amp; Layanan Terpercaya
+              </h2>
+              <p className="section-lead">
+                Armada pick up prima, bersih, dan dilengkapi perlengkapan
+                pengamanan lengkap untuk menjamin barang Anda sampai dengan aman
+                dan utuh.
+              </p>
+            </div>
+
+            <div className="fleet-bento-grid">
+              {/* Left Column: Fleet Specs Bento Card */}
+              <div className="fleet-card">
+                <div className="fleet-image-wrap">
+                  <img
+                    src="/galeri-jasa-angkut-slamet-1-800.jpg"
+                    alt="Armada Pick Up Jasa Angkut Slamet"
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="fleet-card-title">
+                  Spesifikasi Standar Pick Up Bak Terbuka
+                </h3>
+                <ul className="fleet-specs-list">
+                  <li className="fleet-spec-row">
+                    <span className="fleet-spec-label">
+                      <IconTruck size={16} />
+                      Dimensi Bak Muatan
+                    </span>
+                    <span className="fleet-spec-value">
+                      2,45m (P) × 1,55m (L) × 1,30m (T)
+                    </span>
+                  </li>
+                  <li className="fleet-spec-row">
+                    <span className="fleet-spec-label">
+                      <IconBox size={16} />
+                      Kapasitas Muat Maksimal
+                    </span>
+                    <span className="fleet-spec-value">
+                      1.200 – 1.500 kg (Aman)
+                    </span>
+                  </li>
+                  <li className="fleet-spec-row">
+                    <span className="fleet-spec-label">
+                      <IconCheck size={16} />
+                      Proteksi Cuaca &amp; Hujan
+                    </span>
+                    <span className="fleet-spec-value">Terpal</span>
+                  </li>
+                  <li className="fleet-spec-row">
+                    <span className="fleet-spec-label">
+                      <IconRoute size={16} />
+                      Standar Pengikat Muatan
+                    </span>
+                    <span className="fleet-spec-value">Tali Tambang</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Right Column: 4 Key Advantages */}
+              <div className="why-bento-grid">
+                <article className="why-bento-card">
+                  <span className="why-bento-icon">
+                    <IconReceipt size={20} />
+                  </span>
+                  <h3>Tarif Transparan Tanpa Siluman</h3>
+                  <p>
+                    Biaya per kilometer jelas, jasa sopir tetap Rp 50.000, tanpa
+                    pungutan liar tak terduga di jalan.
+                  </p>
+                </article>
+
+                <article className="why-bento-card">
+                  <span className="why-bento-icon">
+                    <IconClock size={20} />
+                  </span>
+                  <h3>100% On-Time &amp; Paham Rute</h3>
+                  <p>
+                    Sopir berpengalaman hafal jalur arteri maupun alternatif di
+                    Demak, Semarang Kota, hingga Ungaran.
+                  </p>
+                </article>
+
+                <article className="why-bento-card">
+                  <span className="why-bento-icon">
+                    <IconUsers size={20} />
+                  </span>
+                  <h3>Tenaga Bantuan Siaga</h3>
+                  <p>
+                    Pilihan bantuan bongkar muat fleksibel: sopir ikut angkut
+                    atau sopir + kenek untuk perabot berat.
+                  </p>
+                </article>
+
+                <article className="why-bento-card">
+                  <span className="why-bento-icon">
+                    <IconWhatsApp size={20} />
+                  </span>
+                  <h3>Respon Kilat Setiap Hari</h3>
+                  <p>
+                    Buka setiap hari 06.00 – 22.00 WIB. Chat WhatsApp dibalas
+                    langsung di bawah 5 menit.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
 
         <section className="gallery" id="galeri" aria-labelledby="galeri-title">
           <div className="gallery-head">
