@@ -1641,6 +1641,8 @@
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
   border-radius: var(--radius-xl);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
