@@ -860,7 +860,8 @@
   transform: translate(-50%, -50%);
   z-index: 1251;
   width: min(1080px, calc(100vw - 32px));
-  max-height: min(92vh, 900px);
+  height: min(88vh, 860px);
+  max-height: min(88vh, 860px);
   overflow: hidden;
   border-color: var(--line);
   border-radius: var(--radius-2xl);
