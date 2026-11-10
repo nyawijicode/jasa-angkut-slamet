@@ -967,7 +967,7 @@ export default function Home() {
   const [service, setService] = useState<Service>("dalam-kota");
   const [helper, setHelper] = useState<Helper>("none");
   const [note, setNote] = useState("");
-  const [priority, setPriority] = useState(false);
+  const [priority, setPriority] = useState(true);
   const [mapReadOnly, setMapReadOnly] = useState(false);
 
   const [step, setStep] = useState(1);

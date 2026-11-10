@@ -93,13 +93,18 @@ test.describe("wizard pesanan", () => {
     });
     const card = page.locator(".priority-toggle-card");
 
-    await expect(toggle).toHaveAttribute("aria-checked", "false");
-    await expect(card).toContainText("maksimal 4 jam");
-
-    await toggle.click();
     await expect(toggle).toHaveAttribute("aria-checked", "true");
     await expect(card).toContainText("+Rp 50.000");
     await expect(card.locator(".priority-badge")).toContainText("Rp");
+
+    // Bisa dinonaktifkan jika pelanggan mau menunggu (jadwal reguler)
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-checked", "false");
+    await expect(card).toContainText("maksimal 4 jam");
+
+    // Aktifkan kembali agar prioritas ikut dihitung
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-checked", "true");
 
     await page
       .getByRole("button", { name: /Lanjut ke Data Pemesan/ })
