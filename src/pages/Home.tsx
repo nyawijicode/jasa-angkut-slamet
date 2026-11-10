@@ -995,6 +995,7 @@ export default function Home() {
   useEffect(() => {
     const sectionIds = SECTION_IDS;
     let ticking = false;
+    let settleTimer = 0;
 
     function detectSection(): string {
       const scrollY = window.scrollY;
@@ -1022,24 +1023,25 @@ export default function Home() {
       return matched;
     }
 
-    function onScroll() {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const current = detectSection();
-          setShowScrollTop(window.scrollY > 480);
-          setActiveNav((prev) => {
-            if (prev !== current) {
-              if (window.location.hash !== `#${current}`) {
-                window.history.replaceState(null, "", `#${current}`);
-              }
-              return current;
-            }
-            return prev;
-          });
-          ticking = false;
-        });
-        ticking = true;
+    function syncSection() {
+      const current = detectSection();
+      setActiveNav((prev) => (prev === current ? prev : current));
+      if (window.location.hash !== `#${current}`) {
+        window.history.replaceState(null, "", `#${current}`);
       }
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        ticking = false;
+        setShowScrollTop(window.scrollY > 480);
+        // Perbarui section aktif setelah scroll berhenti, supaya penanda
+        // navigasi tidak melompati section perantara saat smooth scroll.
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(syncSection, 150);
+      });
     }
 
     function onHashChange() {
@@ -1052,10 +1054,10 @@ export default function Home() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("hashchange", onHashChange);
 
-    // Initial check
-    onScroll();
+    setShowScrollTop(window.scrollY > 480);
 
     return () => {
+      window.clearTimeout(settleTimer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("hashchange", onHashChange);
     };
@@ -1387,7 +1389,10 @@ export default function Home() {
 
   const routeDistances = useMemo(() => {
     if (plan && plan.main.length > 0) {
-      const mainKm = plan.main.reduce((total, leg) => total + leg.distanceKm, 0);
+      const mainKm = plan.main.reduce(
+        (total, leg) => total + leg.distanceKm,
+        0,
+      );
       return { loadToUnload: mainKm };
     }
     return straightDistances;
@@ -2124,7 +2129,10 @@ export default function Home() {
                         width={1200}
                         height={1800}
                         loading="eager"
-                        {...({ fetchpriority: "high" } as Record<string, string>)}
+                        {...({ fetchpriority: "high" } as Record<
+                          string,
+                          string
+                        >)}
                         decoding="async"
                       />
                     </picture>
@@ -3296,7 +3304,14 @@ export default function Home() {
                         </span>
                         <span className="choice-copy">
                           <span className="choice-title">Dalam Kota</span>
-                          <span className="choice-meta" style={{ fontSize: "0.75rem", color: "var(--ink-soft)", display: "block" }}>
+                          <span
+                            className="choice-meta"
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "var(--ink-soft)",
+                              display: "block",
+                            }}
+                          >
                             Demak &amp; Semarang
                           </span>
                         </span>
@@ -3317,7 +3332,14 @@ export default function Home() {
                         </span>
                         <span className="choice-copy">
                           <span className="choice-title">Luar Kota</span>
-                          <span className="choice-meta" style={{ fontSize: "0.75rem", color: "var(--ink-soft)", display: "block" }}>
+                          <span
+                            className="choice-meta"
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "var(--ink-soft)",
+                              display: "block",
+                            }}
+                          >
                             Antar kota (+50% ongkos)
                           </span>
                         </span>
@@ -3745,13 +3767,19 @@ export default function Home() {
                                 <div className="quote-line">
                                   <dt>Ongkos angkut dasar</dt>
                                   <dd>
-                                    Rp {quote.baseTransport.toLocaleString("id-ID")}
+                                    Rp{" "}
+                                    {quote.baseTransport.toLocaleString(
+                                      "id-ID",
+                                    )}
                                   </dd>
                                 </div>
                                 <div className="quote-line">
                                   <dt>Tambahan luar kota (+50%)</dt>
                                   <dd>
-                                    +Rp {quote.outOfTownSurcharge.toLocaleString("id-ID")}
+                                    +Rp{" "}
+                                    {quote.outOfTownSurcharge.toLocaleString(
+                                      "id-ID",
+                                    )}
                                   </dd>
                                 </div>
                               </>

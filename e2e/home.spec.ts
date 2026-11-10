@@ -106,6 +106,43 @@ test("halaman privasi terbuka dari footer tanpa overflow", async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
+test("navigasi halaman tidak melompat saat menu mobile dibuka dan link diklik", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(600);
+
+  const measure = () =>
+    page.evaluate(() => ({
+      doc: document.documentElement.scrollHeight,
+      header: Math.round(
+        document.querySelector(".site-header")!.getBoundingClientRect().height,
+      ),
+    }));
+
+  await page.locator(".nav-burger").click();
+  await expect(page.locator("#mobile-menu")).toBeVisible();
+  await page.waitForTimeout(250);
+
+  // Menu harus menjadi overlay, bukan ikut alur dokumen.
+  await expect(page.locator("#mobile-menu")).toHaveCSS("position", "absolute");
+  const open = await measure();
+
+  await page.locator('.mobile-menu a[href="#galeri"]').click();
+  await expect(page).toHaveURL(/#galeri$/);
+  await page.waitForTimeout(250);
+  const closed = await measure();
+
+  expect(open.doc).toBe(closed.doc);
+  expect(open.header).toBe(closed.header);
+
+  // Selama smooth scroll berjalan, hash tidak boleh berpindah ke section lain.
+  await expect(page).toHaveURL(/#galeri$/);
+  await expect(page.locator('.header-nav a[href="#galeri"]')).toHaveClass(
+    /is-active/,
+  );
+});
+
 test("modal peta responsif di 320px dengan toggle 3D", async ({ page }) => {
   await installMapStubs(page);
   await page.setViewportSize({ width: 320, height: 720 });

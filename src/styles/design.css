@@ -141,6 +141,16 @@ p {
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.03);
 }
 
+/* Blur di belakang header sticky mahal saat scroll di layar kecil.
+   Latar solid memberi hasil visual yang sama tanpa repaint tiap frame. */
+@media (max-width: 1023px) {
+  .site-header {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 .header-inner {
   display: flex !important;
   align-items: center !important;
@@ -339,8 +349,16 @@ p {
 }
 
 .mobile-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface);
   border-top: 1px solid var(--line);
+  box-shadow: 0 18px 36px rgba(11, 28, 48, 0.14);
 }
 
 .mobile-menu-link {
