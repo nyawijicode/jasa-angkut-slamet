@@ -1,4 +1,12 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { BUSINESS } from "../config/business";
 import { validateCustomer } from "../domain/customer";
 import { calculateQuote, floorFee } from "../domain/pricing";
@@ -992,6 +1000,158 @@ export default function Home() {
     return "beranda";
   });
 
+  // Posisi anchor dihitung sendiri supaya selalu mendarat tepat di section
+  // yang diklik: perpindahan jauh langsung diposisikan (tidak "berlari"
+  // melewati section lain), perpindahan dekat tetap dianimasikan halus.
+  const navRafRef = useRef(0);
+  const navSyncSuppressUntilRef = useRef(0);
+
+  const cancelNavScroll = useCallback(() => {
+    if (navRafRef.current) {
+      window.cancelAnimationFrame(navRafRef.current);
+      navRafRef.current = 0;
+      document.documentElement.style.scrollBehavior = "";
+    }
+  }, []);
+
+  const scrollToAnchor = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    cancelNavScroll();
+    navSyncSuppressUntilRef.current = 0;
+
+    const header = document.querySelector<HTMLElement>(".site-header");
+    const headerHeight = header?.getBoundingClientRect().height ?? 0;
+    const scrollMargin =
+      Number.parseFloat(window.getComputedStyle(el).scrollMarginTop) || 0;
+    const offset = Math.max(scrollMargin, headerHeight + 16);
+    const maxTop = Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    const targetTop = Math.min(
+      Math.max(el.getBoundingClientRect().top + window.scrollY - offset, 0),
+      maxTop,
+    );
+    const startTop = window.scrollY;
+    const distance = targetTop - startTop;
+
+    const finish = () => {
+      navRafRef.current = 0;
+      // `window.scrollTo` menempel persis ke target, tanpa sisa animasi.
+      window.scrollTo(0, targetTop);
+      document.documentElement.style.scrollBehavior = "";
+      setActiveNav(id);
+      if (window.location.hash !== `#${id}`) {
+        window.history.replaceState(null, "", `#${id}`);
+      }
+    };
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const animate =
+      !reduceMotion &&
+      Math.abs(distance) > 2 &&
+      Math.abs(distance) <= window.innerHeight * 1.25;
+
+    if (!animate) {
+      // Lompatan jauh: langsung ke tujuan agar tidak terlihat melewati
+      // section-section di antaranya.
+      document.documentElement.style.scrollBehavior = "auto";
+      finish();
+      return;
+    }
+
+    const duration = Math.min(520, Math.max(240, Math.abs(distance) * 0.5));
+    const startedAt = performance.now();
+    // Blokir sinkronisasi section/hash selama animasi berjalan.
+    navSyncSuppressUntilRef.current = startedAt + duration + 250;
+    document.documentElement.style.scrollBehavior = "auto";
+
+    const step = (now: number) => {
+      const progress = Math.min(
+        1,
+        Math.max(0, (now - startedAt) / duration),
+      );
+      const eased =
+        progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      window.scrollTo(0, startTop + distance * eased);
+      if (progress < 1) {
+        navRafRef.current = window.requestAnimationFrame(step);
+        return;
+      }
+      finish();
+      navSyncSuppressUntilRef.current = performance.now() + 120;
+    };
+
+    navRafRef.current = window.requestAnimationFrame(step);
+  }, [cancelNavScroll]);
+
+  // Semua tautan anchor memakai animasi yang sama, termasuk tautan footer/CTA.
+  useEffect(() => {
+    function onClick(event: MouseEvent) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+      const target = event.target as Element | null;
+      const anchor = target?.closest?.('a[href^="#"]');
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+      if (anchor.classList.contains("skip-link")) return;
+      const href = anchor.getAttribute("href");
+      if (!href || href === "#") return;
+      const id = href.slice(1);
+      if (!document.getElementById(id)) return;
+
+      event.preventDefault();
+      setMenuOpen(false);
+      setActiveNav(id);
+      if (window.location.hash !== `#${id}`) {
+        window.history.pushState(null, "", `#${id}`);
+      }
+      scrollToAnchor(id);
+    }
+
+    function onInterrupt() {
+      if (!navRafRef.current) return;
+      cancelNavScroll();
+      // Biarkan sinkronisasi section kembali normal untuk scroll manual.
+      navSyncSuppressUntilRef.current = 0;
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (
+        ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(
+          event.key,
+        )
+      ) {
+        onInterrupt();
+      }
+    }
+
+    document.addEventListener("click", onClick);
+    window.addEventListener("wheel", onInterrupt, { passive: true });
+    window.addEventListener("touchstart", onInterrupt, { passive: true });
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("click", onClick);
+      window.removeEventListener("wheel", onInterrupt);
+      window.removeEventListener("touchstart", onInterrupt);
+      window.removeEventListener("keydown", onKeyDown);
+      cancelNavScroll();
+    };
+  }, [cancelNavScroll, scrollToAnchor]);
+
   useEffect(() => {
     const sectionIds = SECTION_IDS;
     let ticking = false;
@@ -1037,8 +1197,10 @@ export default function Home() {
       window.requestAnimationFrame(() => {
         ticking = false;
         setShowScrollTop(window.scrollY > 480);
-        // Perbarui section aktif setelah scroll berhenti, supaya penanda
-        // navigasi tidak melompati section perantara saat smooth scroll.
+        // Selama animasi anchor berjalan, jangan sentuh section aktif/hash
+        // supaya penanda tidak melompati section perantara.
+        if (performance.now() < navSyncSuppressUntilRef.current) return;
+        // Perbarui section aktif setelah scroll berhenti.
         window.clearTimeout(settleTimer);
         settleTimer = window.setTimeout(syncSection, 150);
       });

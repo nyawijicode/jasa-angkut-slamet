@@ -1,7 +1,26 @@
-import { expect, test } from "playwright/test";
+import { expect, test, type Page } from "playwright/test";
 import { installMapStubs } from "./stubs";
 
 const MIN_TARGET = 44;
+
+async function anchorTop(page: Page, id: string) {
+  return page.evaluate(
+    (anchorId) =>
+      Math.round(
+        document.getElementById(anchorId)!.getBoundingClientRect().top,
+      ),
+    id,
+  );
+}
+
+async function anchorViewportOffset(page: Page, id: string) {
+  return page.evaluate((anchorId) => {
+    const el = document.getElementById(anchorId)!;
+    const header = document.querySelector(".site-header") as HTMLElement;
+    const margin = Number.parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+    return Math.max(margin, header.getBoundingClientRect().height + 16);
+  }, id);
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -106,7 +125,33 @@ test("halaman privasi terbuka dari footer tanpa overflow", async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("navigasi halaman tidak melompat saat menu mobile dibuka dan link diklik", async ({
+test("klik navigasi desktop langsung mendarat di section tujuan", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.waitForTimeout(400);
+
+  const offset = await anchorViewportOffset(page, "galeri");
+  await page.locator('.header-nav a[href="#galeri"]').click();
+
+  // A -> D langsung mendarat: section tujuan sudah menempel di bawah header,
+  // bukan masih di tengah perjalanan melewati section lain.
+  expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
+    8,
+  );
+  await expect(page).toHaveURL(/#galeri$/);
+
+  await page.waitForTimeout(600);
+  // Setelah layout stabil, section tujuan tetap menempel di bawah header.
+  expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
+    4,
+  );
+  await expect(page.locator('.header-nav a[href="#galeri"]')).toHaveClass(
+    /is-active/,
+  );
+});
+
+test("navigasi mobile langsung mendarat di section tujuan", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -128,16 +173,25 @@ test("navigasi halaman tidak melompat saat menu mobile dibuka dan link diklik", 
   await expect(page.locator("#mobile-menu")).toHaveCSS("position", "absolute");
   const open = await measure();
 
-  await page.locator('.mobile-menu a[href="#galeri"]').click();
-  await expect(page).toHaveURL(/#galeri$/);
-  await page.waitForTimeout(250);
-  const closed = await measure();
+  const offset = await anchorViewportOffset(page, "galeri");
 
+  await page.locator('.mobile-menu a[href="#galeri"]').click();
+
+  // Langsung mendarat di tujuan, tidak mampir ke section lain di antaranya.
+  expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
+    8,
+  );
+
+  await expect(page).toHaveURL(/#galeri$/);
+  await page.waitForTimeout(600);
+  expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
+    4,
+  );
+
+  const closed = await measure();
   expect(open.doc).toBe(closed.doc);
   expect(open.header).toBe(closed.header);
 
-  // Selama smooth scroll berjalan, hash tidak boleh berpindah ke section lain.
-  await expect(page).toHaveURL(/#galeri$/);
   await expect(page.locator('.header-nav a[href="#galeri"]')).toHaveClass(
     /is-active/,
   );
