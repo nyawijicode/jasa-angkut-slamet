@@ -68,6 +68,12 @@ export async function installMapStubs(page: Page) {
 }
 
 export async function openMapFor(page: Page, label: string) {
+  // Buka modal pemesanan bila tertutup
+  const bookingModal = page.locator("#pesan.booking-modal, #pesan");
+  if (!(await bookingModal.isVisible().catch(() => false))) {
+    const opener = page.locator("#booking-open");
+    if (await opener.isVisible().catch(() => false)) await opener.click();
+  }
   const modal = page.locator(".map-card.is-modal");
   if (!(await modal.isVisible().catch(() => false))) {
     const trigger = page

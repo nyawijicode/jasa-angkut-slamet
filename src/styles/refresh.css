@@ -853,6 +853,33 @@
   box-shadow: var(--shadow-md);
 }
 
+.booking-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1251;
+  width: min(1080px, calc(100vw - 32px));
+  max-height: min(92vh, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-color: var(--line);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 900px) {
+  .booking-modal {
+    inset: max(16px, env(safe-area-inset-top)) 16px
+      max(16px, env(safe-area-inset-bottom));
+    top: auto;
+    left: auto;
+    transform: none;
+    width: auto;
+    max-height: none;
+  }
+}
+
 .wizard-body {
   min-height: 300px;
   max-height: min(46vh, 420px);

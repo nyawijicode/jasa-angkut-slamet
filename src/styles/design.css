@@ -429,6 +429,12 @@ p {
 
 .hero-booking-col {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
 }
 
 /* Workspace di dalam hero tidak perlu padding vertikal besar */
