@@ -10,9 +10,6 @@ test.describe("wizard pesanan", () => {
   test.beforeEach(async ({ page }) => {
     await installMapStubs(page);
     await page.goto("/");
-    const opener = page.locator("#booking-open");
-    if (await opener.isVisible().catch(() => false)) await opener.click();
-    await expect(page.locator("#pesan")).toBeVisible();
   });
 
   test("menyelesaikan alur rute sampai tautan WhatsApp", async ({

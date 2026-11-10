@@ -200,7 +200,6 @@ test("navigasi mobile langsung mendarat di section tujuan", async ({
 test("modal peta responsif di 320px dengan toggle 3D", async ({ page }) => {
   await installMapStubs(page);
   await page.setViewportSize({ width: 320, height: 720 });
-  await page.locator("#booking-open").click();
   await page.locator("#route-open-map").click();
 
   const modal = page.locator(".map-card.is-modal");
