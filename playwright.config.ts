@@ -10,6 +10,9 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:5199",
     trace: "on-first-retry",
+    // Keep the PWA service worker out of the way so request stubs always
+    // intercept search/tile/route requests in every browser engine.
+    serviceWorkers: "block",
   },
   projects: [
     {

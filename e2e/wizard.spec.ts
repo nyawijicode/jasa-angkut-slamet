@@ -184,17 +184,21 @@ test.describe("wizard pesanan", () => {
   }) => {
     await openMapFor(page, "M1");
 
+    // One handler with a mutable flag: re-registering the same route does not
+    // reliably override the earlier handler across all browsers.
+    let failSearch = false;
     await page.route("**/nominatim.openstreetmap.org/search**", (route) =>
-      route.fulfill({ contentType: "application/json", body: "[]" }),
+      failSearch
+        ? route.fulfill({ status: 503, body: "unavailable" })
+        : route.fulfill({ contentType: "application/json", body: "[]" }),
     );
+
     await page.locator(".map-search input").fill("Alamat tidak ada");
     await expect(
       page.getByText(/Alamat tidak ditemukan\. Coba kata kunci lain/),
     ).toBeVisible();
 
-    await page.route("**/nominatim.openstreetmap.org/search**", (route) =>
-      route.fulfill({ status: 503, body: "unavailable" }),
-    );
+    failSearch = true;
     await page.locator(".map-search input").fill("Alamat gagal");
     await expect(
       page.getByText(/Pencarian alamat sedang tidak tersedia/),
@@ -244,6 +248,9 @@ test.describe("wizard pesanan", () => {
 
   test("hasil alamat tetap bisa dipilih dengan keyboard", async ({ page }) => {
     await openMapFor(page, "M1");
+    // Keep the pointer away from the results list so that a synthetic
+    // mouseenter cannot pre-select an item before the ArrowDown key press.
+    await page.mouse.move(0, 0);
     const input = page.locator(".map-search input");
     await input.fill("Mranggen");
     await expect(page.locator(".map-result").first()).toBeVisible();
