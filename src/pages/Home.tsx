@@ -4055,7 +4055,7 @@ export default function Home() {
                         Rp 7.000 <span className="rate-unit">/km</span>
                       </div>
                       <div className="rate-driver">
-                        + Jasa Sopir Tetap Rp 50.000
+                        + Jasa Sopir Tetap Rp 65.000
                       </div>
                     </div>
                     <p className="hero-visual-subnote">
@@ -4669,11 +4669,17 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Tarif dihitung otomatis dan transparan. Estimasi tarif dasar
-                    jarak <strong>Rp 7.000/km</strong> ditambah jasa sopir{" "}
-                    <strong>Rp 65.000</strong>. Anda juga bisa menambahkan opsi
-                    bantuan tenaga bongkar muat serta tambahan lantai jika
-                    barang perlu dinaikkan/diturunkan lewat tangga.
+                    Tarif dihitung dari total jarak{" "}
+                    <strong>
+                      garasi → titik muat → titik bongkar → garasi
+                    </strong>
+                    , dibulatkan ke atas per km. Ongkos angkut = jarak ×{" "}
+                    <strong>Rp 7.000</strong> + biaya dasar{" "}
+                    <strong>Rp 50.000</strong>; rute luar kota ditambah 50%.
+                    Setelah itu baru biaya layanan yang Anda pilih: bantuan
+                    tenaga Rp 65.000 (sopir) atau Rp 130.000 (sopir + kenek),
+                    biaya lantai, prioritas, dan waktu tunggu. Kalkulator di
+                    halaman ini menghitung semuanya otomatis.
                   </p>
                 </div>
               </details>
