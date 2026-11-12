@@ -58,9 +58,9 @@ describe('whatsapp message', () => {
       quote: luarKotaQuote,
     });
 
-    expect(message).toContain('Ongkos angkut dasar: Rp 628.500');
-    expect(message).toContain('Tambahan luar kota (+50%): Rp 314.250');
-    expect(message).toContain('Total ongkos angkut: Rp 942.750');
+    expect(message).toContain('Ongkos angkut dasar: Rp 673.000');
+    expect(message).toContain('Tambahan luar kota (+50%): Rp 336.500');
+    expect(message).toContain('Total ongkos angkut: Rp 1.009.500');
   });
 
   it('includes waiting time fee and label in message', () => {
@@ -86,6 +86,6 @@ describe('whatsapp message', () => {
     });
 
     expect(message).toContain('Waktu tunggu (90 menit): Rp 72.000');
-    expect(message).toContain('*TOTAL: Rp 187.000*');
+    expect(message).toContain('*TOTAL: Rp 192.000*');
   });
 });

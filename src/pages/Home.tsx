@@ -1987,9 +1987,8 @@ export default function Home() {
   const waitingLabel = waitingOption?.title ?? "Tanpa waktu tunggu";
 
   function scrollToPanel() {
-    const body = panelRef.current?.querySelector<HTMLElement>(
-      ".booking-tabpanel",
-    );
+    const body =
+      panelRef.current?.querySelector<HTMLElement>(".booking-tabpanel");
     body?.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -2310,1667 +2309,1707 @@ export default function Home() {
                     aria-modal="true"
                     aria-labelledby="form-title"
                   >
-                  {mapOpen && (
-                    <>
-                      <div
-                        className="map-backdrop"
-                        onClick={() => setMapOpen(false)}
-                        aria-hidden="true"
-                      />
-                      <div
-                        className="map-card is-modal"
-                        id="peta"
-                        ref={mapModalRef}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="map-modal-title"
-                      >
-                        <div className="map-card-head">
-                          <div className="map-card-title">
-                            <h2 id="map-modal-title">
-                              {mapReadOnly
-                                ? "Lihat Rute Perjalanan"
-                                : `Pilih titik ${activeStop ? stopLabel(activeStop, stops) : ""}`}
-                            </h2>
-                            <p>
-                              {mapReadOnly
-                                ? "Posisi titik muat dan bongkar terkunci agar tidak berubah. Tutup untuk kembali ke formulir."
-                                : `Klik peta, cari alamat, atau pakai lokasi saya. Tekan `}
-                              {!mapReadOnly && (
-                                <>
-                                  <strong>Simpan titik</strong> untuk menyimpan{" "}
-                                  {activeStop
-                                    ? stopLabel(activeStop, stops)
-                                    : "titik"}
-                                  .
-                                </>
-                              )}
-                            </p>
-                          </div>
-                          <div className="map-card-head-actions">
-                            <button
-                              type="button"
-                              className="map-close"
-                              onClick={() => setMapOpen(false)}
-                              aria-label="Tutup peta"
-                              autoFocus
-                            >
-                              <IconX size={18} />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="map-canvas">
-                          <Suspense
-                            fallback={
-                              <div className="map-loading" role="status">
-                                <span className="spinner" aria-hidden="true" />
-                                <span>Memuat peta…</span>
-                              </div>
-                            }
-                          >
-                            <MapErrorBoundary
-                              key={mapBoundaryKey}
-                              onRetry={() =>
-                                setMapBoundaryKey((key) => key + 1)
-                              }
-                            >
-                              <MapCanvas
-                                stops={stops}
-                                activeId={activeId}
-                                draft={mapReadOnly ? null : draft}
-                                routeLine={routeLine}
-                                garageToFirstLine={garageToFirstLine}
-                                lastToGarageLine={lastToGarageLine}
-                                fitPositions={fitPositions}
-                                fitSignal={fitTick}
-                                onPick={mapReadOnly ? undefined : pick}
-                                onDraftMove={mapReadOnly ? undefined : pick}
-                                readOnly={mapReadOnly}
-                              />
-                            </MapErrorBoundary>
-                          </Suspense>
-                          {!mapReadOnly && (
-                            <>
-                              <MapSearchControl
-                                active={activeStop?.kind ?? "load"}
-                                activeLabel={
-                                  activeStop
-                                    ? stopLabel(activeStop, stops)
-                                    : "M1"
-                                }
-                                onSelect={selectPoint}
-                              />
+                    {mapOpen && (
+                      <>
+                        <div
+                          className="map-backdrop"
+                          onClick={() => setMapOpen(false)}
+                          aria-hidden="true"
+                        />
+                        <div
+                          className="map-card is-modal"
+                          id="peta"
+                          ref={mapModalRef}
+                          role="dialog"
+                          aria-modal="true"
+                          aria-labelledby="map-modal-title"
+                        >
+                          <div className="map-card-head">
+                            <div className="map-card-title">
+                              <h2 id="map-modal-title">
+                                {mapReadOnly
+                                  ? "Lihat Rute Perjalanan"
+                                  : `Pilih titik ${activeStop ? stopLabel(activeStop, stops) : ""}`}
+                              </h2>
+                              <p>
+                                {mapReadOnly
+                                  ? "Posisi titik muat dan bongkar terkunci agar tidak berubah. Tutup untuk kembali ke formulir."
+                                  : `Klik peta, cari alamat, atau pakai lokasi saya. Tekan `}
+                                {!mapReadOnly && (
+                                  <>
+                                    <strong>Simpan titik</strong> untuk
+                                    menyimpan{" "}
+                                    {activeStop
+                                      ? stopLabel(activeStop, stops)
+                                      : "titik"}
+                                    .
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                            <div className="map-card-head-actions">
                               <button
                                 type="button"
-                                className="map-locate"
-                                onClick={useMyLocation}
+                                className="map-close"
+                                onClick={() => setMapOpen(false)}
+                                aria-label="Tutup peta"
+                                autoFocus
                               >
-                                <IconTarget size={17} />
-                                <span>Lokasi saya</span>
+                                <IconX size={18} />
                               </button>
-                            </>
-                          )}
-                        </div>
-
-                        <div className="map-modal-foot">
-                          {locateStatus && !mapReadOnly && (
-                            <p
-                              className={`map-status is-${locateStatus.tone}`}
-                              role="status"
-                              aria-live="polite"
-                            >
-                              {locateStatus.text}
-                            </p>
-                          )}
-                          {mapReadOnly ? (
-                            <div className="map-draft" aria-live="polite">
-                              <IconRoute
-                                size={20}
-                                style={{ color: "var(--forest)", flex: "none" }}
-                              />
-                              <div className="map-draft-text">
-                                <span className="map-draft-label">
-                                  Rute Tersimpan (Terkunci)
-                                </span>
-                                <p>
-                                  {routeSummaryLabel} · Semua titik muat dan
-                                  bongkar tetap pada posisinya.
-                                </p>
-                              </div>
                             </div>
-                          ) : (
-                            <div
-                              className={`map-draft${draft ? "" : " is-empty"}`}
-                              aria-live="polite"
+                          </div>
+
+                          <div className="map-canvas">
+                            <Suspense
+                              fallback={
+                                <div className="map-loading" role="status">
+                                  <span
+                                    className="spinner"
+                                    aria-hidden="true"
+                                  />
+                                  <span>Memuat peta…</span>
+                                </div>
+                              }
                             >
-                              <span
-                                className={`segment-dot ${activeStop?.kind ?? "load"}`}
-                                aria-hidden="true"
-                              />
-                              <div className="map-draft-text">
-                                <span className="map-draft-label">
-                                  {activeStop
-                                    ? `${stopLabel(activeStop, stops)} · Titik ${STOP_KIND_LABEL[activeStop.kind]}`
-                                    : "Titik"}
-                                </span>
-                                <p>
-                                  {draft
-                                    ? draft.address
-                                    : "Belum ada titik. Klik peta, cari alamat, atau pakai lokasi saya."}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                          <div className="map-modal-actions">
-                            {mapReadOnly ? (
-                              <>
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => setMapReadOnly(false)}
-                                >
-                                  Ubah Titik
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-primary btn-sm"
-                                  onClick={() => setMapOpen(false)}
-                                >
-                                  Tutup Peta
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => setMapOpen(false)}
-                                >
-                                  Batal
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-primary btn-sm"
-                                  onClick={saveDraft}
-                                  disabled={!draft}
-                                >
-                                  <IconMapPin size={15} />
-                                  Simpan titik
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  <section
-                    className="panel"
-                    aria-labelledby="form-title"
-                    ref={panelRef}
-                  >
-                    <div className="panel-head">
-                      <div>
-                        <span className="panel-eyebrow">Pesan angkutan</span>
-                        <h2 className="panel-title" id="form-title">
-                          Rute &amp; detail angkutan
-                        </h2>
-                        <p className="panel-sub">
-                          Pilih bagian yang ingin diisi, lalu tekan Lanjut.
-                          Estimasi muncul di bagian terakhir.
-                        </p>
-                      </div>
-                      <div className="panel-head-side">
-                        <div className="progress">
-                          <div className="progress-label">
-                            <span>
-                              Bagian {step} dari {wizardSteps.length}
-                            </span>
-                            <span>
-                              {Math.round((step / wizardSteps.length) * 100)}%
-                            </span>
-                          </div>
-                          <div
-                            className="progress-track"
-                            role="progressbar"
-                            aria-valuemin={0}
-                            aria-valuemax={wizardSteps.length}
-                            aria-valuenow={step}
-                            aria-label="Langkah pengisian pesanan"
-                          >
-                            <span
-                              className="progress-fill"
-                              style={{
-                                width: `${(step / wizardSteps.length) * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="panel-route">
-                          <span
-                            className={`panel-route-summary${allStopsSet ? "" : " is-empty"}`}
-                          >
-                            {allStopsSet ? (
-                              <IconRoute size={14} />
-                            ) : (
-                              <IconAlert size={14} />
-                            )}
-                            {routeSummaryLabel}
-                          </span>
-                          <button
-                            type="button"
-                            className="panel-route-btn"
-                            onClick={handleRouteShortcut}
-                          >
-                            <IconMapPin size={14} />
-                            {allStopsSet ? "Lihat rute" : "Lengkapi rute"}
-                          </button>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        className="map-close booking-close"
-                        onClick={closeBooking}
-                        aria-label="Tutup kalkulator tarif"
-                      >
-                        <IconX size={18} />
-                      </button>
-                    </div>
-
-                    <div className="panel-body">
-                      <div
-                        className="booking-tabs"
-                        role="tablist"
-                        aria-label="Bagian kalkulator tarif"
-                      >
-                        {wizardSteps.map((label, index) => {
-                          const value = index + 1;
-                          const isActive = value === step;
-                          const isDone = value < step;
-                          return (
-                            <button
-                              key={label}
-                              type="button"
-                              role="tab"
-                              id={`booking-tab-${value}`}
-                              aria-selected={isActive}
-                              aria-controls={`booking-tabpanel-${value}`}
-                              tabIndex={isActive ? 0 : -1}
-                              className={`booking-tab${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`}
-                              onClick={() => goToStep(value)}
-                            >
-                              <span className="booking-tab-marker">
-                                {isDone ? <IconCheck size={12} /> : value}
-                              </span>
-                              <span className="booking-tab-label">{label}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div
-                        className={`wizard-body booking-tabpanel${stepDirection === "back" ? " is-back" : ""}`}
-                        key={step}
-                        role="tabpanel"
-                        id={`booking-tabpanel-${step}`}
-                        aria-labelledby={`booking-tab-${step}`}
-                        tabIndex={0}
-                      >
-                        {step === 1 && (
-                          <section className="form-section route-step">
-                            <div className="section-head">
-                              <span className="step-badge">1</span>
-                              <div className="section-copy">
-                                <h3 id="wizard-step-title" tabIndex={-1}>
-                                  Rute angkutan
-                                </h3>
-                                <p>
-                                  Tandai titik muat dan bongkar dulu. Jarak dan
-                                  rute mobil dihitung otomatis.
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="route-preview">
-
-                              <div
-                                className={`route-timeline${routeStatus === "ready" ? " is-ready" : ""}`}
+                              <MapErrorBoundary
+                                key={mapBoundaryKey}
+                                onRetry={() =>
+                                  setMapBoundaryKey((key) => key + 1)
+                                }
                               >
-                                {(
-                                  [
-                                    { kind: "load", items: loadStops },
-                                    { kind: "unload", items: unloadStops },
-                                  ] as Array<{ kind: StopKind; items: Stop[] }>
-                                ).map(({ kind, items }) => (
-                                  <div
-                                    className={`map-preview-group is-${kind}`}
-                                    key={kind}
-                                  >
-                                    <div className="map-preview-group-head">
-                                      <span className="map-preview-group-title">
-                                        <span
-                                          className={`segment-dot ${kind}`}
-                                          aria-hidden="true"
-                                        />
-                                        Titik {STOP_KIND_LABEL[kind]}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        className="map-preview-add"
-                                        onClick={() => addStop(kind)}
-                                      >
-                                        <IconPlus size={13} />
-                                        Tambah
-                                      </button>
-                                    </div>
-                                    <ul className="map-preview-rows">
-                                      {items.map((stop, index) => {
-                                        const hasPoint =
-                                          stop.lat !== null &&
-                                          stop.lng !== null;
-                                        const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
-                                        const coords = hasPoint
-                                          ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
-                                          : "Belum ditandai";
-                                        return (
-                                          <li
-                                            key={stop.id}
-                                            className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
-                                          >
-                                            <div className="map-preview-main">
-                                              <button
-                                                type="button"
-                                                className="map-preview-pick"
-                                                onClick={() => openMap(stop.id)}
-                                                aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
-                                              >
-                                                <span
-                                                  className={`map-preview-label is-${kind}`}
-                                                >
-                                                  {label}
-                                                </span>
-                                                <span className="map-preview-coords">
-                                                  {coords}
-                                                </span>
-                                                <span className="map-preview-action">
-                                                  {hasPoint ? "Ubah" : "Pilih"}
-                                                </span>
-                                              </button>
-                                              {hasPoint && (
-                                                <span
-                                                  className="map-preview-address"
-                                                  title={stop.address}
-                                                >
-                                                  {stop.address}
-                                                </span>
-                                              )}
-                                            </div>
-                                            {(items.length > 1 || hasPoint) && (
-                                              <button
-                                                type="button"
-                                                className="map-preview-remove"
-                                                aria-label={`Hapus titik ${label}`}
-                                                onClick={() =>
-                                                  removeStop(stop.id)
-                                                }
-                                              >
-                                                Hapus
-                                              </button>
-                                            )}
-                                          </li>
-                                        );
-                                      })}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </div>
+                                <MapCanvas
+                                  stops={stops}
+                                  activeId={activeId}
+                                  draft={mapReadOnly ? null : draft}
+                                  routeLine={routeLine}
+                                  garageToFirstLine={garageToFirstLine}
+                                  lastToGarageLine={lastToGarageLine}
+                                  fitPositions={fitPositions}
+                                  fitSignal={fitTick}
+                                  onPick={mapReadOnly ? undefined : pick}
+                                  onDraftMove={mapReadOnly ? undefined : pick}
+                                  readOnly={mapReadOnly}
+                                />
+                              </MapErrorBoundary>
+                            </Suspense>
+                            {!mapReadOnly && (
+                              <>
+                                <MapSearchControl
+                                  active={activeStop?.kind ?? "load"}
+                                  activeLabel={
+                                    activeStop
+                                      ? stopLabel(activeStop, stops)
+                                      : "M1"
+                                  }
+                                  onSelect={selectPoint}
+                                />
+                                <button
+                                  type="button"
+                                  className="map-locate"
+                                  onClick={useMyLocation}
+                                >
+                                  <IconTarget size={17} />
+                                  <span>Lokasi saya</span>
+                                </button>
+                              </>
+                            )}
+                          </div>
 
-                              <div className="route-preview-head">
-                                <div>
-                                  <span className="route-preview-label">
-                                    Titik angkutan
+                          <div className="map-modal-foot">
+                            {locateStatus && !mapReadOnly && (
+                              <p
+                                className={`map-status is-${locateStatus.tone}`}
+                                role="status"
+                                aria-live="polite"
+                              >
+                                {locateStatus.text}
+                              </p>
+                            )}
+                            {mapReadOnly ? (
+                              <div className="map-draft" aria-live="polite">
+                                <IconRoute
+                                  size={20}
+                                  style={{
+                                    color: "var(--forest)",
+                                    flex: "none",
+                                  }}
+                                />
+                                <div className="map-draft-text">
+                                  <span className="map-draft-label">
+                                    Rute Tersimpan (Terkunci)
                                   </span>
-                                  <p className="route-preview-note">
-                                    Minimal satu titik muat dan satu titik
-                                    bongkar.
+                                  <p>
+                                    {routeSummaryLabel} · Semua titik muat dan
+                                    bongkar tetap pada posisinya.
                                   </p>
                                 </div>
-                                <button
-                                  type="button"
-                                  id="route-open-map"
-                                  className="btn btn-primary btn-sm"
-                                  onClick={() =>
-                                    allStopsSet
-                                      ? openMap(undefined, true)
-                                      : openRouteMap()
-                                  }
-                                >
-                                  <IconMapPin size={15} />
-                                  {allStopsSet
-                                    ? "Lihat rute di peta"
-                                    : "Buka peta"}
-                                </button>
+                              </div>
+                            ) : (
+                              <div
+                                className={`map-draft${draft ? "" : " is-empty"}`}
+                                aria-live="polite"
+                              >
+                                <span
+                                  className={`segment-dot ${activeStop?.kind ?? "load"}`}
+                                  aria-hidden="true"
+                                />
+                                <div className="map-draft-text">
+                                  <span className="map-draft-label">
+                                    {activeStop
+                                      ? `${stopLabel(activeStop, stops)} · Titik ${STOP_KIND_LABEL[activeStop.kind]}`
+                                      : "Titik"}
+                                  </span>
+                                  <p>
+                                    {draft
+                                      ? draft.address
+                                      : "Belum ada titik. Klik peta, cari alamat, atau pakai lokasi saya."}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            <div className="map-modal-actions">
+                              {mapReadOnly ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => setMapReadOnly(false)}
+                                  >
+                                    Ubah Titik
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => setMapOpen(false)}
+                                  >
+                                    Tutup Peta
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => setMapOpen(false)}
+                                  >
+                                    Batal
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    onClick={saveDraft}
+                                    disabled={!draft}
+                                  >
+                                    <IconMapPin size={15} />
+                                    Simpan titik
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <section
+                      className="panel"
+                      aria-labelledby="form-title"
+                      ref={panelRef}
+                    >
+                      <div className="panel-head">
+                        <div>
+                          <span className="panel-eyebrow">Pesan angkutan</span>
+                          <h2 className="panel-title" id="form-title">
+                            Rute &amp; detail angkutan
+                          </h2>
+                          <p className="panel-sub">
+                            Pilih bagian yang ingin diisi, lalu tekan Lanjut.
+                            Estimasi muncul di bagian terakhir.
+                          </p>
+                        </div>
+                        <div className="panel-head-side">
+                          <div className="progress">
+                            <div className="progress-label">
+                              <span>
+                                Bagian {step} dari {wizardSteps.length}
+                              </span>
+                              <span>
+                                {Math.round((step / wizardSteps.length) * 100)}%
+                              </span>
+                            </div>
+                            <div
+                              className="progress-track"
+                              role="progressbar"
+                              aria-valuemin={0}
+                              aria-valuemax={wizardSteps.length}
+                              aria-valuenow={step}
+                              aria-label="Langkah pengisian pesanan"
+                            >
+                              <span
+                                className="progress-fill"
+                                style={{
+                                  width: `${(step / wizardSteps.length) * 100}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="panel-route">
+                            <span
+                              className={`panel-route-summary${allStopsSet ? "" : " is-empty"}`}
+                            >
+                              {allStopsSet ? (
+                                <IconRoute size={14} />
+                              ) : (
+                                <IconAlert size={14} />
+                              )}
+                              {routeSummaryLabel}
+                            </span>
+                            <button
+                              type="button"
+                              className="panel-route-btn"
+                              onClick={handleRouteShortcut}
+                            >
+                              <IconMapPin size={14} />
+                              {allStopsSet ? "Lihat rute" : "Lengkapi rute"}
+                            </button>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="map-close booking-close"
+                          onClick={closeBooking}
+                          aria-label="Tutup kalkulator tarif"
+                        >
+                          <IconX size={18} />
+                        </button>
+                      </div>
+
+                      <div className="panel-body">
+                        <div
+                          className="booking-tabs"
+                          role="tablist"
+                          aria-label="Bagian kalkulator tarif"
+                        >
+                          {wizardSteps.map((label, index) => {
+                            const value = index + 1;
+                            const isActive = value === step;
+                            const isDone = value < step;
+                            return (
+                              <button
+                                key={label}
+                                type="button"
+                                role="tab"
+                                id={`booking-tab-${value}`}
+                                aria-selected={isActive}
+                                aria-controls={`booking-tabpanel-${value}`}
+                                tabIndex={isActive ? 0 : -1}
+                                className={`booking-tab${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`}
+                                onClick={() => goToStep(value)}
+                              >
+                                <span className="booking-tab-marker">
+                                  {isDone ? <IconCheck size={12} /> : value}
+                                </span>
+                                <span className="booking-tab-label">
+                                  {label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div
+                          className={`wizard-body booking-tabpanel${stepDirection === "back" ? " is-back" : ""}`}
+                          key={step}
+                          role="tabpanel"
+                          id={`booking-tabpanel-${step}`}
+                          aria-labelledby={`booking-tab-${step}`}
+                          tabIndex={0}
+                        >
+                          {step === 1 && (
+                            <section className="form-section route-step">
+                              <div className="section-head">
+                                <span className="step-badge">1</span>
+                                <div className="section-copy">
+                                  <h3 id="wizard-step-title" tabIndex={-1}>
+                                    Rute angkutan
+                                  </h3>
+                                  <p>
+                                    Tandai titik muat dan bongkar dulu. Jarak
+                                    dan rute mobil dihitung otomatis.
+                                  </p>
+                                </div>
                               </div>
 
-                              <div className="route-sequence">
-                                <div className="route-sequence-head">
-                                  <span className="route-sequence-kicker">
-                                    Urutan rute
-                                  </span>
-                                  <span
-                                    className={`route-sequence-meta${routeStatus === "error" ? " is-warn" : ""}`}
-                                    aria-live="polite"
+                              <div className="route-preview">
+                                <div
+                                  className={`route-timeline${routeStatus === "ready" ? " is-ready" : ""}`}
+                                >
+                                  {(
+                                    [
+                                      { kind: "load", items: loadStops },
+                                      { kind: "unload", items: unloadStops },
+                                    ] as Array<{
+                                      kind: StopKind;
+                                      items: Stop[];
+                                    }>
+                                  ).map(({ kind, items }) => (
+                                    <div
+                                      className={`map-preview-group is-${kind}`}
+                                      key={kind}
+                                    >
+                                      <div className="map-preview-group-head">
+                                        <span className="map-preview-group-title">
+                                          <span
+                                            className={`segment-dot ${kind}`}
+                                            aria-hidden="true"
+                                          />
+                                          Titik {STOP_KIND_LABEL[kind]}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          className="map-preview-add"
+                                          onClick={() => addStop(kind)}
+                                        >
+                                          <IconPlus size={13} />
+                                          Tambah
+                                        </button>
+                                      </div>
+                                      <ul className="map-preview-rows">
+                                        {items.map((stop, index) => {
+                                          const hasPoint =
+                                            stop.lat !== null &&
+                                            stop.lng !== null;
+                                          const label = `${kind === "load" ? "M" : "B"}${index + 1}`;
+                                          const coords = hasPoint
+                                            ? `${(stop.lat as number).toFixed(5)}, ${(stop.lng as number).toFixed(5)}`
+                                            : "Belum ditandai";
+                                          return (
+                                            <li
+                                              key={stop.id}
+                                              className={`map-preview-row${hasPoint ? "" : " is-empty"}`}
+                                            >
+                                              <div className="map-preview-main">
+                                                <button
+                                                  type="button"
+                                                  className="map-preview-pick"
+                                                  onClick={() =>
+                                                    openMap(stop.id)
+                                                  }
+                                                  aria-label={`${hasPoint ? "Ubah" : "Pilih"} titik ${label}: ${coords}`}
+                                                >
+                                                  <span
+                                                    className={`map-preview-label is-${kind}`}
+                                                  >
+                                                    {label}
+                                                  </span>
+                                                  <span className="map-preview-coords">
+                                                    {coords}
+                                                  </span>
+                                                  <span className="map-preview-action">
+                                                    {hasPoint
+                                                      ? "Ubah"
+                                                      : "Pilih"}
+                                                  </span>
+                                                </button>
+                                                {hasPoint && (
+                                                  <span
+                                                    className="map-preview-address"
+                                                    title={stop.address}
+                                                  >
+                                                    {stop.address}
+                                                  </span>
+                                                )}
+                                              </div>
+                                              {(items.length > 1 ||
+                                                hasPoint) && (
+                                                <button
+                                                  type="button"
+                                                  className="map-preview-remove"
+                                                  aria-label={`Hapus titik ${label}`}
+                                                  onClick={() =>
+                                                    removeStop(stop.id)
+                                                  }
+                                                >
+                                                  Hapus
+                                                </button>
+                                              )}
+                                            </li>
+                                          );
+                                        })}
+                                      </ul>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="route-preview-head">
+                                  <div>
+                                    <span className="route-preview-label">
+                                      Titik angkutan
+                                    </span>
+                                    <p className="route-preview-note">
+                                      Minimal satu titik muat dan satu titik
+                                      bongkar.
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    id="route-open-map"
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() =>
+                                      allStopsSet
+                                        ? openMap(undefined, true)
+                                        : openRouteMap()
+                                    }
                                   >
-                                    {routeStatus === "loading" && (
-                                      <>
-                                        <span
-                                          className="spinner"
-                                          aria-hidden="true"
-                                        />
-                                        <span>Menghitung rute...</span>
-                                      </>
-                                    )}
-                                    {routeStatus === "ready" &&
-                                      routeSummary && (
+                                    <IconMapPin size={15} />
+                                    {allStopsSet
+                                      ? "Lihat rute di peta"
+                                      : "Buka peta"}
+                                  </button>
+                                </div>
+
+                                <div className="route-sequence">
+                                  <div className="route-sequence-head">
+                                    <span className="route-sequence-kicker">
+                                      Urutan rute
+                                    </span>
+                                    <span
+                                      className={`route-sequence-meta${routeStatus === "error" ? " is-warn" : ""}`}
+                                      aria-live="polite"
+                                    >
+                                      {routeStatus === "loading" && (
                                         <>
-                                          <IconRoute size={14} />
+                                          <span
+                                            className="spinner"
+                                            aria-hidden="true"
+                                          />
+                                          <span>Menghitung rute...</span>
+                                        </>
+                                      )}
+                                      {routeStatus === "ready" &&
+                                        routeSummary && (
+                                          <>
+                                            <IconRoute size={14} />
+                                            <span>
+                                              {routeSummary.km.toFixed(1)} km ·
+                                              ±
+                                              {Math.max(
+                                                1,
+                                                Math.round(
+                                                  routeSummary.minutes,
+                                                ),
+                                              )}{" "}
+                                              mnt
+                                            </span>
+                                          </>
+                                        )}
+                                      {routeStatus === "error" && (
+                                        <>
+                                          <IconAlert size={14} />
                                           <span>
-                                            {routeSummary.km.toFixed(1)} km · ±
-                                            {Math.max(
-                                              1,
-                                              Math.round(routeSummary.minutes),
-                                            )}{" "}
-                                            mnt
+                                            Rute mobil belum tersedia.
                                           </span>
                                         </>
                                       )}
-                                    {routeStatus === "error" && (
-                                      <>
-                                        <IconAlert size={14} />
-                                        <span>Rute mobil belum tersedia.</span>
-                                      </>
-                                    )}
-                                    {routeStatus === "idle" && !allStopsSet && (
-                                      <>
-                                        <IconAlert size={14} />
-                                        <span>
-                                          Lengkapi titik untuk menghitung rute.
-                                        </span>
-                                      </>
-                                    )}
-                                  </span>
-                                </div>
-                                <ol
-                                  className="route-sequence-list"
-                                  aria-label="Urutan titik angkutan"
-                                >
-                                  {orderedStops.map((stop, index) => {
-                                    const label = stopLabel(stop, stops);
-                                    const hasPoint =
-                                      stop.lat !== null && stop.lng !== null;
-                                    return (
-                                      <li
-                                        className="route-sequence-item"
-                                        key={stop.id}
-                                      >
-                                        {index > 0 && (
-                                          <IconArrowRight
-                                            size={13}
-                                            className="route-sequence-arrow"
-                                          />
+                                      {routeStatus === "idle" &&
+                                        !allStopsSet && (
+                                          <>
+                                            <IconAlert size={14} />
+                                            <span>
+                                              Lengkapi titik untuk menghitung
+                                              rute.
+                                            </span>
+                                          </>
                                         )}
-                                        <span
-                                          className={`route-sequence-stop is-${stop.kind}${hasPoint ? "" : " is-empty"}`}
+                                    </span>
+                                  </div>
+                                  <ol
+                                    className="route-sequence-list"
+                                    aria-label="Urutan titik angkutan"
+                                  >
+                                    {orderedStops.map((stop, index) => {
+                                      const label = stopLabel(stop, stops);
+                                      const hasPoint =
+                                        stop.lat !== null && stop.lng !== null;
+                                      return (
+                                        <li
+                                          className="route-sequence-item"
+                                          key={stop.id}
                                         >
-                                          <span className="route-sequence-badge">
-                                            {label}
+                                          {index > 0 && (
+                                            <IconArrowRight
+                                              size={13}
+                                              className="route-sequence-arrow"
+                                            />
+                                          )}
+                                          <span
+                                            className={`route-sequence-stop is-${stop.kind}${hasPoint ? "" : " is-empty"}`}
+                                          >
+                                            <span className="route-sequence-badge">
+                                              {label}
+                                            </span>
+                                            <span className="route-sequence-state">
+                                              Titik {STOP_KIND_LABEL[stop.kind]}
+                                              {hasPoint
+                                                ? ""
+                                                : ", belum ditandai"}
+                                            </span>
                                           </span>
-                                          <span className="route-sequence-state">
-                                            Titik {STOP_KIND_LABEL[stop.kind]}
-                                            {hasPoint ? "" : ", belum ditandai"}
-                                          </span>
+                                        </li>
+                                      );
+                                    })}
+                                  </ol>
+                                </div>
+
+                                {routeError && !allStopsSet && (
+                                  <p className="field-error" role="alert">
+                                    <IconAlert size={15} />
+                                    Tandai titik muat dan bongkar dulu sebelum
+                                    lanjut.
+                                  </p>
+                                )}
+                              </div>
+                            </section>
+                          )}
+
+                          {step === 2 && (
+                            <section className="form-section">
+                              <div className="section-head">
+                                <span className="step-badge">2</span>
+                                <div className="section-copy">
+                                  <h3 id="wizard-step-title" tabIndex={-1}>
+                                    Data pemesan
+                                  </h3>
+                                  <p>
+                                    Nama dan nomor HP wajib diisi agar pesanan
+                                    bisa dikirim lewat WhatsApp.
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="field-stack">
+                                <div className="field">
+                                  <label
+                                    className="field-label"
+                                    htmlFor="customer-name"
+                                  >
+                                    Nama lengkap
+                                  </label>
+                                  <div
+                                    className={`input-shell${nameError ? " is-invalid" : ""}`}
+                                  >
+                                    <span className="input-icon">
+                                      <IconUser size={18} />
+                                    </span>
+                                    <input
+                                      id="customer-name"
+                                      className="field-input"
+                                      value={name}
+                                      onChange={(event) =>
+                                        setName(event.target.value)
+                                      }
+                                      placeholder="Contoh: Budi Santoso"
+                                      autoComplete="name"
+                                      enterKeyHint="next"
+                                      required
+                                      maxLength={80}
+                                      aria-invalid={nameError}
+                                      aria-describedby={
+                                        nameError ? "name-error" : undefined
+                                      }
+                                      onKeyDown={(event) => {
+                                        if (event.key === "Enter") {
+                                          event.preventDefault();
+                                          document
+                                            .getElementById("customer-phone")
+                                            ?.focus();
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  {nameError && (
+                                    <p
+                                      className="field-error"
+                                      id="name-error"
+                                      role="alert"
+                                    >
+                                      <IconAlert size={15} />
+                                      Nama belum diisi.
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="field">
+                                  <label
+                                    className="field-label"
+                                    htmlFor="customer-phone"
+                                  >
+                                    Nomor HP / WhatsApp
+                                  </label>
+                                  <div
+                                    className={`input-shell${phoneError ? " is-invalid" : ""}`}
+                                  >
+                                    <span className="input-icon">
+                                      <IconPhone size={18} />
+                                    </span>
+                                    <input
+                                      id="customer-phone"
+                                      className="field-input"
+                                      type="tel"
+                                      value={phone}
+                                      onChange={(event) =>
+                                        setPhone(event.target.value)
+                                      }
+                                      placeholder="0813 2762 3942"
+                                      inputMode="tel"
+                                      autoComplete="tel"
+                                      enterKeyHint="next"
+                                      required
+                                      maxLength={20}
+                                      aria-invalid={phoneError}
+                                      aria-describedby={
+                                        phoneError
+                                          ? "phone-error"
+                                          : "phone-hint"
+                                      }
+                                      onKeyDown={(event) => {
+                                        if (event.key === "Enter") {
+                                          event.preventDefault();
+                                          advance();
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  {phoneError ? (
+                                    <p
+                                      className="field-error"
+                                      id="phone-error"
+                                      role="alert"
+                                    >
+                                      <IconAlert size={15} />
+                                      {phone.trim().length > 0
+                                        ? "Nomor HP belum benar. Contoh: 0813 2762 3942"
+                                        : "Nomor HP wajib diisi. Contoh: 0813 2762 3942"}
+                                    </p>
+                                  ) : (
+                                    <p className="field-hint" id="phone-hint">
+                                      Kami hanya menghubungi nomor ini untuk
+                                      pesanan Anda.
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="field schedule-field">
+                                  <div className="field-label-row">
+                                    <span className="field-label">
+                                      Jadwal angkut
+                                    </span>
+                                    <span className="badge-optional">
+                                      Opsional
+                                    </span>
+                                  </div>
+                                  <div className="field-grid">
+                                    <div className="field">
+                                      <label
+                                        className="field-sublabel"
+                                        htmlFor="pickup-date"
+                                      >
+                                        Tanggal
+                                      </label>
+                                      <div className="input-shell">
+                                        <span className="input-icon">
+                                          <IconCalendar size={18} />
                                         </span>
-                                      </li>
+                                        <input
+                                          id="pickup-date"
+                                          className="field-input"
+                                          type="date"
+                                          value={pickupDate}
+                                          min={today}
+                                          onChange={(event) =>
+                                            setPickupDate(event.target.value)
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="field">
+                                      <label
+                                        className="field-sublabel"
+                                        htmlFor="pickup-time"
+                                      >
+                                        Jam angkut
+                                      </label>
+                                      <div className="input-shell">
+                                        <span className="input-icon">
+                                          <IconClock size={18} />
+                                        </span>
+                                        <select
+                                          id="pickup-time"
+                                          className="field-input field-select"
+                                          value={pickupTime}
+                                          onChange={(event) =>
+                                            setPickupTime(event.target.value)
+                                          }
+                                          aria-label="Pilih jam dan menit angkut"
+                                        >
+                                          <option value="">
+                                            -- Pilih Jam &amp; Menit --
+                                          </option>
+                                          {TIME_GROUPS.map((grp) => (
+                                            <optgroup
+                                              key={grp.group}
+                                              label={grp.group}
+                                            >
+                                              {grp.options.map((opt) => (
+                                                <option
+                                                  key={opt.value}
+                                                  value={opt.value}
+                                                >
+                                                  {opt.label}
+                                                </option>
+                                              ))}
+                                            </optgroup>
+                                          ))}
+                                          {pickupTime &&
+                                            !TIME_GROUPS.some((g) =>
+                                              g.options.some(
+                                                (o) => o.value === pickupTime,
+                                              ),
+                                            ) && (
+                                              <option value={pickupTime}>
+                                                Waktu: {pickupTime} WIB
+                                              </option>
+                                            )}
+                                        </select>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="time-presets-container">
+                                    <span className="time-presets-label">
+                                      Pilihan cepat:
+                                    </span>
+                                    {TIME_PRESETS.map((preset) => (
+                                      <button
+                                        key={preset.time}
+                                        type="button"
+                                        className={`time-chip${pickupTime === preset.time ? " is-active" : ""}`}
+                                        onClick={() =>
+                                          setPickupTime(preset.time)
+                                        }
+                                      >
+                                        {preset.label}
+                                      </button>
+                                    ))}
+                                  </div>
+
+                                  {pickupTime && (
+                                    <div className="time-selected-alert">
+                                      <IconClock size={14} />
+                                      <span>
+                                        Jam jemput:{" "}
+                                        {formatPickupTime(pickupTime)}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setPickupTime("")}
+                                        style={{
+                                          marginLeft: 8,
+                                          background: "none",
+                                          border: "none",
+                                          color: "var(--danger)",
+                                          cursor: "pointer",
+                                          fontSize: "0.75rem",
+                                          fontWeight: 600,
+                                          textDecoration: "underline",
+                                          padding: 0,
+                                        }}
+                                        title="Hapus pilihan jam"
+                                      >
+                                        Hapus
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  <p className="field-hint">
+                                    Kosongkan jika jadwal akan dibicarakan lewat
+                                    WhatsApp.
+                                  </p>
+                                </div>
+                              </div>
+                            </section>
+                          )}
+
+                          {step === 3 && (
+                            <section className="form-section">
+                              <div className="section-head">
+                                <span className="step-badge">3</span>
+                                <div className="section-copy">
+                                  <h3 id="wizard-step-title" tabIndex={-1}>
+                                    Layanan
+                                  </h3>
+                                  <p>Pilih jangkauan rute angkutan Anda.</p>
+                                </div>
+                              </div>
+
+                              <div
+                                className="choice-grid"
+                                role="radiogroup"
+                                aria-label="Layanan"
+                              >
+                                <button
+                                  type="button"
+                                  role="radio"
+                                  aria-checked={service === "dalam-kota"}
+                                  className={`choice-card${service === "dalam-kota" ? " is-selected" : ""}`}
+                                  onClick={() => setService("dalam-kota")}
+                                >
+                                  <span className="choice-icon">
+                                    <IconBuilding size={18} />
+                                  </span>
+                                  <span className="choice-copy">
+                                    <span className="choice-title">
+                                      Dalam Kota
+                                    </span>
+                                    <span
+                                      className="choice-meta"
+                                      style={{
+                                        fontSize: "0.75rem",
+                                        color: "var(--ink-soft)",
+                                        display: "block",
+                                      }}
+                                    >
+                                      Demak &amp; Semarang
+                                    </span>
+                                  </span>
+                                  <span className="choice-check">
+                                    <IconCheck size={12} />
+                                  </span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  role="radio"
+                                  aria-checked={service === "luar-kota"}
+                                  className={`choice-card${service === "luar-kota" ? " is-selected" : ""}`}
+                                  onClick={() => setService("luar-kota")}
+                                >
+                                  <span className="choice-icon">
+                                    <IconRoute size={18} />
+                                  </span>
+                                  <span className="choice-copy">
+                                    <span className="choice-title">
+                                      Luar Kota
+                                    </span>
+                                    <span
+                                      className="choice-meta"
+                                      style={{
+                                        fontSize: "0.75rem",
+                                        color: "var(--ink-soft)",
+                                        display: "block",
+                                      }}
+                                    >
+                                      Antar kota (+50% ongkos)
+                                    </span>
+                                  </span>
+                                  <span className="choice-check">
+                                    <IconCheck size={12} />
+                                  </span>
+                                </button>
+                              </div>
+
+                              <div
+                                className={`priority-toggle-card${priority ? " is-active" : ""}`}
+                                style={{ marginTop: 0 }}
+                              >
+                                <div className="priority-toggle-row">
+                                  <div className="priority-toggle-info">
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 8,
+                                        flexWrap: "wrap",
+                                      }}
+                                    >
+                                      <span
+                                        className="field-label"
+                                        style={{ margin: 0, fontWeight: 700 }}
+                                      >
+                                        Prioritas Pengiriman Langsung
+                                      </span>
+                                      {priority && (
+                                        <span className="priority-badge-chip">
+                                          Langsung Jalan
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p
+                                      className="field-hint"
+                                      style={{ marginTop: 4 }}
+                                    >
+                                      {priority
+                                        ? "Aktif: armada berangkat secepatnya. Tambahan +Rp 50.000."
+                                        : "Tidak aktif: jadwal reguler, armada tiba maksimal 4 jam."}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={priority}
+                                    className={`toggle-switch${priority ? " is-on" : ""}`}
+                                    onClick={() => setPriority((v) => !v)}
+                                    aria-label="Toggle prioritas pengiriman langsung"
+                                  >
+                                    <span className="toggle-knob" />
+                                  </button>
+                                </div>
+                                {priority && (
+                                  <div
+                                    className="priority-badge"
+                                    style={{ marginTop: 8 }}
+                                  >
+                                    <IconCheck size={14} />
+                                    <span>
+                                      Layanan prioritas aktif · Tambahan +Rp
+                                      50.000
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="field-stack">
+                                <span className="field-label">
+                                  Layanan waktu tunggu
+                                </span>
+                                <div
+                                  className="floor-grid waiting-grid"
+                                  role="radiogroup"
+                                  aria-label="Layanan waktu tunggu"
+                                >
+                                  {waitingOptions.map((option) => {
+                                    const selected = waitingTime === option.key;
+                                    return (
+                                      <button
+                                        key={option.key}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={selected}
+                                        className={`floor-card waiting-card${selected ? " is-selected" : ""}`}
+                                        onClick={() =>
+                                          setWaitingTime(option.key)
+                                        }
+                                      >
+                                        <span className="waiting-title">
+                                          {option.title}
+                                        </span>
+                                        <span className="waiting-price">
+                                          {option.price === 0
+                                            ? "Gratis"
+                                            : `+Rp${option.price.toLocaleString("id-ID")}`}
+                                        </span>
+                                        <span
+                                          className="waiting-check"
+                                          aria-hidden="true"
+                                        >
+                                          <IconCheck size={11} />
+                                        </span>
+                                      </button>
                                     );
                                   })}
-                                </ol>
-                              </div>
-
-                              {routeError && !allStopsSet && (
-                                <p className="field-error" role="alert">
-                                  <IconAlert size={15} />
-                                  Tandai titik muat dan bongkar dulu sebelum
-                                  lanjut.
-                                </p>
-                              )}
-
-                            </div>
-
-                          </section>
-                        )}
-
-                        {step === 2 && (
-                          <section className="form-section">
-                            <div className="section-head">
-                              <span className="step-badge">2</span>
-                              <div className="section-copy">
-                                <h3 id="wizard-step-title" tabIndex={-1}>
-                                  Data pemesan
-                                </h3>
-                                <p>
-                                  Nama dan nomor HP wajib diisi agar pesanan
-                                  bisa dikirim lewat WhatsApp.
+                                </div>
+                                <p className="floor-hint">
+                                  Biaya tambahan bila armada menunggu di lokasi.
                                 </p>
                               </div>
-                            </div>
+                            </section>
+                          )}
 
-                            <div className="field-stack">
-                              <div className="field">
-                                <label
-                                  className="field-label"
-                                  htmlFor="customer-name"
-                                >
-                                  Nama lengkap
-                                </label>
-                                <div
-                                  className={`input-shell${nameError ? " is-invalid" : ""}`}
-                                >
-                                  <span className="input-icon">
-                                    <IconUser size={18} />
-                                  </span>
-                                  <input
-                                    id="customer-name"
-                                    className="field-input"
-                                    value={name}
-                                    onChange={(event) =>
-                                      setName(event.target.value)
-                                    }
-                                    placeholder="Contoh: Budi Santoso"
-                                    autoComplete="name"
-                                    enterKeyHint="next"
-                                    required
-                                    maxLength={80}
-                                    aria-invalid={nameError}
-                                    aria-describedby={
-                                      nameError ? "name-error" : undefined
-                                    }
-                                    onKeyDown={(event) => {
-                                      if (event.key === "Enter") {
-                                        event.preventDefault();
-                                        document
-                                          .getElementById("customer-phone")
-                                          ?.focus();
-                                      }
-                                    }}
-                                  />
-                                </div>
-                                {nameError && (
-                                  <p
-                                    className="field-error"
-                                    id="name-error"
-                                    role="alert"
-                                  >
-                                    <IconAlert size={15} />
-                                    Nama belum diisi.
+                          {step === 4 && (
+                            <section className="form-section">
+                              <div className="section-head">
+                                <span className="step-badge">4</span>
+                                <div className="section-copy">
+                                  <h3 id="wizard-step-title" tabIndex={-1}>
+                                    Bantuan &amp; lantai
+                                  </h3>
+                                  <p>
+                                    Pilih bantuan dan akses lantai di kedua
+                                    titik.
                                   </p>
-                                )}
+                                </div>
+                              </div>
+
+                              <div
+                                className="option-list"
+                                role="radiogroup"
+                                aria-label="Bantuan bongkar muat"
+                              >
+                                {helperOptions.map((option) => {
+                                  const OptionIcon = option.icon;
+                                  return (
+                                    <button
+                                      key={option.key}
+                                      type="button"
+                                      role="radio"
+                                      aria-checked={helper === option.key}
+                                      className={`option-row${helper === option.key ? " is-selected" : ""}`}
+                                      onClick={() => setHelper(option.key)}
+                                    >
+                                      <span className="option-icon">
+                                        <OptionIcon size={18} />
+                                      </span>
+                                      <span className="option-main">
+                                        <span className="option-title">
+                                          {option.title}
+                                        </span>
+                                        <span className="option-desc">
+                                          {option.description}
+                                        </span>
+                                      </span>
+                                      <span className="option-price">
+                                        {option.price === 0
+                                          ? "Gratis"
+                                          : `+Rp${option.price.toLocaleString("id-ID")}`}
+                                      </span>
+                                      <span className="option-check">
+                                        <IconCheck size={12} />
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              <div className="floor-grid">
+                                {orderedStops.map((stop) => {
+                                  const floor = floorOf(stop.id);
+                                  const label = stopLabel(stop, stops);
+                                  const fee = floorFee(floor);
+                                  return (
+                                    <div className="floor-card" key={stop.id}>
+                                      <div className="floor-title">
+                                        {label} · Lantai titik{" "}
+                                        {STOP_KIND_LABEL[stop.kind]}
+                                      </div>
+                                      <div className="stepper">
+                                        <button
+                                          type="button"
+                                          className="stepper-btn"
+                                          aria-label={`Kurangi lantai ${label}`}
+                                          onClick={() =>
+                                            changeFloor(stop.id, floor - 1)
+                                          }
+                                          disabled={floor <= 1}
+                                        >
+                                          <IconMinus size={16} />
+                                        </button>
+                                        <div
+                                          className="stepper-value"
+                                          aria-live="polite"
+                                        >
+                                          {floor}
+                                        </div>
+                                        <button
+                                          type="button"
+                                          className="stepper-btn"
+                                          aria-label={`Tambah lantai ${label}`}
+                                          onClick={() =>
+                                            changeFloor(stop.id, floor + 1)
+                                          }
+                                          disabled={floor >= 20}
+                                        >
+                                          <IconPlus size={16} />
+                                        </button>
+                                      </div>
+                                      <p className="floor-hint">
+                                        {floor === 1
+                                          ? "Lantai dasar · Gratis"
+                                          : `Lantai ${floor} · +Rp${fee.toLocaleString("id-ID")}`}
+                                      </p>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <p className="floor-hint">
+                                Biaya lantai dihitung untuk setiap titik muat
+                                dan bongkar.
+                              </p>
+                            </section>
+                          )}
+
+                          {step === 5 && (
+                            <section className="form-section">
+                              <div className="section-head">
+                                <span className="step-badge">5</span>
+                                <div className="section-copy">
+                                  <h3 id="wizard-step-title" tabIndex={-1}>
+                                    Catatan tambahan
+                                  </h3>
+                                  <p>
+                                    Detail yang membantu tim kami di lapangan
+                                    (opsional).
+                                  </p>
+                                </div>
                               </div>
 
                               <div className="field">
-                                <label
-                                  className="field-label"
-                                  htmlFor="customer-phone"
-                                >
-                                  Nomor HP / WhatsApp
-                                </label>
-                                <div
-                                  className={`input-shell${phoneError ? " is-invalid" : ""}`}
-                                >
-                                  <span className="input-icon">
-                                    <IconPhone size={18} />
-                                  </span>
-                                  <input
-                                    id="customer-phone"
-                                    className="field-input"
-                                    type="tel"
-                                    value={phone}
-                                    onChange={(event) =>
-                                      setPhone(event.target.value)
-                                    }
-                                    placeholder="0813 2762 3942"
-                                    inputMode="tel"
-                                    autoComplete="tel"
-                                    enterKeyHint="next"
-                                    required
-                                    maxLength={20}
-                                    aria-invalid={phoneError}
-                                    aria-describedby={
-                                      phoneError ? "phone-error" : "phone-hint"
-                                    }
-                                    onKeyDown={(event) => {
-                                      if (event.key === "Enter") {
-                                        event.preventDefault();
-                                        advance();
-                                      }
-                                    }}
-                                  />
-                                </div>
-                                {phoneError ? (
-                                  <p
-                                    className="field-error"
-                                    id="phone-error"
-                                    role="alert"
-                                  >
-                                    <IconAlert size={15} />
-                                    {phone.trim().length > 0
-                                      ? "Nomor HP belum benar. Contoh: 0813 2762 3942"
-                                      : "Nomor HP wajib diisi. Contoh: 0813 2762 3942"}
-                                  </p>
-                                ) : (
-                                  <p className="field-hint" id="phone-hint">
-                                    Kami hanya menghubungi nomor ini untuk
-                                    pesanan Anda.
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="field schedule-field">
                                 <div className="field-label-row">
-                                  <span className="field-label">
-                                    Jadwal angkut
-                                  </span>
+                                  <label
+                                    className="field-label"
+                                    htmlFor="customer-note"
+                                  >
+                                    Catatan khusus
+                                  </label>
                                   <span className="badge-optional">
                                     Opsional
                                   </span>
                                 </div>
-                                <div className="field-grid">
-                                  <div className="field">
-                                    <label
-                                      className="field-sublabel"
-                                      htmlFor="pickup-date"
-                                    >
-                                      Tanggal
-                                    </label>
-                                    <div className="input-shell">
-                                      <span className="input-icon">
-                                        <IconCalendar size={18} />
-                                      </span>
-                                      <input
-                                        id="pickup-date"
-                                        className="field-input"
-                                        type="date"
-                                        value={pickupDate}
-                                        min={today}
-                                        onChange={(event) =>
-                                          setPickupDate(event.target.value)
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="field">
-                                    <label
-                                      className="field-sublabel"
-                                      htmlFor="pickup-time"
-                                    >
-                                      Jam angkut
-                                    </label>
-                                    <div className="input-shell">
-                                      <span className="input-icon">
-                                        <IconClock size={18} />
-                                      </span>
-                                      <select
-                                        id="pickup-time"
-                                        className="field-input field-select"
-                                        value={pickupTime}
-                                        onChange={(event) =>
-                                          setPickupTime(event.target.value)
-                                        }
-                                        aria-label="Pilih jam dan menit angkut"
-                                      >
-                                        <option value="">
-                                          -- Pilih Jam &amp; Menit --
-                                        </option>
-                                        {TIME_GROUPS.map((grp) => (
-                                          <optgroup
-                                            key={grp.group}
-                                            label={grp.group}
-                                          >
-                                            {grp.options.map((opt) => (
-                                              <option
-                                                key={opt.value}
-                                                value={opt.value}
-                                              >
-                                                {opt.label}
-                                              </option>
-                                            ))}
-                                          </optgroup>
-                                        ))}
-                                        {pickupTime &&
-                                          !TIME_GROUPS.some((g) =>
-                                            g.options.some(
-                                              (o) => o.value === pickupTime,
-                                            ),
-                                          ) && (
-                                            <option value={pickupTime}>
-                                              Waktu: {pickupTime} WIB
-                                            </option>
-                                          )}
-                                      </select>
-                                    </div>
-                                  </div>
+                                <div className="textarea-shell">
+                                  <textarea
+                                    id="customer-note"
+                                    className="field-textarea"
+                                    value={note}
+                                    onChange={(event) =>
+                                      setNote(event.target.value)
+                                    }
+                                    maxLength={300}
+                                    rows={3}
+                                    placeholder="Contoh: barang perlu ditutup terpal, ada tangga sempit, mohon datang jam 8 pagi."
+                                  />
+                                  <span className="char-count">
+                                    {note.length}/300
+                                  </span>
                                 </div>
 
-                                <div className="time-presets-container">
-                                  <span className="time-presets-label">
-                                    Pilihan cepat:
+                                <div className="quick-suggestions">
+                                  <span className="quick-suggestion-title">
+                                    Saran catatan cepat:
                                   </span>
-                                  {TIME_PRESETS.map((preset) => (
+                                  {QUICK_NOTES.map((snippet) => (
                                     <button
-                                      key={preset.time}
+                                      key={snippet}
                                       type="button"
-                                      className={`time-chip${pickupTime === preset.time ? " is-active" : ""}`}
-                                      onClick={() => setPickupTime(preset.time)}
+                                      className="quick-suggestion-btn"
+                                      onClick={() => appendQuickNote(snippet)}
                                     >
-                                      {preset.label}
+                                      + {snippet}
                                     </button>
                                   ))}
                                 </div>
-
-                                {pickupTime && (
-                                  <div className="time-selected-alert">
-                                    <IconClock size={14} />
-                                    <span>
-                                      Jam jemput: {formatPickupTime(pickupTime)}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => setPickupTime("")}
-                                      style={{
-                                        marginLeft: 8,
-                                        background: "none",
-                                        border: "none",
-                                        color: "var(--danger)",
-                                        cursor: "pointer",
-                                        fontSize: "0.75rem",
-                                        fontWeight: 600,
-                                        textDecoration: "underline",
-                                        padding: 0,
-                                      }}
-                                      title="Hapus pilihan jam"
-                                    >
-                                      Hapus
-                                    </button>
-                                  </div>
-                                )}
-
-                                <p className="field-hint">
-                                  Kosongkan jika jadwal akan dibicarakan lewat
-                                  WhatsApp.
-                                </p>
                               </div>
-                            </div>
+                            </section>
+                          )}
 
-                          </section>
-                        )}
-
-                        {step === 3 && (
-                          <section className="form-section">
-                            <div className="section-head">
-                              <span className="step-badge">3</span>
-                              <div className="section-copy">
-                                <h3 id="wizard-step-title" tabIndex={-1}>
-                                  Layanan
-                                </h3>
-                                <p>Pilih jangkauan rute angkutan Anda.</p>
-                              </div>
-                            </div>
-
-                            <div
-                              className="choice-grid"
-                              role="radiogroup"
-                              aria-label="Layanan"
-                            >
-                              <button
-                                type="button"
-                                role="radio"
-                                aria-checked={service === "dalam-kota"}
-                                className={`choice-card${service === "dalam-kota" ? " is-selected" : ""}`}
-                                onClick={() => setService("dalam-kota")}
-                              >
-                                <span className="choice-icon">
-                                  <IconBuilding size={18} />
-                                </span>
-                                <span className="choice-copy">
-                                  <span className="choice-title">
-                                    Dalam Kota
-                                  </span>
-                                  <span
-                                    className="choice-meta"
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      color: "var(--ink-soft)",
-                                      display: "block",
-                                    }}
-                                  >
-                                    Demak &amp; Semarang
-                                  </span>
-                                </span>
-                                <span className="choice-check">
-                                  <IconCheck size={12} />
-                                </span>
-                              </button>
-
-                              <button
-                                type="button"
-                                role="radio"
-                                aria-checked={service === "luar-kota"}
-                                className={`choice-card${service === "luar-kota" ? " is-selected" : ""}`}
-                                onClick={() => setService("luar-kota")}
-                              >
-                                <span className="choice-icon">
-                                  <IconRoute size={18} />
-                                </span>
-                                <span className="choice-copy">
-                                  <span className="choice-title">
-                                    Luar Kota
-                                  </span>
-                                  <span
-                                    className="choice-meta"
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      color: "var(--ink-soft)",
-                                      display: "block",
-                                    }}
-                                  >
-                                    Antar kota (+50% ongkos)
-                                  </span>
-                                </span>
-                                <span className="choice-check">
-                                  <IconCheck size={12} />
-                                </span>
-                              </button>
-                            </div>
-
-                            <div
-                              className={`priority-toggle-card${priority ? " is-active" : ""}`}
-                              style={{ marginTop: 0 }}
-                            >
-                              <div className="priority-toggle-row">
-                                <div className="priority-toggle-info">
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 8,
-                                      flexWrap: "wrap",
-                                    }}
-                                  >
-                                    <span
-                                      className="field-label"
-                                      style={{ margin: 0, fontWeight: 700 }}
-                                    >
-                                      Prioritas Pengiriman Langsung
-                                    </span>
-                                    {priority && (
-                                      <span className="priority-badge-chip">
-                                        Langsung Jalan
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p
-                                    className="field-hint"
-                                    style={{ marginTop: 4 }}
-                                  >
-                                    {priority
-                                      ? "Aktif: armada berangkat secepatnya. Tambahan +Rp 50.000."
-                                      : "Tidak aktif: jadwal reguler, armada tiba maksimal 4 jam."}
+                          {step === 6 && (
+                            <section className="form-section">
+                              <div className="section-head">
+                                <span className="step-badge">6</span>
+                                <div className="section-copy">
+                                  <h3 id="wizard-step-title" tabIndex={-1}>
+                                    Ringkasan estimasi
+                                  </h3>
+                                  <p>
+                                    Periksa kembali rincian data dan estimasi
+                                    ongkos sebelum kirim ke WhatsApp.
                                   </p>
                                 </div>
-                                <button
-                                  type="button"
-                                  role="switch"
-                                  aria-checked={priority}
-                                  className={`toggle-switch${priority ? " is-on" : ""}`}
-                                  onClick={() => setPriority((v) => !v)}
-                                  aria-label="Toggle prioritas pengiriman langsung"
-                                >
-                                  <span className="toggle-knob" />
-                                </button>
                               </div>
-                              {priority && (
+
+                              {!allStopsSet && (
                                 <div
-                                  className="priority-badge"
-                                  style={{ marginTop: 8 }}
+                                  className="route-warning-banner"
+                                  role="alert"
                                 >
-                                  <IconCheck size={14} />
-                                  <span>
-                                    Layanan prioritas aktif · Tambahan +Rp
-                                    50.000
-                                  </span>
+                                  <IconAlert size={20} />
+                                  <div>
+                                    <p>
+                                      <strong>
+                                        Titik rute di peta belum lengkap!
+                                      </strong>
+                                      <br />
+                                      {orderedStops
+                                        .filter((stop) => stop.lat === null)
+                                        .map((stop) => stopLabel(stop, stops))
+                                        .join(", ")}{" "}
+                                      belum ditandai di peta. Tandai semua titik
+                                      agar jarak &amp; ongkos otomatis dihitung.
+                                    </p>
+                                    <button
+                                      type="button"
+                                      className="btn-map-jump"
+                                      onClick={() =>
+                                        showRoute(
+                                          orderedStops.find(
+                                            (stop) => stop.lat === null,
+                                          )?.kind ?? "load",
+                                        )
+                                      }
+                                    >
+                                      <IconMapPin
+                                        size={14}
+                                        style={{
+                                          display: "inline",
+                                          verticalAlign: "-2px",
+                                          marginRight: 4,
+                                        }}
+                                      />
+                                      Tandai titik di peta sekarang
+                                    </button>
+                                  </div>
                                 </div>
                               )}
-                            </div>
 
-                            <div className="field-stack">
-                              <label
-                                className="field-label"
-                                htmlFor="waiting-time"
-                              >
-                                Layanan waktu tunggu
-                              </label>
-                              <div className="input-shell">
-                                <span className="input-icon">
-                                  <IconClock size={18} />
-                                </span>
-                                <select
-                                  id="waiting-time"
-                                  className="field-input field-select"
-                                  value={waitingTime}
-                                  onChange={(event) =>
-                                    setWaitingTime(
-                                      event.target.value as WaitingTime,
-                                    )
-                                  }
-                                >
-                                  {waitingOptions.map((option) => (
-                                    <option
-                                      key={option.key}
-                                      value={option.key}
+                              <div className="order-review-card">
+                                <div className="review-section">
+                                  <div className="review-section-head">
+                                    <span className="review-section-title">
+                                      Data Pemesan
+                                    </span>
+                                    <button
+                                      type="button"
+                                      className="review-edit-btn"
+                                      onClick={() => goToStep(2)}
                                     >
-                                      {option.title}
-                                      {option.price > 0
-                                        ? ` (+Rp ${option.price.toLocaleString("id-ID")})`
-                                        : ""}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                              <p className="field-hint">
-                                Biaya tambahan bila armada menunggu di lokasi.
-                              </p>
-                            </div>
-
-                          </section>
-                        )}
-
-                        {step === 4 && (
-                          <section className="form-section">
-                            <div className="section-head">
-                              <span className="step-badge">4</span>
-                              <div className="section-copy">
-                                <h3 id="wizard-step-title" tabIndex={-1}>
-                                  Bantuan &amp; lantai
-                                </h3>
-                                <p>
-                                  Pilih bantuan dan akses lantai di kedua titik.
-                                </p>
-                              </div>
-                            </div>
-
-                            <div
-                              className="option-list"
-                              role="radiogroup"
-                              aria-label="Bantuan bongkar muat"
-                            >
-                              {helperOptions.map((option) => {
-                                const OptionIcon = option.icon;
-                                return (
-                                  <button
-                                    key={option.key}
-                                    type="button"
-                                    role="radio"
-                                    aria-checked={helper === option.key}
-                                    className={`option-row${helper === option.key ? " is-selected" : ""}`}
-                                    onClick={() => setHelper(option.key)}
-                                  >
-                                    <span className="option-icon">
-                                      <OptionIcon size={18} />
-                                    </span>
-                                    <span className="option-main">
-                                      <span className="option-title">
-                                        {option.title}
-                                      </span>
-                                      <span className="option-desc">
-                                        {option.description}
-                                      </span>
-                                    </span>
-                                    <span className="option-price">
-                                      {option.price === 0
-                                        ? "Gratis"
-                                        : `+Rp${option.price.toLocaleString("id-ID")}`}
-                                    </span>
-                                    <span className="option-check">
-                                      <IconCheck size={12} />
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-
-                            <div className="floor-grid">
-                              {orderedStops.map((stop) => {
-                                const floor = floorOf(stop.id);
-                                const label = stopLabel(stop, stops);
-                                const fee = floorFee(floor);
-                                return (
-                                  <div className="floor-card" key={stop.id}>
-                                    <div className="floor-title">
-                                      {label} · Lantai titik{" "}
-                                      {STOP_KIND_LABEL[stop.kind]}
+                                      Ubah
+                                    </button>
+                                  </div>
+                                  <dl className="review-rows">
+                                    <div className="review-row">
+                                      <dt>Nama pemesan</dt>
+                                      <dd>{name || "—"}</dd>
                                     </div>
-                                    <div className="stepper">
-                                      <button
-                                        type="button"
-                                        className="stepper-btn"
-                                        aria-label={`Kurangi lantai ${label}`}
-                                        onClick={() =>
-                                          changeFloor(stop.id, floor - 1)
-                                        }
-                                        disabled={floor <= 1}
-                                      >
-                                        <IconMinus size={16} />
-                                      </button>
-                                      <div
-                                        className="stepper-value"
-                                        aria-live="polite"
-                                      >
-                                        {floor}
-                                      </div>
-                                      <button
-                                        type="button"
-                                        className="stepper-btn"
-                                        aria-label={`Tambah lantai ${label}`}
-                                        onClick={() =>
-                                          changeFloor(stop.id, floor + 1)
-                                        }
-                                        disabled={floor >= 20}
-                                      >
-                                        <IconPlus size={16} />
-                                      </button>
+                                    <div className="review-row">
+                                      <dt>Nomor HP / WhatsApp</dt>
+                                      <dd>{phone || "—"}</dd>
                                     </div>
-                                    <p className="floor-hint">
-                                      {floor === 1
-                                        ? "Lantai dasar · Gratis"
-                                        : `Lantai ${floor} · +Rp${fee.toLocaleString("id-ID")}`}
-                                    </p>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            <p className="floor-hint">
-                              Biaya lantai dihitung untuk setiap titik muat dan
-                              bongkar.
-                            </p>
-
-                          </section>
-                        )}
-
-                        {step === 5 && (
-                          <section className="form-section">
-                            <div className="section-head">
-                              <span className="step-badge">5</span>
-                              <div className="section-copy">
-                                <h3 id="wizard-step-title" tabIndex={-1}>
-                                  Catatan tambahan
-                                </h3>
-                                <p>
-                                  Detail yang membantu tim kami di lapangan
-                                  (opsional).
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="field">
-                              <div className="field-label-row">
-                                <label
-                                  className="field-label"
-                                  htmlFor="customer-note"
-                                >
-                                  Catatan khusus
-                                </label>
-                                <span className="badge-optional">Opsional</span>
-                              </div>
-                              <div className="textarea-shell">
-                                <textarea
-                                  id="customer-note"
-                                  className="field-textarea"
-                                  value={note}
-                                  onChange={(event) =>
-                                    setNote(event.target.value)
-                                  }
-                                  maxLength={300}
-                                  rows={3}
-                                  placeholder="Contoh: barang perlu ditutup terpal, ada tangga sempit, mohon datang jam 8 pagi."
-                                />
-                                <span className="char-count">
-                                  {note.length}/300
-                                </span>
-                              </div>
-
-                              <div className="quick-suggestions">
-                                <span className="quick-suggestion-title">
-                                  Saran catatan cepat:
-                                </span>
-                                {QUICK_NOTES.map((snippet) => (
-                                  <button
-                                    key={snippet}
-                                    type="button"
-                                    className="quick-suggestion-btn"
-                                    onClick={() => appendQuickNote(snippet)}
-                                  >
-                                    + {snippet}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                          </section>
-                        )}
-
-                        {step === 6 && (
-                          <section className="form-section">
-                            <div className="section-head">
-                              <span className="step-badge">6</span>
-                              <div className="section-copy">
-                                <h3 id="wizard-step-title" tabIndex={-1}>
-                                  Ringkasan estimasi
-                                </h3>
-                                <p>
-                                  Periksa kembali rincian data dan estimasi
-                                  ongkos sebelum kirim ke WhatsApp.
-                                </p>
-                              </div>
-                            </div>
-
-                            {!allStopsSet && (
-                              <div
-                                className="route-warning-banner"
-                                role="alert"
-                              >
-                                <IconAlert size={20} />
-                                <div>
-                                  <p>
-                                    <strong>
-                                      Titik rute di peta belum lengkap!
-                                    </strong>
-                                    <br />
-                                    {orderedStops
-                                      .filter((stop) => stop.lat === null)
-                                      .map((stop) => stopLabel(stop, stops))
-                                      .join(", ")}{" "}
-                                    belum ditandai di peta. Tandai semua titik
-                                    agar jarak &amp; ongkos otomatis dihitung.
-                                  </p>
-                                  <button
-                                    type="button"
-                                    className="btn-map-jump"
-                                    onClick={() =>
-                                      showRoute(
-                                        orderedStops.find(
-                                          (stop) => stop.lat === null,
-                                        )?.kind ?? "load",
-                                      )
-                                    }
-                                  >
-                                    <IconMapPin
-                                      size={14}
-                                      style={{
-                                        display: "inline",
-                                        verticalAlign: "-2px",
-                                        marginRight: 4,
-                                      }}
-                                    />
-                                    Tandai titik di peta sekarang
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-
-                            <div className="order-review-card">
-                              <div className="review-section">
-                                <div className="review-section-head">
-                                  <span className="review-section-title">
-                                    Data Pemesan
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="review-edit-btn"
-                                    onClick={() => goToStep(2)}
-                                  >
-                                    Ubah
-                                  </button>
-                                </div>
-                                <dl className="review-rows">
-                                  <div className="review-row">
-                                    <dt>Nama pemesan</dt>
-                                    <dd>{name || "—"}</dd>
-                                  </div>
-                                  <div className="review-row">
-                                    <dt>Nomor HP / WhatsApp</dt>
-                                    <dd>{phone || "—"}</dd>
-                                  </div>
-                                  <div className="review-row">
-                                    <dt>Jadwal angkut</dt>
-                                    <dd>
-                                      {scheduleLabel ||
-                                        "Dibicarakan lewat WhatsApp"}
-                                    </dd>
-                                  </div>
-                                </dl>
-                              </div>
-
-                              <div className="review-section">
-                                <div className="review-section-head">
-                                  <span className="review-section-title">
-                                    Rute Angkutan
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="review-edit-btn"
-                                    onClick={() => showRoute("load")}
-                                  >
-                                    Peta
-                                  </button>
-                                </div>
-                                <dl className="review-rows">
-                                  {orderedStops.map((stop) => (
-                                    <div className="review-row" key={stop.id}>
-                                      <dt>
-                                        {stopLabel(stop, stops)} ·{" "}
-                                        {stop.kind === "load"
-                                          ? "Muat"
-                                          : "Bongkar"}
-                                      </dt>
+                                    <div className="review-row">
+                                      <dt>Jadwal angkut</dt>
                                       <dd>
-                                        {stop.lat !== null
-                                          ? stop.address
-                                          : "Belum dipilih di peta"}
+                                        {scheduleLabel ||
+                                          "Dibicarakan lewat WhatsApp"}
                                       </dd>
                                     </div>
-                                  ))}
-                                  {quote && (
-                                    <div className="review-row">
-                                      <dt>Jarak total</dt>
-                                      <dd>{quote.billableKm} km</dd>
-                                    </div>
-                                  )}
-                                  <div className="review-row">
-                                    <dt>Pengiriman</dt>
-                                    <dd>
-                                      {priority
-                                        ? "Prioritas Langsung (ASAP, +Rp 50.000)"
-                                        : "Reguler (Tiba maks. 4 jam)"}
-                                    </dd>
-                                  </div>
-                                </dl>
-                              </div>
-
-                              <div className="review-section">
-                                <div className="review-section-head">
-                                  <span className="review-section-title">
-                                    Layanan &amp; Bantuan
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="review-edit-btn"
-                                    onClick={() => goToStep(3)}
-                                  >
-                                    Ubah
-                                  </button>
+                                  </dl>
                                 </div>
-                                <dl className="review-rows">
-                                  <div className="review-row">
-                                    <dt>Layanan</dt>
-                                    <dd>{serviceLabel}</dd>
+
+                                <div className="review-section">
+                                  <div className="review-section-head">
+                                    <span className="review-section-title">
+                                      Rute Angkutan
+                                    </span>
+                                    <button
+                                      type="button"
+                                      className="review-edit-btn"
+                                      onClick={() => showRoute("load")}
+                                    >
+                                      Peta
+                                    </button>
                                   </div>
-                                  <div className="review-row">
-                                    <dt>Bantuan tenaga</dt>
-                                    <dd>{helperLabel}</dd>
-                                  </div>
-                                  {waitingTime !== "none" && (
+                                  <dl className="review-rows">
+                                    {orderedStops.map((stop) => (
+                                      <div className="review-row" key={stop.id}>
+                                        <dt>
+                                          {stopLabel(stop, stops)} ·{" "}
+                                          {stop.kind === "load"
+                                            ? "Muat"
+                                            : "Bongkar"}
+                                        </dt>
+                                        <dd>
+                                          {stop.lat !== null
+                                            ? stop.address
+                                            : "Belum dipilih di peta"}
+                                        </dd>
+                                      </div>
+                                    ))}
+                                    {quote && (
+                                      <div className="review-row">
+                                        <dt>Jarak total</dt>
+                                        <dd>{quote.billableKm} km</dd>
+                                      </div>
+                                    )}
                                     <div className="review-row">
-                                      <dt>Waktu tunggu</dt>
+                                      <dt>Pengiriman</dt>
                                       <dd>
-                                        {`${waitingLabel} (+Rp ${(
-                                          waitingOption?.price ?? 0
-                                        ).toLocaleString("id-ID")})`}
+                                        {priority
+                                          ? "Prioritas Langsung (ASAP, +Rp 50.000)"
+                                          : "Reguler (Tiba maks. 4 jam)"}
                                       </dd>
                                     </div>
-                                  )}
-                                  <div className="review-row">
-                                    <dt>Lantai muat</dt>
-                                    <dd>
-                                      {loadStops
-                                        .map(
-                                          (stop, index) =>
-                                            `M${index + 1}: ${floorOf(stop.id)}`,
-                                        )
-                                        .join(" · ")}
-                                    </dd>
-                                  </div>
-                                  <div className="review-row">
-                                    <dt>Lantai bongkar</dt>
-                                    <dd>
-                                      {unloadStops
-                                        .map(
-                                          (stop, index) =>
-                                            `B${index + 1}: ${floorOf(stop.id)}`,
-                                        )
-                                        .join(" · ")}
-                                    </dd>
-                                  </div>
-                                  {note.trim() && (
-                                    <div className="review-row">
-                                      <dt>Catatan</dt>
-                                      <dd>{note}</dd>
-                                    </div>
-                                  )}
-                                </dl>
-                              </div>
-                            </div>
+                                  </dl>
+                                </div>
 
-                            <div
-                              className="summary-block"
-                              style={{
-                                marginTop: 0,
-                                paddingTop: 0,
-                                borderTop: 0,
-                              }}
-                            >
-                              {quote ? (
-                                <div className="quote-card" aria-live="polite">
-                                  <div className="quote-head">
-                                    <span className="quote-title">
-                                      Rincian Estimasi Biaya
+                                <div className="review-section">
+                                  <div className="review-section-head">
+                                    <span className="review-section-title">
+                                      Layanan &amp; Bantuan
                                     </span>
-                                    <span className="quote-badge">
-                                      Estimasi
-                                    </span>
+                                    <button
+                                      type="button"
+                                      className="review-edit-btn"
+                                      onClick={() => goToStep(3)}
+                                    >
+                                      Ubah
+                                    </button>
                                   </div>
-                                  <dl className="quote-lines">
-                                    <div className="quote-line">
-                                      <dt>Jarak total</dt>
-                                      <dd>{quote.billableKm} km</dd>
+                                  <dl className="review-rows">
+                                    <div className="review-row">
+                                      <dt>Layanan</dt>
+                                      <dd>{serviceLabel}</dd>
                                     </div>
-                                    {quote.outOfTownSurcharge > 0 ? (
-                                      <>
-                                        <div className="quote-line">
-                                          <dt>Ongkos angkut dasar</dt>
-                                          <dd>
-                                            Rp{" "}
-                                            {quote.baseTransport.toLocaleString(
-                                              "id-ID",
-                                            )}
-                                          </dd>
-                                        </div>
-                                        <div className="quote-line">
-                                          <dt>Tambahan luar kota (+50%)</dt>
-                                          <dd>
-                                            +Rp{" "}
-                                            {quote.outOfTownSurcharge.toLocaleString(
-                                              "id-ID",
-                                            )}
-                                          </dd>
-                                        </div>
-                                      </>
-                                    ) : (
-                                      <div className="quote-line">
-                                        <dt>Ongkos angkut</dt>
+                                    <div className="review-row">
+                                      <dt>Bantuan tenaga</dt>
+                                      <dd>{helperLabel}</dd>
+                                    </div>
+                                    {waitingTime !== "none" && (
+                                      <div className="review-row">
+                                        <dt>Waktu tunggu</dt>
                                         <dd>
-                                          Rp{" "}
-                                          {quote.transport.toLocaleString(
-                                            "id-ID",
-                                          )}
+                                          {`${waitingLabel} (+Rp ${(
+                                            waitingOption?.price ?? 0
+                                          ).toLocaleString("id-ID")})`}
                                         </dd>
                                       </div>
                                     )}
-                                    {quote.helper > 0 && (
-                                      <div className="quote-line">
-                                        <dt>Bantuan bongkar muat</dt>
-                                        <dd>
-                                          Rp{" "}
-                                          {quote.helper.toLocaleString("id-ID")}
-                                        </dd>
-                                      </div>
-                                    )}
-                                    {quote.loadFloor > 0 && (
-                                      <div className="quote-line">
-                                        <dt>
-                                          Lantai muat
-                                          {loadStops.length > 1
-                                            ? ` (${loadStops.length} titik)`
-                                            : ""}
-                                        </dt>
-                                        <dd>
-                                          Rp{" "}
-                                          {quote.loadFloor.toLocaleString(
-                                            "id-ID",
-                                          )}
-                                        </dd>
-                                      </div>
-                                    )}
-                                    {quote.unloadFloor > 0 && (
-                                      <div className="quote-line">
-                                        <dt>
-                                          Lantai bongkar
-                                          {unloadStops.length > 1
-                                            ? ` (${unloadStops.length} titik)`
-                                            : ""}
-                                        </dt>
-                                        <dd>
-                                          Rp{" "}
-                                          {quote.unloadFloor.toLocaleString(
-                                            "id-ID",
-                                          )}
-                                        </dd>
-                                      </div>
-                                    )}
-                                    {quote.priority > 0 && (
-                                      <div className="quote-line">
-                                        <dt>Prioritas pengiriman</dt>
-                                        <dd>
-                                          Rp{" "}
-                                          {quote.priority.toLocaleString(
-                                            "id-ID",
-                                          )}
-                                        </dd>
-                                      </div>
-                                    )}
-                                    {quote.waitingTime > 0 && (
-                                      <div className="quote-line">
-                                        <dt>
-                                          Waktu tunggu ({waitingLabel})
-                                        </dt>
-                                        <dd>
-                                          Rp{" "}
-                                          {quote.waitingTime.toLocaleString(
-                                            "id-ID",
-                                          )}
-                                        </dd>
+                                    <div className="review-row">
+                                      <dt>Lantai muat</dt>
+                                      <dd>
+                                        {loadStops
+                                          .map(
+                                            (stop, index) =>
+                                              `M${index + 1}: ${floorOf(stop.id)}`,
+                                          )
+                                          .join(" · ")}
+                                      </dd>
+                                    </div>
+                                    <div className="review-row">
+                                      <dt>Lantai bongkar</dt>
+                                      <dd>
+                                        {unloadStops
+                                          .map(
+                                            (stop, index) =>
+                                              `B${index + 1}: ${floorOf(stop.id)}`,
+                                          )
+                                          .join(" · ")}
+                                      </dd>
+                                    </div>
+                                    {note.trim() && (
+                                      <div className="review-row">
+                                        <dt>Catatan</dt>
+                                        <dd>{note}</dd>
                                       </div>
                                     )}
                                   </dl>
-                                  <div className="quote-total">
-                                    <span>Total estimasi</span>
-                                    <strong>
-                                      Rp {quote.total.toLocaleString("id-ID")}
-                                    </strong>
-                                  </div>
-                                  <p className="quote-note">
-                                    Harga final dikonfirmasi oleh Jasa Angkut
-                                    Slamet lewat WhatsApp.
-                                  </p>
                                 </div>
-                              ) : (
-                                <div className="quote-empty">
-                                  <span className="empty-icon">
-                                    <IconReceipt size={19} />
-                                  </span>
-                                  <div className="empty-copy">
-                                    <strong>Harga belum bisa dihitung</strong>
-                                    <p>
-                                      {missing.length > 0
-                                        ? `Lengkapi ${missing.join(", ").toLowerCase()} untuk melihat estimasi.`
-                                        : "Periksa kembali data pesanan Anda."}
+                              </div>
+
+                              <div
+                                className="summary-block"
+                                style={{
+                                  marginTop: 0,
+                                  paddingTop: 0,
+                                  borderTop: 0,
+                                }}
+                              >
+                                {quote ? (
+                                  <div
+                                    className="quote-card"
+                                    aria-live="polite"
+                                  >
+                                    <div className="quote-head">
+                                      <span className="quote-title">
+                                        Rincian Estimasi Biaya
+                                      </span>
+                                      <span className="quote-badge">
+                                        Estimasi
+                                      </span>
+                                    </div>
+                                    <dl className="quote-lines">
+                                      <div className="quote-line">
+                                        <dt>Jarak total</dt>
+                                        <dd>{quote.billableKm} km</dd>
+                                      </div>
+                                      {quote.outOfTownSurcharge > 0 ? (
+                                        <>
+                                          <div className="quote-line">
+                                            <dt>Ongkos angkut dasar</dt>
+                                            <dd>
+                                              Rp{" "}
+                                              {quote.baseTransport.toLocaleString(
+                                                "id-ID",
+                                              )}
+                                            </dd>
+                                          </div>
+                                          <div className="quote-line">
+                                            <dt>Tambahan luar kota (+50%)</dt>
+                                            <dd>
+                                              +Rp{" "}
+                                              {quote.outOfTownSurcharge.toLocaleString(
+                                                "id-ID",
+                                              )}
+                                            </dd>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <div className="quote-line">
+                                          <dt>Ongkos angkut</dt>
+                                          <dd>
+                                            Rp{" "}
+                                            {quote.transport.toLocaleString(
+                                              "id-ID",
+                                            )}
+                                          </dd>
+                                        </div>
+                                      )}
+                                      {quote.helper > 0 && (
+                                        <div className="quote-line">
+                                          <dt>Bantuan bongkar muat</dt>
+                                          <dd>
+                                            Rp{" "}
+                                            {quote.helper.toLocaleString(
+                                              "id-ID",
+                                            )}
+                                          </dd>
+                                        </div>
+                                      )}
+                                      {quote.loadFloor > 0 && (
+                                        <div className="quote-line">
+                                          <dt>
+                                            Lantai muat
+                                            {loadStops.length > 1
+                                              ? ` (${loadStops.length} titik)`
+                                              : ""}
+                                          </dt>
+                                          <dd>
+                                            Rp{" "}
+                                            {quote.loadFloor.toLocaleString(
+                                              "id-ID",
+                                            )}
+                                          </dd>
+                                        </div>
+                                      )}
+                                      {quote.unloadFloor > 0 && (
+                                        <div className="quote-line">
+                                          <dt>
+                                            Lantai bongkar
+                                            {unloadStops.length > 1
+                                              ? ` (${unloadStops.length} titik)`
+                                              : ""}
+                                          </dt>
+                                          <dd>
+                                            Rp{" "}
+                                            {quote.unloadFloor.toLocaleString(
+                                              "id-ID",
+                                            )}
+                                          </dd>
+                                        </div>
+                                      )}
+                                      {quote.priority > 0 && (
+                                        <div className="quote-line">
+                                          <dt>Prioritas pengiriman</dt>
+                                          <dd>
+                                            Rp{" "}
+                                            {quote.priority.toLocaleString(
+                                              "id-ID",
+                                            )}
+                                          </dd>
+                                        </div>
+                                      )}
+                                      {quote.waitingTime > 0 && (
+                                        <div className="quote-line">
+                                          <dt>Waktu tunggu ({waitingLabel})</dt>
+                                          <dd>
+                                            Rp{" "}
+                                            {quote.waitingTime.toLocaleString(
+                                              "id-ID",
+                                            )}
+                                          </dd>
+                                        </div>
+                                      )}
+                                    </dl>
+                                    <div className="quote-total">
+                                      <span>Total estimasi</span>
+                                      <strong>
+                                        Rp {quote.total.toLocaleString("id-ID")}
+                                      </strong>
+                                    </div>
+                                    <p className="quote-note">
+                                      Harga final dikonfirmasi oleh Jasa Angkut
+                                      Slamet lewat WhatsApp.
                                     </p>
                                   </div>
-                                </div>
-                              )}
-                            </div>
+                                ) : (
+                                  <div className="quote-empty">
+                                    <span className="empty-icon">
+                                      <IconReceipt size={19} />
+                                    </span>
+                                    <div className="empty-copy">
+                                      <strong>Harga belum bisa dihitung</strong>
+                                      <p>
+                                        {missing.length > 0
+                                          ? `Lengkapi ${missing.join(", ").toLowerCase()} untuk melihat estimasi.`
+                                          : "Periksa kembali data pesanan Anda."}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
 
-                            <div className="submit-area">
-                              {waUrl ? (
-                                <a
-                                  className="btn btn-primary btn-lg btn-block"
-                                  href={waUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <IconWhatsApp size={20} />
-                                  Kirim pesanan ke WhatsApp
-                                </a>
-                              ) : (
-                                <button
-                                  className="btn btn-primary btn-lg btn-block"
-                                  disabled
-                                >
-                                  <IconWhatsApp size={20} />
-                                  Kirim pesanan ke WhatsApp
-                                </button>
-                              )}
-                              <p className="submit-note">
-                                <IconLock size={14} />
-                                Data hanya dikirim saat Anda menekan tombol.
-                              </p>
-                              {!waUrl && (
-                                <p className="submit-reason">
-                                  Lengkapi{" "}
-                                  {missing.join(", ").toLowerCase() ||
-                                    "data pesanan"}{" "}
-                                  untuk mengaktifkan tombol.
+                              <div className="submit-area">
+                                {waUrl ? (
+                                  <a
+                                    className="btn btn-primary btn-lg btn-block"
+                                    href={waUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <IconWhatsApp size={20} />
+                                    Kirim pesanan ke WhatsApp
+                                  </a>
+                                ) : (
+                                  <button
+                                    className="btn btn-primary btn-lg btn-block"
+                                    disabled
+                                  >
+                                    <IconWhatsApp size={20} />
+                                    Kirim pesanan ke WhatsApp
+                                  </button>
+                                )}
+                                <p className="submit-note">
+                                  <IconLock size={14} />
+                                  Data hanya dikirim saat Anda menekan tombol.
                                 </p>
-                              )}
-                            </div>
+                                {!waUrl && (
+                                  <p className="submit-reason">
+                                    Lengkapi{" "}
+                                    {missing.join(", ").toLowerCase() ||
+                                      "data pesanan"}{" "}
+                                    untuk mengaktifkan tombol.
+                                  </p>
+                                )}
+                              </div>
+                            </section>
+                          )}
+                        </div>
 
-                          </section>
-                        )}
-                      </div>
-
-                      <div className="wizard-actions booking-tab-actions">
-                        <button
-                          type="button"
-                          className="btn btn-secondary"
-                          onClick={step === 1 ? closeBooking : goBack}
-                        >
-                          {step > 1 && <IconArrowLeft size={18} />}
-                          <span>{step === 1 ? "Tutup" : "Kembali"}</span>
-                        </button>
-                        {quote && (
-                          <div className="booking-tab-price">
-                            <span className="booking-tab-price-label">
-                              Estimasi
-                            </span>
-                            <strong>
-                              Rp {quote.total.toLocaleString("id-ID")}
-                            </strong>
-                          </div>
-                        )}
-                        {step < wizardSteps.length && (
+                        <div className="wizard-actions booking-tab-actions">
                           <button
                             type="button"
-                            className="btn btn-primary wizard-actions-right"
-                            onClick={advance}
+                            className="btn btn-secondary"
+                            onClick={step === 1 ? closeBooking : goBack}
                           >
-                            <span>Lanjut</span>
-                            <IconArrowRight size={18} />
+                            {step > 1 && <IconArrowLeft size={18} />}
+                            <span>{step === 1 ? "Tutup" : "Kembali"}</span>
                           </button>
-                        )}
+                          {quote && (
+                            <div className="booking-tab-price">
+                              <span className="booking-tab-price-label">
+                                Estimasi
+                              </span>
+                              <strong>
+                                Rp {quote.total.toLocaleString("id-ID")}
+                              </strong>
+                            </div>
+                          )}
+                          {step < wizardSteps.length && (
+                            <button
+                              type="button"
+                              className="btn btn-primary wizard-actions-right"
+                              onClick={advance}
+                            >
+                              <span>Lanjut</span>
+                              <IconArrowRight size={18} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </section>
                   </section>
-                </section>
                 </>
               )}
-            <div className="hero-content hero-content-centered">
-              <div className="hero-pill-badge">
-                <span className="hero-pill-star">★</span>
-                <span>
-                  Jasa Angkut Slamet Kebonbatur, Mranggen, Demak, Kota Semarang,
-                  Kab. Semarang
-                </span>
-              </div>
-              <h1 className="hero-title" id="hero-title">
-                Pindahan Lebih Tenang,{" "}
-                <span>Barang Sampai dengan Aman &amp; Tepat Waktu.</span>
-              </h1>
-              <p className="hero-lead">
-                Layanan armada pick up handal untuk pindahan rumah, kos, kantor,
-                hingga distribusi barang dagangan se-Demak, Semarang, dan
-                sekitarnya. Tarif transparan di awal, respon cepat &lt; 5 menit!
-              </p>
+              <div className="hero-content hero-content-centered">
+                <div className="hero-pill-badge">
+                  <span className="hero-pill-star">★</span>
+                  <span>
+                    Jasa Angkut Slamet Kebonbatur, Mranggen, Demak, Kota
+                    Semarang, Kab. Semarang
+                  </span>
+                </div>
+                <h1 className="hero-title" id="hero-title">
+                  Pindahan Lebih Tenang,{" "}
+                  <span>Barang Sampai dengan Aman &amp; Tepat Waktu.</span>
+                </h1>
+                <p className="hero-lead">
+                  Layanan armada pick up handal untuk pindahan rumah, kos,
+                  kantor, hingga distribusi barang dagangan se-Demak, Semarang,
+                  dan sekitarnya. Tarif transparan di awal, respon cepat &lt; 5
+                  menit!
+                </p>
 
-              <div className="hero-cta">
-                <a
-                  className="btn btn-primary btn-lg"
-                  href={waChatUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconWhatsApp size={18} />
-                  <span>Pesan via WhatsApp</span>
-                </a>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-lg"
-                  onClick={() => setBookingOpen(true)}
-                >
-                  <span>Hitung Tarif Sekarang</span>
-                  <IconArrowRight size={18} />
-                </button>
-              </div>
+                <div className="hero-cta">
+                  <a
+                    className="btn btn-primary btn-lg"
+                    href={waChatUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <IconWhatsApp size={18} />
+                    <span>Pesan via WhatsApp</span>
+                  </a>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-lg"
+                    onClick={() => setBookingOpen(true)}
+                  >
+                    <span>Hitung Tarif Sekarang</span>
+                    <IconArrowRight size={18} />
+                  </button>
+                </div>
 
-              <div className="hero-trust-cards" aria-label="Keunggulan Utama">
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconReceipt size={18} />
+                <div className="hero-trust-cards" aria-label="Keunggulan Utama">
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconReceipt size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Tarif Jelas di Awal</div>
+                      <div className="trust-desc">Tanpa biaya siluman</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="trust-title">Tarif Jelas di Awal</div>
-                    <div className="trust-desc">Tanpa biaya siluman</div>
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconUsers size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Bantu Angkat Muat</div>
+                      <div className="trust-desc">
+                        Opsi sopir / kenek angkut
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconUsers size={18} />
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconClock size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Respon &lt; 5 Menit</div>
+                      <div className="trust-desc">
+                        Admin siaga &amp; solutif
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="trust-title">Bantu Angkat Muat</div>
-                    <div className="trust-desc">Opsi sopir / kenek angkut</div>
-                  </div>
-                </div>
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconClock size={18} />
-                  </div>
-                  <div>
-                    <div className="trust-title">Respon &lt; 5 Menit</div>
-                    <div className="trust-desc">Admin siaga &amp; solutif</div>
-                  </div>
-                </div>
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconCheck size={18} />
-                  </div>
-                  <div>
-                    <div className="trust-title">Terpal &amp; Tali Aman</div>
-                    <div className="trust-desc">Standar cuaca hujan</div>
+                  <div className="trust-card">
+                    <div className="trust-icon">
+                      <IconCheck size={18} />
+                    </div>
+                    <div>
+                      <div className="trust-title">Terpal &amp; Tali Aman</div>
+                      <div className="trust-desc">Standar cuaca hujan</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
               <div className="hero-visual-col">
                 <figure className="hero-visual-card">
                   <div className="hero-visual-media">
@@ -4013,7 +4052,7 @@ export default function Home() {
                     </div>
                     <div className="hero-visual-rate">
                       <div className="rate-num">
-                        Rp 6.500 <span className="rate-unit">/km</span>
+                        Rp 7.000 <span className="rate-unit">/km</span>
                       </div>
                       <div className="rate-driver">
                         + Jasa Sopir Tetap Rp 50.000
@@ -4027,7 +4066,6 @@ export default function Home() {
                 </figure>
               </div>
             </div>
-
           </div>
         </section>
 
@@ -4265,7 +4303,7 @@ export default function Home() {
                   </span>
                   <h3>Tarif Transparan Tanpa Siluman</h3>
                   <p>
-                    Biaya per kilometer jelas, jasa sopir tetap Rp 50.000, tanpa
+                    Biaya per kilometer jelas, jasa sopir tetap Rp 65.000, tanpa
                     pungutan liar tak terduga di jalan.
                   </p>
                 </article>
@@ -4632,8 +4670,8 @@ export default function Home() {
                 <div className="faq-answer">
                   <p>
                     Tarif dihitung otomatis dan transparan. Estimasi tarif dasar
-                    jarak <strong>Rp 6.500/km</strong> ditambah jasa sopir{" "}
-                    <strong>Rp 50.000</strong>. Anda juga bisa menambahkan opsi
+                    jarak <strong>Rp 7.000/km</strong> ditambah jasa sopir{" "}
+                    <strong>Rp 65.000</strong>. Anda juga bisa menambahkan opsi
                     bantuan tenaga bongkar muat serta tambahan lantai jika
                     barang perlu dinaikkan/diturunkan lewat tangga.
                   </p>
@@ -4712,10 +4750,10 @@ export default function Home() {
                     </li>
                     <li>
                       <strong>Sopir ikut bongkar muat:</strong> Tambahan Rp
-                      50.000 (1 tenaga bantuan).
+                      65.000 (1 tenaga bantuan).
                     </li>
                     <li>
-                      <strong>Sopir + Kenek:</strong> Tambahan Rp 100.000 (2
+                      <strong>Sopir + Kenek:</strong> Tambahan Rp 130.000 (2
                       tenaga bantuan untuk barang banyak/berat).
                     </li>
                   </ul>
@@ -5054,9 +5092,9 @@ export default function Home() {
             ) : (
               <>
                 <strong className="mobile-bar-value">
-                  Rp 6.500<small>/km</small>
+                  Rp 7.000<small>/km</small>
                 </strong>
-                <span className="mobile-bar-note">+ jasa sopir Rp 50.000</span>
+                <span className="mobile-bar-note">+ jasa sopir Rp 65.000</span>
               </>
             )}
           </div>

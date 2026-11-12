@@ -3555,3 +3555,81 @@
     font-size: 0.54rem;
   }
 }
+
+/* Waiting-time selector mirrors the floor cards so both pickers feel the
+   same. The layout reuses .floor-grid/.floor-card (including the phone
+   compaction defined earlier); only the selectable state is new. */
+.waiting-grid {
+  margin-top: 0;
+}
+
+.waiting-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.waiting-card:hover {
+  border-color: var(--forest);
+}
+
+.waiting-card.is-selected {
+  border-color: var(--forest);
+  background: var(--brand-50);
+  box-shadow: inset 0 0 0 1px var(--forest);
+}
+
+.waiting-title {
+  min-width: 0;
+  padding-right: 28px;
+  color: var(--gray-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.waiting-price {
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.waiting-card.is-selected .waiting-price {
+  color: var(--forest-ink);
+}
+
+.waiting-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: transparent;
+}
+
+.waiting-card.is-selected .waiting-check {
+  background: var(--forest);
+  color: #fff;
+}
+
+/* Floor steppers need the full width on tiny screens, but waiting-time
+   cards are short labels, so keep them paired on phones. */
+@media (max-width: 400px) {
+  .waiting-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

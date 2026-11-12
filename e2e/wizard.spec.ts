@@ -144,17 +144,24 @@ test.describe("wizard pesanan", () => {
     await page.locator("#customer-phone").fill("081234567890");
     await page.getByRole("button", { name: /^Lanjut$/i }).click();
 
-    const select = page.locator("#waiting-time");
-    await expect(select).toHaveValue("none");
-    await expect(select.locator("option")).toHaveText([
-      "Tanpa waktu tunggu",
-      "Lebih dari 30 menit (+Rp 18.000)",
-      "60 menit (+Rp 36.000)",
-      "90 menit (+Rp 72.000)",
-    ]);
+    const group = page.getByRole("radiogroup", {
+      name: "Layanan waktu tunggu",
+    });
+    const cards = group.getByRole("radio");
+    await expect(cards).toHaveCount(4);
+    await expect(cards.nth(0)).toContainText("Tanpa waktu tunggu");
+    await expect(cards.nth(0)).toContainText("Gratis");
+    await expect(cards.nth(1)).toContainText("Lebih dari 30 menit");
+    await expect(cards.nth(1)).toContainText("+Rp18.000");
+    await expect(cards.nth(2)).toContainText("60 menit");
+    await expect(cards.nth(2)).toContainText("+Rp36.000");
+    await expect(cards.nth(3)).toContainText("90 menit");
+    await expect(cards.nth(3)).toContainText("+Rp72.000");
+    await expect(cards.nth(0)).toHaveAttribute("aria-checked", "true");
 
-    await select.selectOption("min60");
-    await expect(select).toHaveValue("min60");
+    const sixty = group.getByRole("radio", { name: /^60 menit/ });
+    await sixty.click();
+    await expect(sixty).toHaveAttribute("aria-checked", "true");
 
     // Layanan -> Bantuan & lantai -> Catatan -> Ringkasan
     await page.getByRole("button", { name: /^Lanjut$/i }).click();

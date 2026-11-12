@@ -32,9 +32,9 @@ test("menampilkan tarif transparan tanpa overflow horizontal", async ({
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Pindahan Lebih Tenang",
   );
-  await expect(page.locator(".hero-visual-rate")).toContainText("Rp 50.000");
-  await expect(page.locator(".faq-answer").first()).toContainText("Rp 50.000");
-  await expect(page.locator(".mobile-bar-note")).toContainText("Rp 50.000");
+  await expect(page.locator(".hero-visual-rate")).toContainText("Rp 65.000");
+  await expect(page.locator(".faq-answer").first()).toContainText("Rp 65.000");
+  await expect(page.locator(".mobile-bar-note")).toContainText("Rp 65.000");
 
   for (const width of [320, 360, 375, 390, 414, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });

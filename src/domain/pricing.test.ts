@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { billableKm, calculateQuote, floorFee } from './pricing';
 
 describe('pricing', () => {
-  it('example: 12.3 km, dalam kota, sopir, lantai 1 / 3 -> total 214500', () => {
+  it('example: 12.3 km, dalam kota, sopir, lantai 1 / 3 -> total 236000', () => {
     const quote = calculateQuote({
       service: 'dalam-kota',
       distances: { loadToUnload: 12.3 },
@@ -11,11 +11,11 @@ describe('pricing', () => {
       unloadFloor: 3,
     });
     expect(quote.billableKm).toBe(13);
-    expect(quote.transport).toBe(134500);
-    expect(quote.helper).toBe(50000);
+    expect(quote.transport).toBe(141000);
+    expect(quote.helper).toBe(65000);
     expect(quote.loadFloor).toBe(0);
     expect(quote.unloadFloor).toBe(30000);
-    expect(quote.total).toBe(214500);
+    expect(quote.total).toBe(236000);
   });
 
   it('floor fees', () => {
@@ -39,14 +39,14 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 1,
     });
-    // 89 km * 6.500 + 50.000 (jasa sopir) = 578.500 + 50.000 = 628.500
-    // +50% luar kota = 314.250
-    // Total ongkos angkut luar kota = 628.500 + 314.250 = 942.750
+    // 89 km * 7.000 + 50.000 (setoran) = 623.000 + 50.000 = 673.000
+    // +50% luar kota = 336.500
+    // Total ongkos angkut luar kota = 673.000 + 336.500 = 1.009.500
     expect(q.billableKm).toBe(89);
-    expect(q.baseTransport).toBe(628500);
-    expect(q.outOfTownSurcharge).toBe(314250);
-    expect(q.transport).toBe(942750);
-    expect(q.total).toBe(942750);
+    expect(q.baseTransport).toBe(673000);
+    expect(q.outOfTownSurcharge).toBe(336500);
+    expect(q.transport).toBe(1009500);
+    expect(q.total).toBe(1009500);
   });
 
   it('counts garage, load-to-unload, and return-to-garage legs', () => {
@@ -68,10 +68,10 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 1,
     });
-    // 19 km * 6.500 + 50.000 = 173.500
+    // 19 km * 7.000 + 50.000 = 183.000
     expect(q.billableKm).toBe(19);
-    expect(q.baseTransport).toBe(173500);
-    expect(q.total).toBe(173500);
+    expect(q.baseTransport).toBe(183000);
+    expect(q.total).toBe(183000);
   });
 
   it('adds waiting time fee per selected tier', () => {
@@ -89,7 +89,7 @@ describe('pricing', () => {
     expect(calculateQuote({ ...base, waitingTime: 'min90' }).waitingTime).toBe(72000);
 
     const q = calculateQuote({ ...base, waitingTime: 'min60' });
-    expect(q.total).toBe(115000 + 36000);
+    expect(q.total).toBe(120000 + 36000);
   });
 
   it('ceil up', () => {
@@ -109,7 +109,7 @@ describe('pricing', () => {
     });
     expect(q.loadFloor).toBe(20000);
     expect(q.unloadFloor).toBe(30000);
-    expect(q.total).toBe(165000);
+    expect(q.total).toBe(170000);
   });
 
   it('throws on invalid floor', () => {
@@ -138,6 +138,6 @@ describe('pricing', () => {
       priority: true,
     });
     expect(q.priority).toBe(50000);
-    expect(q.total).toBe(115000 + 50000);
+    expect(q.total).toBe(120000 + 50000);
   });
 });

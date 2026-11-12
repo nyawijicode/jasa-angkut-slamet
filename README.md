@@ -189,7 +189,7 @@ angka produksi tetap perlu dicek dengan Lighthouse/Web Vitals setelah deploy.
 
 **Validasi structured data** memastikan semua blok JSON-LD valid, tipe yang
 dibutuhkan ada, FAQ memiliki jawaban, galeri memiliki dimensi gambar, dan
-`priceRange` memakai tarif nyata (Rp 6.500/km + setoran Rp 50.000), bukan angka
+`priceRange` memakai tarif nyata (Rp 7.000/km + setoran Rp 50.000), bukan angka
 karangan:
 
 ```bash
