@@ -5100,7 +5100,7 @@ export default function Home() {
                 <strong className="mobile-bar-value">
                   Rp 7.000<small>/km</small>
                 </strong>
-                <span className="mobile-bar-note">+ jasa sopir Rp 65.000</span>
+                <span className="mobile-bar-note">+ jasa sopir Rp 50.000</span>
               </>
             )}
           </div>
