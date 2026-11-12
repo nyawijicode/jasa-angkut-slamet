@@ -4055,7 +4055,7 @@ export default function Home() {
                         Rp 7.000 <span className="rate-unit">/km</span>
                       </div>
                       <div className="rate-driver">
-                        + Jasa Sopir Tetap Rp 65.000
+                        + Jasa Sopir Tetap Rp 50.000
                       </div>
                     </div>
                     <p className="hero-visual-subnote">
