@@ -67,7 +67,17 @@ export async function installMapStubs(page: Page) {
   );
 }
 
+export async function openBooking(page: Page) {
+  const modal = page.locator(".booking-modal");
+  if (!(await modal.isVisible().catch(() => false))) {
+    await page.getByRole("button", { name: "Hitung Tarif Sekarang" }).click();
+    await expect(modal).toBeVisible();
+  }
+  return modal;
+}
+
 export async function openMapFor(page: Page, label: string) {
+  await openBooking(page);
   const modal = page.locator(".map-card.is-modal");
   if (!(await modal.isVisible().catch(() => false))) {
     const trigger = page

@@ -2743,3 +2743,815 @@
     transform: none;
   }
 }
+
+/* ============================================================
+   Calculator (#pesan) as a full centered tabs modal
+   ============================================================ */
+
+.booking-modal {
+  position: fixed;
+  z-index: 1301;
+  inset: 16px;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  max-width: 1320px;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border-color: var(--gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 32px 80px rgba(12, 30, 23, 0.32);
+  animation: booking-modal-rise 200ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes booking-modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Neutralize the grid/padding constraints of the base .workspace */
+.workspace.booking-modal {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  gap: 0;
+  max-width: 1320px;
+  margin: auto;
+  padding: 0;
+}
+
+.booking-modal .panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.booking-modal .panel-head {
+  flex: 0 0 auto;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 52px 14px 18px;
+}
+
+.booking-modal .panel-title {
+  font-size: 1.2rem;
+}
+
+.booking-modal .panel-sub {
+  font-size: 0.78rem;
+}
+
+.booking-modal .panel-head-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+  max-width: 320px;
+}
+
+.booking-modal .panel-route {
+  justify-content: flex-end;
+}
+
+.booking-modal .booking-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.booking-modal .panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Tabs */
+.booking-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--line);
+  background: var(--gray-50);
+}
+
+.booking-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.booking-tab {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gray-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.booking-tab:hover {
+  background: var(--gray-100);
+  color: var(--forest);
+}
+
+.booking-tab.is-active {
+  border-color: var(--forest);
+  background: var(--surface);
+  color: var(--forest-ink);
+  box-shadow: 0 6px 14px -12px rgb(7 56 38 / 0.8);
+}
+
+.booking-tab.is-done {
+  color: var(--gray-800);
+}
+
+.booking-tab-marker {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.booking-tab.is-active .booking-tab-marker {
+  background: var(--forest);
+  color: #fff;
+}
+
+.booking-tab.is-done .booking-tab-marker {
+  background: var(--brand-100);
+  color: var(--forest);
+}
+
+/* Tab panel fills the remaining height with no internal scroll */
+.booking-tabpanel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  padding: 0 18px;
+  animation: booking-tab-forward 200ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.booking-tabpanel.is-back {
+  animation-name: booking-tab-back;
+}
+
+@keyframes booking-tab-forward {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes booking-tab-back {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.booking-modal .form-section {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0 4px;
+  overflow: hidden;
+}
+
+.booking-modal .section-head {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.booking-modal .section-copy h3 {
+  font-size: 0.95rem;
+}
+
+.booking-modal .section-copy p {
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.booking-modal .step-badge {
+  width: 26px;
+  height: 26px;
+  font-size: 0.72rem;
+}
+
+/* Compaction so each tab fits without scrolling */
+.booking-modal .field-stack {
+  gap: 8px;
+}
+
+.booking-modal .field-label {
+  margin-bottom: 3px;
+  font-size: 0.75rem;
+}
+
+.booking-modal .field-input {
+  height: 40px;
+  font-size: 0.875rem;
+}
+
+.booking-modal .field-hint {
+  margin-top: 2px;
+  font-size: 0.68rem;
+}
+
+.booking-modal .field-textarea {
+  min-height: 68px;
+  font-size: 0.875rem;
+}
+
+.booking-modal .choice-grid {
+  gap: 8px;
+}
+
+.booking-modal .choice-card {
+  padding: 10px;
+}
+
+.booking-modal .choice-card h4 {
+  font-size: 0.8rem;
+}
+
+.booking-modal .choice-card p {
+  font-size: 0.68rem;
+}
+
+.booking-modal .option-row {
+  padding: 8px 10px;
+}
+
+.booking-modal .floor-card {
+  padding: 10px;
+}
+
+.booking-modal .route-preview {
+  gap: 8px;
+  padding: 10px;
+}
+
+.booking-modal .quote-card {
+  padding: 12px;
+}
+
+.booking-modal .time-chip,
+.booking-modal .quick-suggestion-btn {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.68rem;
+}
+
+/* Shared footer actions for every tab */
+.booking-modal .wizard-actions,
+.booking-tab-actions {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 10px 18px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.booking-modal .wizard-actions .btn {
+  height: 40px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+  .booking-modal {
+    inset: max(8px, env(safe-area-inset-top)) 8px
+      max(8px, env(safe-area-inset-bottom));
+    max-width: none;
+    margin: 0;
+  }
+
+  .workspace.booking-modal {
+    max-width: none;
+    margin: 0;
+  }
+
+  .booking-modal .panel-head {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 44px 10px 12px;
+  }
+
+  .booking-modal .panel-head-side {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: none;
+  }
+
+  .booking-tabs {
+    padding: 6px 8px;
+  }
+
+  .booking-tab {
+    min-height: 34px;
+    padding: 5px 8px;
+    font-size: 0.7rem;
+  }
+
+  .booking-tabpanel {
+    padding: 0 12px;
+  }
+
+  .booking-modal .wizard-actions {
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .booking-modal .panel-head {
+    padding: 8px 40px 8px 10px;
+  }
+
+  .booking-modal .panel-title {
+    font-size: 0.98rem;
+  }
+
+  .booking-modal .panel-sub {
+    display: none;
+  }
+
+  .booking-modal .panel-eyebrow {
+    font-size: 0.6rem;
+  }
+
+  .booking-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 5px 6px;
+  }
+
+  .booking-tab-label {
+    display: none;
+  }
+
+  .booking-tabpanel {
+    padding: 0 10px;
+  }
+
+  .booking-modal .section-copy h3 {
+    font-size: 0.88rem;
+  }
+
+  .booking-modal .section-copy p {
+    font-size: 0.7rem;
+  }
+
+  .booking-modal .field-input {
+    height: 38px;
+  }
+
+  .booking-modal .wizard-actions .btn {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .booking-modal {
+    inset: max(4px, env(safe-area-inset-top)) 4px
+      max(4px, env(safe-area-inset-bottom));
+  }
+
+  .booking-tab {
+    min-height: 30px;
+  }
+
+  .booking-tab-marker {
+    width: 18px;
+    height: 18px;
+    font-size: 0.62rem;
+  }
+
+  .booking-tabpanel {
+    padding: 0 8px;
+  }
+
+  .booking-modal .panel-head {
+    padding: 6px 36px 6px 8px;
+  }
+}
+
+/* Let tab content take its natural height; scroll only when a very short
+   screen cannot physically fit it (nothing gets clipped or hidden). */
+.booking-modal .form-section {
+  flex: 0 0 auto;
+  overflow: visible;
+  padding-bottom: 8px;
+}
+
+.booking-tabpanel {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.booking-tabpanel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.booking-tabpanel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+
+@media (max-width: 600px) {
+  .booking-modal .route-preview-note {
+    display: none;
+  }
+
+  .booking-modal .route-preview-head {
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+/* Estimate tab: place the three review groups side by side on desktop so the
+   whole summary + quote fits the full-height panel without scrolling. */
+@media (min-width: 900px) {
+  .booking-modal .form-section {
+    gap: 8px;
+  }
+
+  .booking-modal .order-review-card {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 8px;
+  }
+
+  .booking-modal .review-section {
+    padding: 9px 12px;
+  }
+
+  .booking-modal .review-section + .review-section {
+    border-top: 0;
+    border-left: 1px solid var(--gray-200);
+  }
+
+  .booking-modal .review-section-head {
+    margin-bottom: 4px;
+  }
+
+  .booking-modal .review-row {
+    gap: 8px;
+    font-size: 0.72rem;
+  }
+
+  .booking-modal .review-rows {
+    gap: 3px;
+  }
+
+  .booking-modal .summary-block,
+  .booking-modal .quote-card {
+    margin: 0;
+  }
+
+  .booking-modal .quote-card {
+    padding: 10px 12px;
+  }
+}
+
+/* Compact the help/floor and review blocks on phones. */
+@media (max-width: 900px) {
+  .booking-modal .option-list {
+    gap: 6px;
+  }
+
+  .booking-modal .floor-grid {
+    gap: 6px;
+  }
+
+  .booking-modal .floor-card {
+    padding: 8px;
+  }
+
+  .booking-modal .floor-hint {
+    margin-top: 2px;
+  }
+
+  .booking-modal .review-section {
+    padding: 9px 11px;
+  }
+
+  .booking-modal .review-section-head {
+    margin-bottom: 3px;
+  }
+
+  .booking-modal .review-rows {
+    gap: 3px;
+  }
+
+  .booking-modal .quote-card {
+    padding: 10px 12px;
+  }
+}
+
+/* Keep the shared Kembali/Lanjut bar on one row on phones: it saves vertical
+   space and matches the tab flow (the old wizard stacked full-width buttons). */
+@media (max-width: 900px) {
+  .booking-modal .booking-tab-actions {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .booking-modal .booking-tab-actions .btn {
+    flex: 1 1 0;
+    width: auto;
+  }
+}
+
+/* On phones the route shortcut button is enough; the long summary text is what
+   forces a second header line. Keep the header to one compact row. */
+@media (max-width: 600px) {
+  .booking-modal .panel-route {
+    flex-wrap: nowrap;
+  }
+
+  .booking-modal .panel-route-summary {
+    display: none;
+  }
+}
+
+/* ---- Mobile compaction: make every tab fit the panel without scrolling ----
+   The review summary is laid out as a 2-column card on phones: the route
+   section spans the full width, the two short groups sit side by side.
+   Desktop keeps the 3-column layout defined above. */
+@media (max-width: 600px) {
+  /* The heading alone is enough on a phone; the helper paragraph is what
+     pushes several tabs past the panel height. */
+  .booking-modal .section-head p {
+    display: none;
+  }
+
+  .booking-modal .section-head {
+    gap: 8px;
+  }
+
+  .booking-modal .review-section {
+    padding: 6px 8px;
+  }
+
+  .booking-modal .review-section-head {
+    margin-bottom: 2px;
+  }
+
+  .booking-modal .review-section-title {
+    font-size: 0.69rem;
+  }
+
+  .booking-modal .review-rows {
+    gap: 2px;
+  }
+
+  .booking-modal .review-row {
+    gap: 6px;
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+
+  .booking-modal .review-row dd {
+    min-width: 0;
+  }
+
+  .booking-modal .quote-card {
+    padding: 8px 10px;
+  }
+
+  .booking-modal .quote-lines {
+    gap: 2px;
+  }
+
+  .booking-modal .form-section {
+    gap: 6px;
+    padding-bottom: 0;
+  }
+
+  .booking-modal .field-stack {
+    gap: 6px;
+  }
+
+  .booking-modal .submit-area {
+    gap: 5px;
+  }
+
+  .booking-modal .option-list {
+    gap: 5px;
+  }
+
+  .booking-modal .option-row {
+    padding: 10px 12px;
+  }
+
+  .booking-modal .floor-grid {
+    gap: 4px;
+  }
+
+  .booking-modal .floor-card {
+    padding: 6px;
+  }
+}
+
+@media (min-width: 340px) and (max-width: 600px) {
+  .booking-modal .order-review-card {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 8px;
+  }
+
+  .booking-modal .review-section + .review-section {
+    border-top: 0;
+    border-left: 1px solid var(--gray-200);
+  }
+
+  .booking-modal .review-section:nth-child(2) {
+    grid-column: 1 / -1;
+    order: -1;
+    border-left: 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .booking-modal .review-section:nth-child(3) {
+    border-left: 0;
+  }
+}
+
+/* The base .workspace uses align-items: start at >=1024px for the two-column
+   layout. Inside the modal that made the panel shrink to its content width and
+   hug the left edge, so the dialog looked off-center even though the box was
+   centered. Stretch the panel so the dialog content fills the whole modal. */
+.workspace.booking-modal {
+  align-items: stretch;
+}
+
+.booking-modal .panel {
+  width: 100%;
+}
+
+/* Footer: compact buttons at the edges, live estimate centered. */
+.booking-tab-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+}
+
+.booking-tab-actions > .btn:first-child {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.booking-tab-actions > .btn:last-child:not(:first-child) {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.booking-tab-price {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.booking-tab-price-label {
+  color: var(--ink-soft);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.booking-tab-price strong {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* Header on phones/tablets: the progress bar must shrink so the route button
+   is never pushed outside the modal and clipped by overflow: hidden. */
+@media (max-width: 900px) {
+  .booking-modal .panel-head-side {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .booking-modal .panel-head-side .progress {
+    flex: 1 1 140px;
+    width: auto;
+  }
+
+  .booking-modal .panel-route {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .booking-modal .panel-route-summary {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .booking-modal .panel-route-btn {
+    min-height: 32px;
+    padding: 5px 9px;
+  }
+}
+
+/* Compact footer buttons on phones, with the price kept dead-center. */
+@media (max-width: 600px) {
+  .booking-modal .booking-tab-actions {
+    padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+    column-gap: 4px;
+  }
+
+  .booking-modal .booking-tab-actions .btn {
+    flex: none;
+    width: auto;
+    height: 36px;
+    padding: 0 10px;
+    gap: 4px;
+    font-size: 0.72rem;
+  }
+
+  .booking-modal .booking-tab-actions .btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .booking-tab-price strong {
+    font-size: 0.8rem;
+  }
+
+  .booking-tab-price-label {
+    font-size: 0.54rem;
+  }
+}

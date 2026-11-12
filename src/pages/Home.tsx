@@ -953,6 +953,7 @@ export default function Home() {
   const [floors, setFloors] = useState<Record<string, number>>({});
   const [fitTick, setFitTick] = useState(0);
   const [mapOpen, setMapOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
   const [draft, setDraft] = useState<MapPoint | null>(null);
   const [locateStatus, setLocateStatus] = useState<{
     tone: "info" | "error";
@@ -971,7 +972,6 @@ export default function Home() {
   const [mapReadOnly, setMapReadOnly] = useState(false);
 
   const [step, setStep] = useState(1);
-  const [furthest, setFurthest] = useState(1);
   const [stepDirection, setStepDirection] = useState<"forward" | "back">(
     "forward",
   );
@@ -981,8 +981,6 @@ export default function Home() {
   const [routeStatus, setRouteStatus] = useState<RouteStatus>("idle");
 
   const panelRef = useRef<HTMLElement | null>(null);
-  const wizardNavRef = useRef<HTMLElement | null>(null);
-  const wizardTrackRef = useRef<HTMLDivElement | null>(null);
   const lastStepRef = useRef(1);
   const galleryTrackRef = useRef<HTMLUListElement | null>(null);
   const galleryTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -1264,55 +1262,6 @@ export default function Home() {
   }, [menuOpen]);
 
   useEffect(() => {
-    const nav = wizardNavRef.current;
-    const track = wizardTrackRef.current;
-    if (!nav || !track) return;
-
-    const move = (behavior: ScrollBehavior) => {
-      const steps = track.querySelectorAll<HTMLElement>(".wizard-step");
-      const active = track.querySelector<HTMLElement>(".wizard-step.is-active");
-      if (!active || steps.length === 0) return;
-
-      const first = steps[0];
-      const last = steps[steps.length - 1];
-      const railStart = first.offsetLeft + first.offsetWidth / 2;
-      const railEnd = last.offsetLeft + last.offsetWidth / 2;
-      const railWidth = Math.max(railEnd - railStart, 0);
-      const activeCenter = active.offsetLeft + active.offsetWidth / 2;
-
-      track.style.setProperty("--wizard-rail-start", `${railStart}px`);
-      track.style.setProperty("--wizard-rail-width", `${railWidth}px`);
-      track.style.setProperty(
-        "--wizard-progress",
-        `${Math.min(Math.max(activeCenter - railStart, 0), railWidth)}px`,
-      );
-
-      const navRect = nav.getBoundingClientRect();
-      const activeRect = active.getBoundingClientRect();
-      const delta =
-        activeRect.left +
-        activeRect.width / 2 -
-        (navRect.left + navRect.width / 2);
-
-      nav.scrollTo({
-        left: Math.max(0, nav.scrollLeft + delta),
-        behavior,
-      });
-    };
-
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    move(reduceMotion ? "auto" : "smooth");
-
-    const onResize = () => move("auto");
-    window.addEventListener("resize", onResize);
-    document.fonts?.ready.then(onResize).catch(() => undefined);
-
-    return () => window.removeEventListener("resize", onResize);
-  }, [step]);
-
-  useEffect(() => {
     if (lastStepRef.current === step) return;
     lastStepRef.current = step;
     document
@@ -1391,6 +1340,54 @@ export default function Home() {
       }
     };
   }, [mapOpen]);
+
+  useEffect(() => {
+    if (!bookingOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setBookingOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [bookingOpen]);
+
+  useEffect(() => {
+    if (window.location.hash === "#pesan") {
+      setBookingOpen(true);
+    }
+    const onHashChange = () => {
+      if (window.location.hash === "#pesan") setBookingOpen(true);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const anchor = target?.closest<HTMLAnchorElement>("a");
+      if (!anchor) return;
+      if (anchor.getAttribute("href") !== "#pesan") return;
+      event.preventDefault();
+      setBookingOpen(true);
+      if (window.location.hash !== "#pesan") {
+        history.replaceState(
+          null,
+          "",
+          `${window.location.pathname}${window.location.search}#pesan`,
+        );
+      }
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
   useEffect(() => {
     if (!galleryOpen) return;
@@ -1889,17 +1886,21 @@ export default function Home() {
     "Tanpa bantuan";
 
   function scrollToPanel() {
-    const isSmallScreen =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(max-width: 1023px)").matches;
-    if (!isSmallScreen) return;
-    const reduceMotion =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    panelRef.current?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "start",
-    });
+    const body = panelRef.current?.querySelector<HTMLElement>(
+      ".booking-tabpanel",
+    );
+    body?.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  function closeBooking() {
+    setBookingOpen(false);
+    if (window.location.hash === "#pesan") {
+      history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}`,
+      );
+    }
   }
 
   function scrollToTop() {
@@ -1946,7 +1947,6 @@ export default function Home() {
     const next = Math.min(wizardSteps.length, step + 1);
     setStepDirection("forward");
     setStep(next);
-    setFurthest((current) => Math.max(current, next));
     scrollToPanel();
   }
 
@@ -1957,11 +1957,12 @@ export default function Home() {
   }
 
   function goToStep(target: number) {
-    if (target === step || target > furthest) return;
+    if (target === step) return;
     if (target > 1 && !validateRoute()) {
       if (step !== 1) {
         setStepDirection("back");
         setStep(1);
+        scrollToPanel();
       }
       return;
     }
@@ -1969,6 +1970,7 @@ export default function Home() {
       if (step !== 2) {
         setStepDirection("back");
         setStep(2);
+        scrollToPanel();
       }
       return;
     }
@@ -2193,8 +2195,20 @@ export default function Home() {
 
           <div className="container hero-container">
             <div className="hero-top-row">
-              <div className="hero-booking-col">
-                <section className="workspace" id="pesan">
+              {bookingOpen && (
+                <>
+                  <div
+                    className="map-backdrop"
+                    onClick={closeBooking}
+                    aria-hidden="true"
+                  />
+                  <section
+                    className="workspace booking-modal booking-modal-full"
+                    id="pesan"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="form-title"
+                  >
                   {mapOpen && (
                     <>
                       <div
@@ -2403,15 +2417,15 @@ export default function Home() {
                           Rute &amp; detail angkutan
                         </h2>
                         <p className="panel-sub">
-                          Tandai rute dulu, lalu lengkapi detail. Estimasi
-                          muncul di akhir.
+                          Pilih bagian yang ingin diisi, lalu tekan Lanjut.
+                          Estimasi muncul di bagian terakhir.
                         </p>
                       </div>
                       <div className="panel-head-side">
                         <div className="progress">
                           <div className="progress-label">
                             <span>
-                              Langkah {step} dari {wizardSteps.length}
+                              Bagian {step} dari {wizardSteps.length}
                             </span>
                             <span>
                               {Math.round((step / wizardSteps.length) * 100)}%
@@ -2455,44 +2469,54 @@ export default function Home() {
                           </button>
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        className="map-close booking-close"
+                        onClick={closeBooking}
+                        aria-label="Tutup kalkulator tarif"
+                      >
+                        <IconX size={18} />
+                      </button>
                     </div>
 
                     <div className="panel-body">
-                      <nav
-                        className="wizard-nav"
-                        aria-label="Langkah pemesanan"
-                        ref={wizardNavRef}
+                      <div
+                        className="booking-tabs"
+                        role="tablist"
+                        aria-label="Bagian kalkulator tarif"
                       >
-                        <div className="wizard-track" ref={wizardTrackRef}>
-                          {wizardSteps.map((label, index) => {
-                            const value = index + 1;
-                            const isActive = value === step;
-                            const isDone = value < step;
-                            const isReachable = value <= furthest;
-                            return (
-                              <button
-                                key={label}
-                                type="button"
-                                className={`wizard-step${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`}
-                                onClick={() => goToStep(value)}
-                                disabled={!isReachable}
-                                aria-current={isActive ? "step" : undefined}
-                              >
-                                <span className="wizard-step-marker">
-                                  {isDone ? <IconCheck size={13} /> : value}
-                                </span>
-                                <span className="wizard-step-label">
-                                  {label}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </nav>
+                        {wizardSteps.map((label, index) => {
+                          const value = index + 1;
+                          const isActive = value === step;
+                          const isDone = value < step;
+                          return (
+                            <button
+                              key={label}
+                              type="button"
+                              role="tab"
+                              id={`booking-tab-${value}`}
+                              aria-selected={isActive}
+                              aria-controls={`booking-tabpanel-${value}`}
+                              tabIndex={isActive ? 0 : -1}
+                              className={`booking-tab${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`}
+                              onClick={() => goToStep(value)}
+                            >
+                              <span className="booking-tab-marker">
+                                {isDone ? <IconCheck size={12} /> : value}
+                              </span>
+                              <span className="booking-tab-label">{label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
 
                       <div
-                        className={`wizard-body${stepDirection === "back" ? " is-back" : ""}`}
+                        className={`wizard-body booking-tabpanel${stepDirection === "back" ? " is-back" : ""}`}
                         key={step}
+                        role="tabpanel"
+                        id={`booking-tabpanel-${step}`}
+                        aria-labelledby={`booking-tab-${step}`}
+                        tabIndex={0}
                       >
                         {step === 1 && (
                           <section className="form-section route-step">
@@ -2724,76 +2748,6 @@ export default function Home() {
 
                             </div>
 
-                            <div
-                              className={`priority-toggle-card${priority ? " is-active" : ""}`}
-                              style={{ marginTop: 10 }}
-                            >
-                              <div className="priority-toggle-row">
-                                <div className="priority-toggle-info">
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 8,
-                                      flexWrap: "wrap",
-                                    }}
-                                  >
-                                    <span
-                                      className="field-label"
-                                      style={{ margin: 0, fontWeight: 700 }}
-                                    >
-                                      Prioritas Pengiriman Langsung
-                                    </span>
-                                    {priority && (
-                                      <span className="priority-badge-chip">
-                                        Langsung Jalan
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p
-                                    className="field-hint"
-                                    style={{ marginTop: 4 }}
-                                  >
-                                    {priority
-                                      ? "Aktif: Armada langsung jalan secepatnya (ASAP). Biaya tambahan +Rp 50.000."
-                                      : "Tidak aktif: Jadwal reguler — armada tiba di lokasi muat maksimal 4 jam."}
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  role="switch"
-                                  aria-checked={priority}
-                                  className={`toggle-switch${priority ? " is-on" : ""}`}
-                                  onClick={() => setPriority((v) => !v)}
-                                  aria-label="Toggle prioritas pengiriman langsung"
-                                >
-                                  <span className="toggle-knob" />
-                                </button>
-                              </div>
-                              {priority && (
-                                <div
-                                  className="priority-badge"
-                                  style={{ marginTop: 10 }}
-                                >
-                                  <IconCheck size={14} />
-                                  <span>
-                                    Layanan prioritas aktif · Tambahan +Rp
-                                    50.000
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="wizard-actions">
-                              <button
-                                type="button"
-                                className="btn btn-primary btn-lg wizard-actions-right"
-                                onClick={advance}
-                              >
-                                <span>Lanjut ke Data Pemesan</span>
-                                <IconArrowRight size={18} />
-                              </button>
-                            </div>
                           </section>
                         )}
 
@@ -3058,24 +3012,6 @@ export default function Home() {
                               </div>
                             </div>
 
-                            <div className="wizard-actions">
-                              <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={goBack}
-                              >
-                                <IconArrowLeft size={18} />
-                                <span>Kembali ke Rute</span>
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary btn-lg"
-                                onClick={advance}
-                              >
-                                <span>Lanjut ke Layanan</span>
-                                <IconArrowRight size={18} />
-                              </button>
-                            </div>
                           </section>
                         )}
 
@@ -3157,24 +3093,66 @@ export default function Home() {
                               </button>
                             </div>
 
-                            <div className="wizard-actions">
-                              <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={goBack}
-                              >
-                                <IconArrowLeft size={18} />
-                                <span>Kembali</span>
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={advance}
-                              >
-                                <span>Lanjut ke Bantuan &amp; Lantai</span>
-                                <IconArrowRight size={18} />
-                              </button>
+                            <div
+                              className={`priority-toggle-card${priority ? " is-active" : ""}`}
+                              style={{ marginTop: 0 }}
+                            >
+                              <div className="priority-toggle-row">
+                                <div className="priority-toggle-info">
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 8,
+                                      flexWrap: "wrap",
+                                    }}
+                                  >
+                                    <span
+                                      className="field-label"
+                                      style={{ margin: 0, fontWeight: 700 }}
+                                    >
+                                      Prioritas Pengiriman Langsung
+                                    </span>
+                                    {priority && (
+                                      <span className="priority-badge-chip">
+                                        Langsung Jalan
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p
+                                    className="field-hint"
+                                    style={{ marginTop: 4 }}
+                                  >
+                                    {priority
+                                      ? "Aktif: armada berangkat secepatnya. Tambahan +Rp 50.000."
+                                      : "Tidak aktif: jadwal reguler, armada tiba maksimal 4 jam."}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  role="switch"
+                                  aria-checked={priority}
+                                  className={`toggle-switch${priority ? " is-on" : ""}`}
+                                  onClick={() => setPriority((v) => !v)}
+                                  aria-label="Toggle prioritas pengiriman langsung"
+                                >
+                                  <span className="toggle-knob" />
+                                </button>
+                              </div>
+                              {priority && (
+                                <div
+                                  className="priority-badge"
+                                  style={{ marginTop: 8 }}
+                                >
+                                  <IconCheck size={14} />
+                                  <span>
+                                    Layanan prioritas aktif · Tambahan +Rp
+                                    50.000
+                                  </span>
+                                </div>
+                              )}
                             </div>
+
                           </section>
                         )}
 
@@ -3287,24 +3265,6 @@ export default function Home() {
                               bongkar.
                             </p>
 
-                            <div className="wizard-actions">
-                              <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={goBack}
-                              >
-                                <IconArrowLeft size={18} />
-                                <span>Kembali</span>
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={advance}
-                              >
-                                <span>Lanjut ke Catatan</span>
-                                <IconArrowRight size={18} />
-                              </button>
-                            </div>
                           </section>
                         )}
 
@@ -3367,24 +3327,6 @@ export default function Home() {
                               </div>
                             </div>
 
-                            <div className="wizard-actions">
-                              <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={goBack}
-                              >
-                                <IconArrowLeft size={18} />
-                                <span>Kembali</span>
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={advance}
-                              >
-                                <span>Lihat Ringkasan Estimasi</span>
-                                <IconArrowRight size={18} />
-                              </button>
-                            </div>
                           </section>
                         )}
 
@@ -3750,23 +3692,122 @@ export default function Home() {
                               )}
                             </div>
 
-                            <div className="wizard-actions">
-                              <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={goBack}
-                              >
-                                <IconArrowLeft size={18} />
-                                <span>Kembali ke Catatan</span>
-                              </button>
-                            </div>
                           </section>
+                        )}
+                      </div>
+
+                      <div className="wizard-actions booking-tab-actions">
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={step === 1 ? closeBooking : goBack}
+                        >
+                          {step > 1 && <IconArrowLeft size={18} />}
+                          <span>{step === 1 ? "Tutup" : "Kembali"}</span>
+                        </button>
+                        {quote && (
+                          <div className="booking-tab-price">
+                            <span className="booking-tab-price-label">
+                              Estimasi
+                            </span>
+                            <strong>
+                              Rp {quote.total.toLocaleString("id-ID")}
+                            </strong>
+                          </div>
+                        )}
+                        {step < wizardSteps.length && (
+                          <button
+                            type="button"
+                            className="btn btn-primary wizard-actions-right"
+                            onClick={advance}
+                          >
+                            <span>Lanjut</span>
+                            <IconArrowRight size={18} />
+                          </button>
                         )}
                       </div>
                     </div>
                   </section>
                 </section>
+                </>
+              )}
+            <div className="hero-content hero-content-centered">
+              <div className="hero-pill-badge">
+                <span className="hero-pill-star">★</span>
+                <span>
+                  Jasa Angkut Slamet Kebonbatur, Mranggen, Demak, Kota Semarang,
+                  Kab. Semarang
+                </span>
               </div>
+              <h1 className="hero-title" id="hero-title">
+                Pindahan Lebih Tenang,{" "}
+                <span>Barang Sampai dengan Aman &amp; Tepat Waktu.</span>
+              </h1>
+              <p className="hero-lead">
+                Layanan armada pick up handal untuk pindahan rumah, kos, kantor,
+                hingga distribusi barang dagangan se-Demak, Semarang, dan
+                sekitarnya. Tarif transparan di awal, respon cepat &lt; 5 menit!
+              </p>
+
+              <div className="hero-cta">
+                <a
+                  className="btn btn-primary btn-lg"
+                  href={waChatUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <IconWhatsApp size={18} />
+                  <span>Pesan via WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-lg"
+                  onClick={() => setBookingOpen(true)}
+                >
+                  <span>Hitung Tarif Sekarang</span>
+                  <IconArrowRight size={18} />
+                </button>
+              </div>
+
+              <div className="hero-trust-cards" aria-label="Keunggulan Utama">
+                <div className="trust-card">
+                  <div className="trust-icon">
+                    <IconReceipt size={18} />
+                  </div>
+                  <div>
+                    <div className="trust-title">Tarif Jelas di Awal</div>
+                    <div className="trust-desc">Tanpa biaya siluman</div>
+                  </div>
+                </div>
+                <div className="trust-card">
+                  <div className="trust-icon">
+                    <IconUsers size={18} />
+                  </div>
+                  <div>
+                    <div className="trust-title">Bantu Angkat Muat</div>
+                    <div className="trust-desc">Opsi sopir / kenek angkut</div>
+                  </div>
+                </div>
+                <div className="trust-card">
+                  <div className="trust-icon">
+                    <IconClock size={18} />
+                  </div>
+                  <div>
+                    <div className="trust-title">Respon &lt; 5 Menit</div>
+                    <div className="trust-desc">Admin siaga &amp; solutif</div>
+                  </div>
+                </div>
+                <div className="trust-card">
+                  <div className="trust-icon">
+                    <IconCheck size={18} />
+                  </div>
+                  <div>
+                    <div className="trust-title">Terpal &amp; Tali Aman</div>
+                    <div className="trust-desc">Standar cuaca hujan</div>
+                  </div>
+                </div>
+              </div>
+            </div>
               <div className="hero-visual-col">
                 <figure className="hero-visual-card">
                   <div className="hero-visual-media">
@@ -3824,79 +3865,6 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="hero-content hero-content-centered">
-              <div className="hero-pill-badge">
-                <span className="hero-pill-star">★</span>
-                <span>
-                  Jasa Angkut Slamet Kebonbatur, Mranggen, Demak, Kota Semarang,
-                  Kab. Semarang
-                </span>
-              </div>
-              <h1 className="hero-title" id="hero-title">
-                Pindahan Lebih Tenang,{" "}
-                <span>Barang Sampai dengan Aman &amp; Tepat Waktu.</span>
-              </h1>
-              <p className="hero-lead">
-                Layanan armada pick up handal untuk pindahan rumah, kos, kantor,
-                hingga distribusi barang dagangan se-Demak, Semarang, dan
-                sekitarnya. Tarif transparan di awal, respon cepat &lt; 5 menit!
-              </p>
-
-              <div className="hero-cta">
-                <a
-                  className="btn btn-primary btn-lg"
-                  href={waChatUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconWhatsApp size={18} />
-                  <span>Pesan via WhatsApp</span>
-                </a>
-                <a className="btn btn-secondary btn-lg" href="#pesan">
-                  <span>Hitung Tarif Sekarang</span>
-                  <IconArrowRight size={18} />
-                </a>
-              </div>
-
-              <div className="hero-trust-cards" aria-label="Keunggulan Utama">
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconReceipt size={18} />
-                  </div>
-                  <div>
-                    <div className="trust-title">Tarif Jelas di Awal</div>
-                    <div className="trust-desc">Tanpa biaya siluman</div>
-                  </div>
-                </div>
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconUsers size={18} />
-                  </div>
-                  <div>
-                    <div className="trust-title">Bantu Angkat Muat</div>
-                    <div className="trust-desc">Opsi sopir / kenek angkut</div>
-                  </div>
-                </div>
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconClock size={18} />
-                  </div>
-                  <div>
-                    <div className="trust-title">Respon &lt; 5 Menit</div>
-                    <div className="trust-desc">Admin siaga &amp; solutif</div>
-                  </div>
-                </div>
-                <div className="trust-card">
-                  <div className="trust-icon">
-                    <IconCheck size={18} />
-                  </div>
-                  <div>
-                    <div className="trust-title">Terpal &amp; Tali Aman</div>
-                    <div className="trust-desc">Standar cuaca hujan</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 

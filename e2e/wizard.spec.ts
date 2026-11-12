@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+﻿import { test, expect } from "playwright/test";
 import {
   installMapStubs,
   openMapFor,
@@ -20,14 +20,14 @@ test.describe("wizard pesanan", () => {
 
     await expect(page.locator(".route-sequence-meta")).toContainText("km");
     await page
-      .getByRole("button", { name: /Lanjut ke Data Pemesan/ })
+      .getByRole("button", { name: /^Lanjut$/i })
       .click();
 
     await expect(page.locator("#wizard-step-title")).toHaveText(
       "Data pemesan",
     );
 
-    await page.getByRole("button", { name: /Lanjut ke Layanan/ }).click();
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
     await expect(page.locator("#name-error")).toBeVisible();
     await expect(page.locator("#phone-error")).toBeVisible();
     await expect(page.locator("#wizard-step-title")).toHaveText(
@@ -36,21 +36,21 @@ test.describe("wizard pesanan", () => {
 
     await page.locator("#customer-name").fill("Budi Santoso");
     await page.locator("#customer-phone").fill("081327623942");
-    await page.getByRole("button", { name: /Lanjut ke Layanan/ }).click();
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
 
     await expect(page.locator("#wizard-step-title")).toHaveText("Layanan");
     await page
-      .getByRole("button", { name: /Lanjut ke Bantuan & Lantai/ })
+      .getByRole("button", { name: /^Lanjut$/i })
       .click();
     await expect(page.locator("#wizard-step-title")).toHaveText(
       "Bantuan & lantai",
     );
-    await page.getByRole("button", { name: /Lanjut ke Catatan/ }).click();
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
     await expect(page.locator("#wizard-step-title")).toHaveText(
       "Catatan tambahan",
     );
     await page
-      .getByRole("button", { name: /Lihat Ringkasan Estimasi/ })
+      .getByRole("button", { name: /^Lanjut$/i })
       .click();
 
     await expect(page.locator("#wizard-step-title")).toHaveText(
@@ -88,6 +88,12 @@ test.describe("wizard pesanan", () => {
     await pickAddress(page, "M1", "Mranggen");
     await pickAddress(page, "B1", "Semarang");
 
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+    await page.locator("#customer-name").fill("Siti Aminah");
+    await page.locator("#customer-phone").fill("081234567890");
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+
+    // Prioritas adalah opsi layanan, jadi ada di tab Layanan.
     const toggle = page.getByRole("switch", {
       name: "Toggle prioritas pengiriman langsung",
     });
@@ -106,19 +112,10 @@ test.describe("wizard pesanan", () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-checked", "true");
 
-    await page
-      .getByRole("button", { name: /Lanjut ke Data Pemesan/ })
-      .click();
-    await page.locator("#customer-name").fill("Siti Aminah");
-    await page.locator("#customer-phone").fill("081234567890");
-    await page.getByRole("button", { name: /Lanjut ke Layanan/ }).click();
-    await page
-      .getByRole("button", { name: /Lanjut ke Bantuan & Lantai/ })
-      .click();
-    await page.getByRole("button", { name: /Lanjut ke Catatan/ }).click();
-    await page
-      .getByRole("button", { name: /Lihat Ringkasan Estimasi/ })
-      .click();
+    // Layanan -> Bantuan & lantai -> Catatan -> Ringkasan
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
 
     await expect(page.locator(".order-review-card")).toContainText(
       "Prioritas Langsung",
@@ -272,3 +269,4 @@ test.describe("wizard pesanan", () => {
     );
   });
 });
+
