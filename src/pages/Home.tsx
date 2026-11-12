@@ -4303,7 +4303,7 @@ export default function Home() {
                   </span>
                   <h3>Tarif Transparan Tanpa Siluman</h3>
                   <p>
-                    Biaya per kilometer jelas, jasa sopir tetap Rp 65.000, tanpa
+                    Biaya per kilometer jelas, jasa sopir tetap Rp 50.000, tanpa
                     pungutan liar tak terduga di jalan.
                   </p>
                 </article>
