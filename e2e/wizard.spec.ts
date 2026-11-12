@@ -133,6 +133,55 @@ test.describe("wizard pesanan", () => {
     expect(message).toContain("Rp 50.000");
   });
 
+  test("layanan waktu tunggu menambah biaya sesuai pilihan", async ({
+    page,
+  }) => {
+    await pickAddress(page, "M1", "Mranggen");
+    await pickAddress(page, "B1", "Semarang");
+
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+    await page.locator("#customer-name").fill("Siti Aminah");
+    await page.locator("#customer-phone").fill("081234567890");
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+
+    const select = page.locator("#waiting-time");
+    await expect(select).toHaveValue("none");
+    await expect(select.locator("option")).toHaveText([
+      "Tanpa waktu tunggu",
+      "Lebih dari 30 menit (+Rp 18.000)",
+      "60 menit (+Rp 36.000)",
+      "90 menit (+Rp 72.000)",
+    ]);
+
+    await select.selectOption("min60");
+    await expect(select).toHaveValue("min60");
+
+    // Layanan -> Bantuan & lantai -> Catatan -> Ringkasan
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+    await page.getByRole("button", { name: /^Lanjut$/i }).click();
+
+    await expect(
+      page.locator(".quote-line").filter({ hasText: "Waktu tunggu (60 menit)" }),
+    ).toContainText("Rp 36.000");
+    await expect(page.locator(".order-review-card")).toContainText(
+      "60 menit (+Rp 36.000)",
+    );
+
+    // Jarak ditagih dari garasi -> muat -> bongkar -> garasi.
+    // Stub rute 12,4 km per leg, tiga leg (garasi-muat, muat-bongkar, bongkar-garasi).
+    await expect(
+      page.locator(".quote-line").filter({ hasText: "Jarak total" }),
+    ).toContainText("38 km");
+
+    const waLink = page.getByRole("link", {
+      name: /Kirim pesanan ke WhatsApp/,
+    });
+    const href = await waLink.getAttribute("href");
+    const message = decodeURIComponent(href!.split("text=")[1]);
+    expect(message).toContain("Waktu tunggu (60 menit): Rp 36.000");
+  });
+
   test("rute tersimpan terkunci sampai Ubah Titik ditekan", async ({
     page,
   }) => {

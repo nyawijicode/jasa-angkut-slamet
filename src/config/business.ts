@@ -10,10 +10,16 @@ export const BUSINESS = {
     lng: 110.496811,
   },
   pricing: {
-    perKm: 6500,
+    perKm: 7000,
     setoran: 50000,
     kmPerLiter: 10,
-    helper: { none: 0, driver: 50000, driverAndAssistant: 100000 } as const,
+    helper: { none: 0, driver: 65000, driverAndAssistant: 130000 } as const,
+    waitingTime: {
+      none: 0,
+      over30: 18000,
+      min60: 36000,
+      min90: 72000,
+    } as const,
     floor: { first: 20000, next: 10000, max: 20 },
     roundKm: "ceil" as const,
     outOfTownSurchargeRate: 0.5,

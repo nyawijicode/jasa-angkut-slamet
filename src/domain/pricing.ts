@@ -2,10 +2,14 @@ import { BUSINESS } from '../config/business';
 import type { Service } from './types';
 
 export type Helper = keyof typeof BUSINESS.pricing.helper;
+export type WaitingTime = keyof typeof BUSINESS.pricing.waitingTime;
 
 export interface Distances {
+  /** Garage -> first load stop. */
   garageToLoad?: number;
+  /** First load stop -> last unload stop, following every stop in order. */
   loadToUnload: number;
+  /** Last unload stop -> garage. */
   unloadToGarage?: number;
 }
 
@@ -13,6 +17,7 @@ export interface QuoteInput {
   service: Service;
   distances: Distances;
   helper: Helper;
+  waitingTime?: WaitingTime;
   loadFloor: number;
   unloadFloor: number;
   loadFloors?: number[];
@@ -26,6 +31,7 @@ export interface Quote {
   outOfTownSurcharge: number;
   transport: number;
   helper: number;
+  waitingTime: number;
   loadFloor: number;
   unloadFloor: number;
   priority: number;
@@ -42,7 +48,9 @@ export const floorFee = (floor: number): number => {
 };
 
 export function billableKm(_service: Service, d: Distances): number {
-  return Math.ceil(d.loadToUnload - 1e-9);
+  const total =
+    (d.garageToLoad ?? 0) + d.loadToUnload + (d.unloadToGarage ?? 0);
+  return Math.ceil(total - 1e-9);
 }
 
 export function calculateQuote(i: QuoteInput): Quote {
@@ -55,6 +63,9 @@ export function calculateQuote(i: QuoteInput): Quote {
       : 0;
   const transport = baseTransport + outOfTownSurcharge;
   const h = helper[i.helper];
+  const waitingFee = i.waitingTime
+    ? BUSINESS.pricing.waitingTime[i.waitingTime] ?? 0
+    : 0;
   const lf =
     i.loadFloors && i.loadFloors.length > 0
       ? i.loadFloors.reduce((total, floor) => total + floorFee(floor), 0)
@@ -70,9 +81,10 @@ export function calculateQuote(i: QuoteInput): Quote {
     outOfTownSurcharge,
     transport,
     helper: h,
+    waitingTime: waitingFee,
     loadFloor: lf,
     unloadFloor: uf,
     priority: priorityFee,
-    total: transport + h + lf + uf + priorityFee,
+    total: transport + h + waitingFee + lf + uf + priorityFee,
   };
 }

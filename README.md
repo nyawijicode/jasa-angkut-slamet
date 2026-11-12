@@ -231,7 +231,7 @@ dipertahankan untuk browser lama, sitemap gambar, dan pratinjau sosial.
 
 ## ⚙️ Konfigurasi Bisnis & Tarif
 
-Seluruh parameter bisnis (nomor WhatsApp, titik garasi, tarif dasar per km, biaya bantuan tenaga, dan biaya per lantai) dapat disesuaikan pada berkas:
+Seluruh parameter bisnis (nomor WhatsApp, titik garasi, tarif dasar per km, biaya bantuan tenaga, biaya waktu tunggu, dan biaya per lantai) dapat disesuaikan pada berkas:
 
 📁 **`src/config/business.ts`**
 
@@ -247,12 +247,18 @@ export const BUSINESS = {
     lng: 110.496811,
   },
   pricing: {
-    perKm: 6500, // Biaya per km
+    perKm: 7000, // Biaya per km
     setoran: 50000, // Biaya dasar angkutan
     helper: {
       none: 0, // Bongkar muat sendiri
-      driver: 50000, // Sopir ikut bongkar muat
-      driverAndAssistant: 100000, // Sopir + Kenek
+      driver: 65000, // Sopir ikut bongkar muat
+      driverAndAssistant: 130000, // Sopir + Kenek
+    },
+    waitingTime: {
+      none: 0,
+      over30: 18000, // Lebih dari 30 menit
+      min60: 36000, // 60 menit
+      min90: 72000, // 90 menit
     },
     floor: {
       first: 20000, // Biaya naik ke lantai 2
@@ -262,6 +268,11 @@ export const BUSINESS = {
   },
 };
 ```
+
+Jarak yang ditagihkan dihitung dari **garasi → titik muat → titik bongkar → garasi**.
+Semua titik muat/bongkar dijumlahkan sesuai urutan, lalu dibulatkan ke atas per km.
+Biaya layanan (bantuan tenaga, lantai, prioritas, dan waktu tunggu) ditambahkan
+setelah ongkos angkut.
 
 ---
 

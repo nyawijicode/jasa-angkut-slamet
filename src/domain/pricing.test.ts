@@ -49,9 +49,47 @@ describe('pricing', () => {
     expect(q.total).toBe(942750);
   });
 
-  it('dalam kota ignores garage', () => {
-    const km = billableKm('dalam-kota', { loadToUnload: 10 });
-    expect(km).toBe(10);
+  it('counts garage, load-to-unload, and return-to-garage legs', () => {
+    const km = billableKm('dalam-kota', {
+      garageToLoad: 4.2,
+      loadToUnload: 10,
+      unloadToGarage: 4.2,
+    });
+    expect(km).toBe(19);
+
+    const q = calculateQuote({
+      service: 'dalam-kota',
+      distances: {
+        garageToLoad: 4.2,
+        loadToUnload: 10,
+        unloadToGarage: 4.2,
+      },
+      helper: 'none',
+      loadFloor: 1,
+      unloadFloor: 1,
+    });
+    // 19 km * 6.500 + 50.000 = 173.500
+    expect(q.billableKm).toBe(19);
+    expect(q.baseTransport).toBe(173500);
+    expect(q.total).toBe(173500);
+  });
+
+  it('adds waiting time fee per selected tier', () => {
+    const base = {
+      service: 'dalam-kota' as const,
+      distances: { loadToUnload: 10 },
+      helper: 'none' as const,
+      loadFloor: 1,
+      unloadFloor: 1,
+    };
+    expect(calculateQuote(base).waitingTime).toBe(0);
+    expect(calculateQuote({ ...base, waitingTime: 'none' }).waitingTime).toBe(0);
+    expect(calculateQuote({ ...base, waitingTime: 'over30' }).waitingTime).toBe(18000);
+    expect(calculateQuote({ ...base, waitingTime: 'min60' }).waitingTime).toBe(36000);
+    expect(calculateQuote({ ...base, waitingTime: 'min90' }).waitingTime).toBe(72000);
+
+    const q = calculateQuote({ ...base, waitingTime: 'min60' });
+    expect(q.total).toBe(115000 + 36000);
   });
 
   it('ceil up', () => {

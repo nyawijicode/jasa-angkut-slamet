@@ -19,6 +19,7 @@ export interface WaPayload {
   loads: WaStop[];
   unloads: WaStop[];
   helperLabel: string;
+  waitingLabel?: string;
   distanceKm: number;
   note?: string;
   quote: Quote;
@@ -63,6 +64,10 @@ export function buildWhatsAppMessage(p: WaPayload): string {
   }
   if (p.quote.helper > 0) {
     lines.push(`Bantuan bongkar muat: Rp ${p.quote.helper.toLocaleString('id-ID')}`);
+  }
+  if (p.quote.waitingTime > 0) {
+    const suffix = p.waitingLabel ? ` (${p.waitingLabel})` : '';
+    lines.push(`Waktu tunggu${suffix}: Rp ${p.quote.waitingTime.toLocaleString('id-ID')}`);
   }
   if (p.quote.loadFloor > 0) {
     lines.push(`Lantai muat: Rp ${p.quote.loadFloor.toLocaleString('id-ID')}`);

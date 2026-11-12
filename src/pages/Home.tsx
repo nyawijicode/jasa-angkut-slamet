@@ -9,7 +9,7 @@ import {
 } from "react";
 import { BUSINESS } from "../config/business";
 import { validateCustomer } from "../domain/customer";
-import { calculateQuote, floorFee } from "../domain/pricing";
+import { calculateQuote, floorFee, type WaitingTime } from "../domain/pricing";
 import { formatPickupTime, formatSchedule } from "../domain/schedule";
 import { buildWhatsAppUrl, type WaStop } from "../domain/whatsapp";
 import type { Helper, Service } from "../domain/types";
@@ -967,6 +967,7 @@ export default function Home() {
   const [pickupTime, setPickupTime] = useState("");
   const [service, setService] = useState<Service>("dalam-kota");
   const [helper, setHelper] = useState<Helper>("none");
+  const [waitingTime, setWaitingTime] = useState<WaitingTime>("none");
   const [note, setNote] = useState("");
   const [priority, setPriority] = useState(true);
   const [mapReadOnly, setMapReadOnly] = useState(false);
@@ -1471,6 +1472,10 @@ export default function Home() {
   const routeKey = routePoints
     .map((point) => `${point.lat},${point.lng}`)
     .join("|");
+  const garagePoint = useMemo(
+    () => ({ lat: BUSINESS.garage.lat, lng: BUSINESS.garage.lng }),
+    [],
+  );
 
   useEffect(() => {
     if (!allStopsSet || routePoints.length < 2) {
@@ -1486,16 +1491,27 @@ export default function Home() {
       .slice(0, -1)
       .map((point, index) => [point, routePoints[index + 1]] as const);
 
-    Promise.all(
-      mainPairs.map(([from, to]) => fetchRoute(from, to, controller.signal)),
-    ).then((results) => {
+    Promise.all([
+      ...mainPairs.map(([from, to]) => fetchRoute(from, to, controller.signal)),
+      fetchRoute(garagePoint, routePoints[0], controller.signal),
+      fetchRoute(
+        routePoints[routePoints.length - 1],
+        garagePoint,
+        controller.signal,
+      ),
+    ]).then((results) => {
       if (controller.signal.aborted) return;
-      const main = results as Array<RouteResult | null>;
+      const main = results.slice(
+        0,
+        mainPairs.length,
+      ) as Array<RouteResult | null>;
+      const garageToFirst = results[mainPairs.length] as RouteResult | null;
+      const lastToGarage = results[mainPairs.length + 1] as RouteResult | null;
       const mainOk = main.length > 0 && main.every(Boolean);
       setPlan({
         main: main.filter((leg): leg is RouteResult => Boolean(leg)),
-        garageToFirst: null,
-        lastToGarage: null,
+        garageToFirst,
+        lastToGarage,
       });
       setRouteStatus(mainOk ? "ready" : "error");
     });
@@ -1546,19 +1562,38 @@ export default function Home() {
     for (let index = 0; index < routePoints.length - 1; index++) {
       mainKm += straightLineKm(routePoints[index], routePoints[index + 1]);
     }
-    return { loadToUnload: mainKm };
-  }, [allStopsSet, routePoints]);
+    return {
+      garageToLoad: straightLineKm(garagePoint, routePoints[0]),
+      loadToUnload: mainKm,
+      unloadToGarage: straightLineKm(
+        routePoints[routePoints.length - 1],
+        garagePoint,
+      ),
+    };
+  }, [allStopsSet, routePoints, garagePoint]);
 
   const routeDistances = useMemo(() => {
-    if (plan && plan.main.length > 0) {
+    if (!straightDistances) return null;
+    const mainIsComplete =
+      routeStatus === "ready" &&
+      plan !== null &&
+      plan.main.length === routePoints.length - 1;
+
+    if (plan && mainIsComplete) {
       const mainKm = plan.main.reduce(
         (total, leg) => total + leg.distanceKm,
         0,
       );
-      return { loadToUnload: mainKm };
+      return {
+        garageToLoad:
+          plan.garageToFirst?.distanceKm ?? straightDistances.garageToLoad,
+        loadToUnload: mainKm,
+        unloadToGarage:
+          plan.lastToGarage?.distanceKm ?? straightDistances.unloadToGarage,
+      };
     }
     return straightDistances;
-  }, [plan, straightDistances]);
+  }, [plan, routeStatus, straightDistances, routePoints.length]);
 
   const quote = useMemo(() => {
     if (!allStopsSet || !routeDistances) return null;
@@ -1571,6 +1606,7 @@ export default function Home() {
         service,
         distances: routeDistances,
         helper,
+        waitingTime,
         loadFloor: loadFloorList[0] ?? 1,
         unloadFloor: unloadFloorList[0] ?? 1,
         loadFloors: loadFloorList,
@@ -1585,6 +1621,7 @@ export default function Home() {
     routeDistances,
     service,
     helper,
+    waitingTime,
     floors,
     loadStops,
     unloadStops,
@@ -1622,6 +1659,14 @@ export default function Home() {
           : helper === "driver"
             ? "Sopir ikut bongkar muat"
             : "Sopir + Kenek",
+      waitingLabel:
+        waitingTime === "over30"
+          ? "Lebih dari 30 menit"
+          : waitingTime === "min60"
+            ? "60 menit"
+            : waitingTime === "min90"
+              ? "90 menit"
+              : "Tanpa waktu tunggu",
       distanceKm: quote.billableKm,
       note: priority
         ? `[PRIORITAS] Sopir tiba ASAP (+Rp 50.000). ${note}`.trim()
@@ -1640,6 +1685,7 @@ export default function Home() {
     pickupTime,
     service,
     helper,
+    waitingTime,
     floors,
     note,
     priority,
@@ -1708,23 +1754,47 @@ export default function Home() {
     return [];
   }, [routeStatus, mainRouteLine, fallbackLine]);
 
-  const garageToFirstLine = useMemo<Array<[number, number]>>(() => [], []);
-  const lastToGarageLine = useMemo<Array<[number, number]>>(() => [], []);
+  const garageToFirstLine = useMemo<Array<[number, number]>>(() => {
+    if (plan?.garageToFirst) return plan.garageToFirst.coordinates;
+    if (routePoints.length === 0) return [];
+    return [
+      [garagePoint.lat, garagePoint.lng],
+      [routePoints[0].lat, routePoints[0].lng],
+    ];
+  }, [plan, routePoints, garagePoint]);
+
+  const lastToGarageLine = useMemo<Array<[number, number]>>(() => {
+    if (plan?.lastToGarage) return plan.lastToGarage.coordinates;
+    if (routePoints.length === 0) return [];
+    const last = routePoints[routePoints.length - 1];
+    return [
+      [last.lat, last.lng],
+      [garagePoint.lat, garagePoint.lng],
+    ];
+  }, [plan, routePoints, garagePoint]);
 
   const fitPositions = useMemo<Array<[number, number]>>(
     () => [
       ...routeLine,
+      ...garageToFirstLine,
+      ...lastToGarageLine,
       ...routePoints.map((point) => [point.lat, point.lng] as [number, number]),
       ...(draft ? [[draft.lat, draft.lng] as [number, number]] : []),
     ],
-    [routeLine, routePoints, draft],
+    [routeLine, garageToFirstLine, lastToGarageLine, routePoints, draft],
   );
 
   const routeSummary = useMemo(() => {
     if (routeStatus !== "ready" || !plan) return null;
     return {
-      km: plan.main.reduce((total, leg) => total + leg.distanceKm, 0),
-      minutes: plan.main.reduce((total, leg) => total + leg.durationMin, 0),
+      km:
+        plan.main.reduce((total, leg) => total + leg.distanceKm, 0) +
+        (plan.garageToFirst?.distanceKm ?? 0) +
+        (plan.lastToGarage?.distanceKm ?? 0),
+      minutes:
+        plan.main.reduce((total, leg) => total + leg.durationMin, 0) +
+        (plan.garageToFirst?.durationMin ?? 0) +
+        (plan.lastToGarage?.durationMin ?? 0),
     };
   }, [plan, routeStatus]);
 
@@ -1884,6 +1954,37 @@ export default function Home() {
   const helperLabel =
     helperOptions.find((option) => option.key === helper)?.title ??
     "Tanpa bantuan";
+
+  const waitingOptions: Array<{
+    key: WaitingTime;
+    title: string;
+    price: number;
+  }> = [
+    {
+      key: "none",
+      title: "Tanpa waktu tunggu",
+      price: BUSINESS.pricing.waitingTime.none,
+    },
+    {
+      key: "over30",
+      title: "Lebih dari 30 menit",
+      price: BUSINESS.pricing.waitingTime.over30,
+    },
+    {
+      key: "min60",
+      title: "60 menit",
+      price: BUSINESS.pricing.waitingTime.min60,
+    },
+    {
+      key: "min90",
+      title: "90 menit",
+      price: BUSINESS.pricing.waitingTime.min90,
+    },
+  ];
+  const waitingOption = waitingOptions.find(
+    (option) => option.key === waitingTime,
+  );
+  const waitingLabel = waitingOption?.title ?? "Tanpa waktu tunggu";
 
   function scrollToPanel() {
     const body = panelRef.current?.querySelector<HTMLElement>(
@@ -3153,6 +3254,45 @@ export default function Home() {
                               )}
                             </div>
 
+                            <div className="field-stack">
+                              <label
+                                className="field-label"
+                                htmlFor="waiting-time"
+                              >
+                                Layanan waktu tunggu
+                              </label>
+                              <div className="input-shell">
+                                <span className="input-icon">
+                                  <IconClock size={18} />
+                                </span>
+                                <select
+                                  id="waiting-time"
+                                  className="field-input field-select"
+                                  value={waitingTime}
+                                  onChange={(event) =>
+                                    setWaitingTime(
+                                      event.target.value as WaitingTime,
+                                    )
+                                  }
+                                >
+                                  {waitingOptions.map((option) => (
+                                    <option
+                                      key={option.key}
+                                      value={option.key}
+                                    >
+                                      {option.title}
+                                      {option.price > 0
+                                        ? ` (+Rp ${option.price.toLocaleString("id-ID")})`
+                                        : ""}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <p className="field-hint">
+                                Biaya tambahan bila armada menunggu di lokasi.
+                              </p>
+                            </div>
+
                           </section>
                         )}
 
@@ -3453,7 +3593,7 @@ export default function Home() {
                                   ))}
                                   {quote && (
                                     <div className="review-row">
-                                      <dt>Jarak terhitung</dt>
+                                      <dt>Jarak total</dt>
                                       <dd>{quote.billableKm} km</dd>
                                     </div>
                                   )}
@@ -3490,6 +3630,16 @@ export default function Home() {
                                     <dt>Bantuan tenaga</dt>
                                     <dd>{helperLabel}</dd>
                                   </div>
+                                  {waitingTime !== "none" && (
+                                    <div className="review-row">
+                                      <dt>Waktu tunggu</dt>
+                                      <dd>
+                                        {`${waitingLabel} (+Rp ${(
+                                          waitingOption?.price ?? 0
+                                        ).toLocaleString("id-ID")})`}
+                                      </dd>
+                                    </div>
+                                  )}
                                   <div className="review-row">
                                     <dt>Lantai muat</dt>
                                     <dd>
@@ -3542,7 +3692,7 @@ export default function Home() {
                                   </div>
                                   <dl className="quote-lines">
                                     <div className="quote-line">
-                                      <dt>Jarak</dt>
+                                      <dt>Jarak total</dt>
                                       <dd>{quote.billableKm} km</dd>
                                     </div>
                                     {quote.outOfTownSurcharge > 0 ? (
@@ -3624,6 +3774,19 @@ export default function Home() {
                                         <dd>
                                           Rp{" "}
                                           {quote.priority.toLocaleString(
+                                            "id-ID",
+                                          )}
+                                        </dd>
+                                      </div>
+                                    )}
+                                    {quote.waitingTime > 0 && (
+                                      <div className="quote-line">
+                                        <dt>
+                                          Waktu tunggu ({waitingLabel})
+                                        </dt>
+                                        <dd>
+                                          Rp{" "}
+                                          {quote.waitingTime.toLocaleString(
                                             "id-ID",
                                           )}
                                         </dd>
