@@ -59,8 +59,8 @@ if (business) {
   for (const field of ["name", "url", "telephone", "priceRange", "image", "address", "geo"]) {
     if (!business[field]) problems.push(`MovingCompany.${field} wajib diisi.`);
   }
-  if (!String(business.priceRange ?? "").includes("6.000")) {
-    problems.push("MovingCompany.priceRange harus memuat tarif Rp 6.000/km.");
+  if (!String(business.priceRange ?? "").includes("6.500")) {
+    problems.push("MovingCompany.priceRange harus memuat tarif Rp 6.500/km.");
   }
   if (!String(business.priceRange ?? "").includes("65.000")) {
     problems.push("MovingCompany.priceRange harus memuat jasa sopir Rp 65.000.");

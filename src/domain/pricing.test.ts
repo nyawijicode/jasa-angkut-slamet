@@ -39,7 +39,7 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 1,
     });
-    // 89 km * 6.000 + 50.000 (setoran) = 623.000 + 50.000 = 673.000
+    // 89 km * 6.500 + 50.000 (setoran) = 623.000 + 50.000 = 673.000
     // +50% luar kota = 336.500
     // Total ongkos angkut luar kota = 673.000 + 336.500 = 1.009.500
     expect(q.billableKm).toBe(89);
@@ -68,7 +68,7 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 1,
     });
-    // 19 km * 6.000 + 50.000 = 183.000
+    // 19 km * 6.500 + 50.000 = 183.000
     expect(q.billableKm).toBe(19);
     expect(q.baseTransport).toBe(183000);
     expect(q.total).toBe(183000);

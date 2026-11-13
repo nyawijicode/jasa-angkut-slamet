@@ -154,7 +154,7 @@ test.describe("wizard pesanan", () => {
     await expect(cards.nth(1)).toContainText("Lebih dari 30 menit");
     await expect(cards.nth(1)).toContainText("+Rp18.000");
     await expect(cards.nth(2)).toContainText("60 menit");
-    await expect(cards.nth(2)).toContainText("+Rp36.000");
+    await expect(cards.nth(2)).toContainText("+Rp36.500");
     await expect(cards.nth(3)).toContainText("90 menit");
     await expect(cards.nth(3)).toContainText("+Rp72.000");
     await expect(cards.nth(0)).toHaveAttribute("aria-checked", "true");
@@ -170,9 +170,9 @@ test.describe("wizard pesanan", () => {
 
     await expect(
       page.locator(".quote-line").filter({ hasText: "Waktu tunggu (60 menit)" }),
-    ).toContainText("Rp 36.000");
+    ).toContainText("Rp 36.500");
     await expect(page.locator(".order-review-card")).toContainText(
-      "60 menit (+Rp 36.000)",
+      "60 menit (+Rp 36.500)",
     );
 
     // Jarak ditagih dari garasi -> muat -> bongkar -> garasi.
@@ -186,7 +186,7 @@ test.describe("wizard pesanan", () => {
     });
     const href = await waLink.getAttribute("href");
     const message = decodeURIComponent(href!.split("text=")[1]);
-    expect(message).toContain("Waktu tunggu (60 menit): Rp 36.000");
+    expect(message).toContain("Waktu tunggu (60 menit): Rp 36.500");
   });
 
   test("rute tersimpan terkunci sampai Ubah Titik ditekan", async ({
