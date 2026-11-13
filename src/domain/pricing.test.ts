@@ -109,7 +109,7 @@ describe('pricing', () => {
     });
     expect(q.loadFloor).toBe(20000);
     expect(q.unloadFloor).toBe(30000);
-    expect(q.total).toBe(170000);
+    expect(q.total).toBe(160000);
   });
 
   it('throws on invalid floor', () => {

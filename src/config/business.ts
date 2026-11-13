@@ -10,7 +10,7 @@ export const BUSINESS = {
     lng: 110.496811,
   },
   pricing: {
-    perKm: 7000,
+    perKm: 6000,
     setoran: 50000,
     kmPerLiter: 10,
     helper: { none: 0, driver: 65000, driverAndAssistant: 130000 } as const,

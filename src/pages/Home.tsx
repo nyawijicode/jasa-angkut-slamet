@@ -4674,7 +4674,7 @@ export default function Home() {
                       garasi → titik muat → titik bongkar → garasi
                     </strong>
                     , dibulatkan ke atas per km. Ongkos angkut = jarak ×{" "}
-                    <strong>Rp 7.000</strong> + biaya dasar{" "}
+                    <strong>Rp 7.000</strong> + jasa sopir tetap{" "}
                     <strong>Rp 50.000</strong>; rute luar kota ditambah 50%.
                     Setelah itu baru biaya layanan yang Anda pilih: bantuan
                     tenaga Rp 65.000 (sopir) atau Rp 130.000 (sopir + kenek),

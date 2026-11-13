@@ -247,8 +247,8 @@ export const BUSINESS = {
     lng: 110.496811,
   },
   pricing: {
-    perKm: 7000, // Biaya per km
-    setoran: 50000, // Biaya dasar angkutan
+    perKm: 6000, // Biaya per km
+    setoran: 50000, // Jasa  Sopir Tetap
     helper: {
       none: 0, // Bongkar muat sendiri
       driver: 65000, // Sopir ikut bongkar muat
