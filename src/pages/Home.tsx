@@ -4052,7 +4052,7 @@ export default function Home() {
                     </div>
                     <div className="hero-visual-rate">
                       <div className="rate-num">
-                        Rp 7.000 <span className="rate-unit">/km</span>
+                        Rp 6.000 <span className="rate-unit">/km</span>
                       </div>
                       <div className="rate-driver">
                         + Jasa Sopir Tetap Rp 50.000
@@ -4674,7 +4674,7 @@ export default function Home() {
                       garasi → titik muat → titik bongkar → garasi
                     </strong>
                     , dibulatkan ke atas per km. Ongkos angkut = jarak ×{" "}
-                    <strong>Rp 7.000</strong> + jasa sopir tetap{" "}
+                    <strong>Rp 6.000</strong> + jasa sopir tetap{" "}
                     <strong>Rp 50.000</strong>; rute luar kota ditambah 50%.
                     Setelah itu baru biaya layanan yang Anda pilih: bantuan
                     tenaga Rp 65.000 (sopir) atau Rp 130.000 (sopir + kenek),
@@ -5098,7 +5098,7 @@ export default function Home() {
             ) : (
               <>
                 <strong className="mobile-bar-value">
-                  Rp 7.000<small>/km</small>
+                  Rp 6.000<small>/km</small>
                 </strong>
                 <span className="mobile-bar-note">+ jasa sopir Rp 50.000</span>
               </>
