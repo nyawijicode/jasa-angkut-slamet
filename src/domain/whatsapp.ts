@@ -49,7 +49,16 @@ export function buildWhatsAppMessage(p: WaPayload): string {
   lines.push('', `*Layanan:* ${p.serviceLabel}`);
   appendStops('Titik Muat', p.loads);
   appendStops('Titik Bongkar', p.unloads);
-  lines.push('', `*Bantuan:* ${p.helperLabel}`, `*Jarak:* ${p.distanceKm} km`);
+  lines.push(
+    '',
+    `*Bantuan:* ${p.helperLabel}`,
+    `*Jarak tagihan:* ${p.distanceKm} km`,
+  );
+  if (p.quote.freeGarageKm > 0) {
+    lines.push(
+      `*Gratis garasi → muat:* ${Number(p.quote.freeGarageKm.toFixed(1)).toLocaleString('id-ID')} km`,
+    );
+  }
   if (p.note && p.note.trim()) {
     lines.push(`*Catatan:* ${p.note.trim()}`);
   }

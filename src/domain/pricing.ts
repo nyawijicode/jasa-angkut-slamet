@@ -26,6 +26,10 @@ export interface QuoteInput {
 }
 
 export interface Quote {
+  /** Actual distance across every leg, before the free garage allowance. */
+  distanceKm: number;
+  /** Garage -> load distance that is not charged (0 when the leg is absent). */
+  freeGarageKm: number;
   billableKm: number;
   baseTransport: number;
   outOfTownSurcharge: number;
@@ -48,13 +52,28 @@ export const floorFee = (floor: number): number => {
 };
 
 export function billableKm(_service: Service, d: Distances): number {
+  const freeGarageKm = Math.min(
+    d.garageToLoad ?? 0,
+    BUSINESS.pricing.freeGarageKm,
+  );
   const total =
-    (d.garageToLoad ?? 0) + d.loadToUnload + (d.unloadToGarage ?? 0);
-  return Math.ceil(total - 1e-9);
+    (d.garageToLoad ?? 0) -
+    freeGarageKm +
+    d.loadToUnload +
+    (d.unloadToGarage ?? 0);
+  return Math.max(0, Math.ceil(total - 1e-9));
 }
 
 export function calculateQuote(i: QuoteInput): Quote {
   const { perKm, setoran, helper } = BUSINESS.pricing;
+  const distanceKm =
+    (i.distances.garageToLoad ?? 0) +
+    i.distances.loadToUnload +
+    (i.distances.unloadToGarage ?? 0);
+  const freeGarageKm = Math.min(
+    i.distances.garageToLoad ?? 0,
+    BUSINESS.pricing.freeGarageKm,
+  );
   const km = billableKm(i.service, i.distances);
   const baseTransport = km * perKm + setoran;
   const outOfTownSurcharge =
@@ -76,6 +95,8 @@ export function calculateQuote(i: QuoteInput): Quote {
       : floorFee(i.unloadFloor);
   const priorityFee = i.priority ? 50000 : 0;
   return {
+    distanceKm,
+    freeGarageKm,
     billableKm: km,
     baseTransport,
     outOfTownSurcharge,

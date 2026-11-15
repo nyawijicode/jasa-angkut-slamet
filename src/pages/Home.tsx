@@ -3624,10 +3624,29 @@ export default function Home() {
                                       </div>
                                     ))}
                                     {quote && (
-                                      <div className="review-row">
-                                        <dt>Jarak total</dt>
-                                        <dd>{quote.billableKm} km</dd>
-                                      </div>
+                                      <>
+                                        {quote.freeGarageKm > 0 && (
+                                          <>
+                                            <div className="review-row">
+                                              <dt>Jarak tempuh</dt>
+                                              <dd>
+                                                {quote.distanceKm.toFixed(1)} km
+                                              </dd>
+                                            </div>
+                                            <div className="review-row">
+                                              <dt>Gratis garasi → muat</dt>
+                                              <dd>
+                                                −{quote.freeGarageKm.toFixed(1)}{" "}
+                                                km
+                                              </dd>
+                                            </div>
+                                          </>
+                                        )}
+                                        <div className="review-row">
+                                          <dt>Jarak tagihan</dt>
+                                          <dd>{quote.billableKm} km</dd>
+                                        </div>
+                                      </>
                                     )}
                                     <div className="review-row">
                                       <dt>Pengiriman</dt>
@@ -3726,8 +3745,24 @@ export default function Home() {
                                       </span>
                                     </div>
                                     <dl className="quote-lines">
+                                      {quote.freeGarageKm > 0 && (
+                                        <>
+                                          <div className="quote-line">
+                                            <dt>Jarak tempuh</dt>
+                                            <dd>
+                                              {quote.distanceKm.toFixed(1)} km
+                                            </dd>
+                                          </div>
+                                          <div className="quote-line">
+                                            <dt>Gratis garasi → muat</dt>
+                                            <dd>
+                                              −{quote.freeGarageKm.toFixed(1)} km
+                                            </dd>
+                                          </div>
+                                        </>
+                                      )}
                                       <div className="quote-line">
-                                        <dt>Jarak total</dt>
+                                        <dt>Jarak tagihan</dt>
                                         <dd>{quote.billableKm} km</dd>
                                       </div>
                                       {quote.outOfTownSurcharge > 0 ? (
@@ -4059,8 +4094,9 @@ export default function Home() {
                       </div>
                     </div>
                     <p className="hero-visual-subnote">
-                      Perhitungan tarif otomatis transparan langsung di rute
-                      peta. Konfirmasi via WhatsApp sebelum berangkat.
+                      10 km pertama dari garasi gratis. Perhitungan tarif
+                      otomatis transparan langsung di rute peta. Konfirmasi via
+                      WhatsApp sebelum berangkat.
                     </p>
                   </figcaption>
                 </figure>
@@ -4303,8 +4339,9 @@ export default function Home() {
                   </span>
                   <h3>Tarif Transparan Tanpa Siluman</h3>
                   <p>
-                    Biaya per kilometer jelas, jasa sopir tetap Rp 50.000, tanpa
-                    pungutan liar tak terduga di jalan.
+                    10 km pertama dari garasi gratis. Biaya per kilometer
+                    jelas, jasa sopir tetap Rp 50.000, tanpa pungutan liar tak
+                    terduga di jalan.
                   </p>
                 </article>
 
@@ -4669,11 +4706,14 @@ export default function Home() {
                 </summary>
                 <div className="faq-answer">
                   <p>
-                    Tarif dihitung dari total jarak{" "}
+                    Tarif dihitung dari jarak{" "}
                     <strong>
                       garasi → titik muat → titik bongkar → garasi
                     </strong>
-                    , dibulatkan ke atas per km. Ongkos angkut = jarak ×{" "}
+                    , dibulatkan ke atas per km. <strong>10 km pertama</strong>{" "}
+                    dari garasi ke titik muat gratis; kelebihannya baru
+                    dihitung, sedangkan jarak muat → bongkar → garasi tetap
+                    dihitung penuh. Ongkos angkut = jarak tagihan ×{" "}
                     <strong>Rp 6.500</strong> + jasa sopir tetap{" "}
                     <strong>Rp 50.000</strong>; rute luar kota ditambah 50%.
                     Setelah itu baru biaya layanan yang Anda pilih: bantuan

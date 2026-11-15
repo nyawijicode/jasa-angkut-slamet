@@ -248,7 +248,8 @@ export const BUSINESS = {
   },
   pricing: {
     perKm: 6500, // Biaya per km
-    setoran: 50000, // Jasa  Sopir Tetap
+    setoran: 50000, // Jasa Sopir Tetap
+    freeGarageKm: 10, // 10 km pertama garasi -> titik muat gratis
     helper: {
       none: 0, // Bongkar muat sendiri
       driver: 65000, // Sopir ikut bongkar muat
@@ -270,9 +271,11 @@ export const BUSINESS = {
 ```
 
 Jarak yang ditagihkan dihitung dari **garasi → titik muat → titik bongkar → garasi**.
-Semua titik muat/bongkar dijumlahkan sesuai urutan, lalu dibulatkan ke atas per km.
-Biaya layanan (bantuan tenaga, lantai, prioritas, dan waktu tunggu) ditambahkan
-setelah ongkos angkut.
+**10 km pertama** pada leg garasi → titik muat gratis; jika jaraknya lebih dari
+10 km, hanya kelebihannya yang ditagihkan (contoh: 30 km → 20 km). Leg titik
+muat → titik bongkar dan titik bongkar → garasi tetap dihitung penuh. Semua leg
+dijumlahkan, lalu dibulatkan ke atas per km. Biaya layanan (bantuan tenaga,
+lantai, prioritas, dan waktu tunggu) ditambahkan setelah ongkos angkut.
 
 ---
 

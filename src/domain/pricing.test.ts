@@ -10,12 +10,13 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 3,
     });
+    // 13 km * 6.500 + 50.000 = 134.500
     expect(quote.billableKm).toBe(13);
-    expect(quote.transport).toBe(141000);
+    expect(quote.transport).toBe(134500);
     expect(quote.helper).toBe(65000);
     expect(quote.loadFloor).toBe(0);
     expect(quote.unloadFloor).toBe(30000);
-    expect(quote.total).toBe(236000);
+    expect(quote.total).toBe(229500);
   });
 
   it('floor fees', () => {
@@ -39,23 +40,24 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 1,
     });
-    // 89 km * 6.500 + 50.000 (setoran) = 623.000 + 50.000 = 673.000
-    // +50% luar kota = 336.500
-    // Total ongkos angkut luar kota = 673.000 + 336.500 = 1.009.500
+    // 89 km * 6.500 + 50.000 (setoran) = 578.500 + 50.000 = 628.500
+    // +50% luar kota = 314.250
+    // Total ongkos angkut luar kota = 628.500 + 314.250 = 942.750
     expect(q.billableKm).toBe(89);
-    expect(q.baseTransport).toBe(673000);
-    expect(q.outOfTownSurcharge).toBe(336500);
-    expect(q.transport).toBe(1009500);
-    expect(q.total).toBe(1009500);
+    expect(q.baseTransport).toBe(628500);
+    expect(q.outOfTownSurcharge).toBe(314250);
+    expect(q.transport).toBe(942750);
+    expect(q.total).toBe(942750);
   });
 
-  it('counts garage, load-to-unload, and return-to-garage legs', () => {
+  it('waives the garage leg up to 10 km and still charges the other legs', () => {
     const km = billableKm('dalam-kota', {
       garageToLoad: 4.2,
       loadToUnload: 10,
       unloadToGarage: 4.2,
     });
-    expect(km).toBe(19);
+    // Garasi -> muat 4,2 km gratis; 10 + 4,2 = 14,2 km -> 15 km.
+    expect(km).toBe(15);
 
     const q = calculateQuote({
       service: 'dalam-kota',
@@ -68,10 +70,51 @@ describe('pricing', () => {
       loadFloor: 1,
       unloadFloor: 1,
     });
-    // 19 km * 6.500 + 50.000 = 183.000
-    expect(q.billableKm).toBe(19);
-    expect(q.baseTransport).toBe(183000);
-    expect(q.total).toBe(183000);
+    // 15 km * 6.500 + 50.000 = 147.500
+    expect(q.distanceKm).toBeCloseTo(18.4);
+    expect(q.freeGarageKm).toBeCloseTo(4.2);
+    expect(q.billableKm).toBe(15);
+    expect(q.baseTransport).toBe(147500);
+    expect(q.total).toBe(147500);
+  });
+
+  it('charges only the garage distance above the 10 km allowance', () => {
+    const km = billableKm('dalam-kota', {
+      garageToLoad: 30,
+      loadToUnload: 10,
+      unloadToGarage: 10,
+    });
+    // Garasi -> muat 30 km, 10 km gratis, sisa 20 km + 10 + 10 = 40 km.
+    expect(km).toBe(40);
+
+    const q = calculateQuote({
+      service: 'dalam-kota',
+      distances: {
+        garageToLoad: 30,
+        loadToUnload: 10,
+        unloadToGarage: 10,
+      },
+      helper: 'none',
+      loadFloor: 1,
+      unloadFloor: 1,
+    });
+    expect(q.distanceKm).toBe(50);
+    expect(q.freeGarageKm).toBe(10);
+    expect(q.billableKm).toBe(40);
+    expect(q.baseTransport).toBe(310000);
+    expect(q.total).toBe(310000);
+  });
+
+  it('makes the garage leg fully free at exactly 10 km', () => {
+    expect(
+      billableKm('dalam-kota', { garageToLoad: 10, loadToUnload: 0 }),
+    ).toBe(0);
+    expect(
+      billableKm('dalam-kota', { garageToLoad: 10, loadToUnload: 5 }),
+    ).toBe(5);
+    expect(
+      billableKm('dalam-kota', { loadToUnload: 10 }),
+    ).toBe(10);
   });
 
   it('adds waiting time fee per selected tier', () => {
@@ -89,7 +132,8 @@ describe('pricing', () => {
     expect(calculateQuote({ ...base, waitingTime: 'min90' }).waitingTime).toBe(72000);
 
     const q = calculateQuote({ ...base, waitingTime: 'min60' });
-    expect(q.total).toBe(120000 + 36000);
+    // 10 km * 6.500 + 50.000 = 115.000
+    expect(q.total).toBe(115000 + 36000);
   });
 
   it('ceil up', () => {
@@ -109,7 +153,7 @@ describe('pricing', () => {
     });
     expect(q.loadFloor).toBe(20000);
     expect(q.unloadFloor).toBe(30000);
-    expect(q.total).toBe(160000);
+    expect(q.total).toBe(115000 + 20000 + 30000);
   });
 
   it('throws on invalid floor', () => {
@@ -138,6 +182,6 @@ describe('pricing', () => {
       priority: true,
     });
     expect(q.priority).toBe(50000);
-    expect(q.total).toBe(120000 + 50000);
+    expect(q.total).toBe(115000 + 50000);
   });
 });
