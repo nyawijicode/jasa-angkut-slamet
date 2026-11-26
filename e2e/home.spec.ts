@@ -412,43 +412,74 @@ test("scroll dan klik CTA tidak menambahkan fragment ke URL", async ({
   expect(new URL(page.url()).hash).toBe("");
 });
 
-test("menu aktif langsung sesuai path dan tidak ikut berpindah saat scroll", async ({
+test("menu aktif langsung sesuai path, mengikuti scroll, dan tidak menulis hash", async ({
   page,
 }) => {
+  test.setTimeout(60000);
   await page.setViewportSize({ width: 1280, height: 800 });
 
-  for (const [path, label] of [
-    ["/galeri", "Galeri"],
-    ["/area-layanan", "Area"],
-    ["/faq", "FAQ"],
-    ["/layanan", "Layanan"],
-  ] as const) {
-    await page.goto(path);
-    const active = page.locator(".header-nav .nav-link.is-active");
-    await expect(active).toHaveCount(1);
-    await expect(active).toHaveText(label);
+  const pages: {
+    path: string;
+    initial: string;
+    id: string;
+    label: string;
+    modal?: boolean;
+  }[] = [
+    { path: "/", initial: "Beranda", id: "galeri", label: "Galeri" },
+    { path: "/layanan", initial: "Layanan", id: "faq", label: "FAQ" },
+    { path: "/galeri", initial: "Galeri", id: "layanan", label: "Layanan" },
+    { path: "/area-layanan", initial: "Area", id: "galeri", label: "Galeri" },
+    { path: "/faq", initial: "FAQ", id: "area-layanan", label: "Area" },
+    {
+      path: "/hitung-tarif",
+      initial: "Beranda",
+      id: "galeri",
+      label: "Galeri",
+      modal: true,
+    },
+    { path: "/kontak", initial: "FAQ", id: "galeri", label: "Galeri" },
+  ];
 
-    await page.evaluate(() =>
-      window.scrollTo(0, document.documentElement.scrollHeight),
-    );
-    await page.waitForTimeout(250);
-    await expect(active).toHaveText(label);
-    expect(new URL(page.url()).hash).toBe("");
+  const active = page.locator(".header-nav .nav-link.is-active");
+
+  for (const entry of pages) {
+    await page.goto(entry.path);
+    if (entry.modal) {
+      await expect(page.locator(".booking-modal")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.locator(".booking-modal")).toBeHidden({
+        timeout: 10000,
+      });
+    }
+
+    await expect(active).toHaveCount(1);
+    await expect(active).toHaveText(entry.initial);
+    // Tunggu animasi scroll saat halaman dibuka selesai agar sinkronisasi
+    // scroll-spy tidak sedang ditunda.
+    await page.waitForTimeout(500);
+
+    await page.evaluate((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        window.scrollTo(
+          0,
+          el.getBoundingClientRect().top + window.scrollY - 120,
+        );
+      }
+    }, entry.id);
+    await page.waitForTimeout(200);
+
+    await expect(active).toHaveText(entry.label);
+    const current = new URL(page.url());
+    expect(current.pathname).toBe(entry.path);
+    expect(current.hash).toBe("");
   }
 
-  // Di homepage, scroll-spy tetap berfungsi tetapi hanya mengubah tampilan.
-  await page.goto("/");
-  await expect(page.locator(".header-nav .nav-link.is-active")).toHaveText(
-    "Beranda",
-  );
-  await page.evaluate(() => {
-    const el = document.getElementById("galeri");
-    if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 120);
-  });
-  await page.waitForTimeout(300);
-  await expect(page.locator(".header-nav .nav-link.is-active")).toHaveText(
-    "Galeri",
-  );
+  // Berpindah lewat menu tetap langsung menyorot tujuan, bukan lewat menu tengah.
+  await page.goto("/galeri");
+  await page.locator('.header-nav a[href="/area-layanan"]').click();
+  await expect(page).toHaveURL(/\/area-layanan$/);
+  await expect(active).toHaveText("Area");
   expect(new URL(page.url()).hash).toBe("");
 });
 

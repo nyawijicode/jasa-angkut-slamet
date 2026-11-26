@@ -1212,9 +1212,7 @@ export default function Home() {
 
   useEffect(() => {
     const sectionIds = SECTION_IDS;
-    const pageNavId = SECTION_BY_PATH[normalizePath(window.location.pathname)];
     let ticking = false;
-    let settleTimer = 0;
 
     function detectSection(): string {
       const scrollY = window.scrollY;
@@ -1253,15 +1251,12 @@ export default function Home() {
       window.requestAnimationFrame(() => {
         ticking = false;
         setShowScrollTop(window.scrollY > 480);
-        // Selama animasi anchor berjalan, jangan sentuh section aktif/hash
-        // supaya penanda tidak melompati section perantara.
+        // Selama animasi anchor berjalan, jangan sentuh section aktif supaya
+        // penanda tidak melompati section perantara. Di luar itu, penanda
+        // mengikuti scroll secara langsung di semua halaman; alamat tetap memakai
+        // path halaman dan tidak ditulis ulang.
         if (performance.now() < navSyncSuppressUntilRef.current) return;
-        // Di halaman khusus, menu aktif mengikuti path—bukan posisi scroll— agar
-        // seleksi menu selalu cocok dengan alamat yang terlihat di browser.
-        if (pageNavId) return;
-        // Perbarui section aktif setelah scroll berhenti.
-        window.clearTimeout(settleTimer);
-        settleTimer = window.setTimeout(syncSection, 150);
+        syncSection();
       });
     }
 
@@ -1278,7 +1273,6 @@ export default function Home() {
     setShowScrollTop(window.scrollY > 480);
 
     return () => {
-      window.clearTimeout(settleTimer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("hashchange", onHashChange);
     };

@@ -275,10 +275,12 @@ dibersihkan dengan `history.replaceState`. Scroll-spy juga tidak lagi menulis
 hash ke URL, jadi `/layanan` tidak berubah menjadi `/layanan#kontak` saat
 digulir ke bawah.
 
-Pada halaman khusus, penanda menu aktif diambil dari path sejak render pertama
-dan tidak diubah oleh scroll, sehingga pilihan menu selalu cocok dengan alamat.
-Di homepage, scroll-spy tetap berfungsi tetapi hanya mengubah penanda visual;
-alamat tetap `/`.
+Penanda menu aktif diambil dari path sejak render pertama, sehingga membuka
+`/galeri` langsung menyorot Galeri tanpa sempat lewat Beranda. Setelah itu,
+scroll-spy berfungsi di semua halaman dan hanya mengubah penanda visual saat
+pengguna menggulir; alamat tetap memakai path halaman, bukan hash. Saat tautan
+menu diklik, penanda langsung diarahkan ke tujuan dan sinkronisasi scroll
+ditunda selama animasi agar tidak melompati section perantara.
 
 `/hitung-tarif` langsung membuka kalkulator tarif. `/kontak` mendarat di
 section "Hubungi Kami" yang berisi WhatsApp, telepon, alamat garasi, dan peta.
