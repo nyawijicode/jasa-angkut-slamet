@@ -1025,9 +1025,14 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeNav, setActiveNav] = useState<string>(() => {
-    if (typeof window !== "undefined" && window.location.hash) {
+    if (typeof window !== "undefined") {
       const h = window.location.hash.replace("#", "");
       if (ANCHOR_IDS.includes(h)) return h;
+      // Halaman khusus langsung memakai menu aktif dari path, supaya tidak
+      // sempat menyala di Beranda sebelum efek scroll berjalan.
+      return (
+        SECTION_BY_PATH[normalizePath(window.location.pathname)] ?? "beranda"
+      );
     }
     return "beranda";
   });
@@ -1207,6 +1212,7 @@ export default function Home() {
 
   useEffect(() => {
     const sectionIds = SECTION_IDS;
+    const pageNavId = SECTION_BY_PATH[normalizePath(window.location.pathname)];
     let ticking = false;
     let settleTimer = 0;
 
@@ -1250,6 +1256,9 @@ export default function Home() {
         // Selama animasi anchor berjalan, jangan sentuh section aktif/hash
         // supaya penanda tidak melompati section perantara.
         if (performance.now() < navSyncSuppressUntilRef.current) return;
+        // Di halaman khusus, menu aktif mengikuti path—bukan posisi scroll— agar
+        // seleksi menu selalu cocok dengan alamat yang terlihat di browser.
+        if (pageNavId) return;
         // Perbarui section aktif setelah scroll berhenti.
         window.clearTimeout(settleTimer);
         settleTimer = window.setTimeout(syncSection, 150);

@@ -412,6 +412,46 @@ test("scroll dan klik CTA tidak menambahkan fragment ke URL", async ({
   expect(new URL(page.url()).hash).toBe("");
 });
 
+test("menu aktif langsung sesuai path dan tidak ikut berpindah saat scroll", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+
+  for (const [path, label] of [
+    ["/galeri", "Galeri"],
+    ["/area-layanan", "Area"],
+    ["/faq", "FAQ"],
+    ["/layanan", "Layanan"],
+  ] as const) {
+    await page.goto(path);
+    const active = page.locator(".header-nav .nav-link.is-active");
+    await expect(active).toHaveCount(1);
+    await expect(active).toHaveText(label);
+
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight),
+    );
+    await page.waitForTimeout(250);
+    await expect(active).toHaveText(label);
+    expect(new URL(page.url()).hash).toBe("");
+  }
+
+  // Di homepage, scroll-spy tetap berfungsi tetapi hanya mengubah tampilan.
+  await page.goto("/");
+  await expect(page.locator(".header-nav .nav-link.is-active")).toHaveText(
+    "Beranda",
+  );
+  await page.evaluate(() => {
+    const el = document.getElementById("galeri");
+    if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 120);
+  });
+  await page.waitForTimeout(300);
+  await expect(page.locator(".header-nav .nav-link.is-active")).toHaveText(
+    "Galeri",
+  );
+  expect(new URL(page.url()).hash).toBe("");
+});
+
 test("navigasi desktop dan mobile memakai tautan HTML yang dapat dirayapi", async ({
   page,
 }) => {
