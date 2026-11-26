@@ -2294,7 +2294,7 @@ export default function Home() {
           <div className="hero-ambient-glow hero-glow-2" aria-hidden="true" />
 
           <div className="container hero-container">
-            <div className="hero-top-row">
+            <div className="hero-top-row" id="pesan">
               {bookingOpen && (
                 <>
                   <div
@@ -2304,7 +2304,6 @@ export default function Home() {
                   />
                   <section
                     className="workspace booking-modal booking-modal-full"
-                    id="pesan"
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="form-title"
@@ -4290,6 +4289,8 @@ export default function Home() {
                     src="/galeri-jasa-angkut-slamet-1-800.jpg"
                     alt="Armada Pick Up Jasa Angkut Slamet"
                     loading="lazy"
+                    width={800}
+                    height={1200}
                   />
                 </div>
                 <h3 className="fleet-card-title">

@@ -240,3 +240,49 @@ test("modal galeri mengunci fokus dan menutup dengan Escape", async ({
   await expect(modal).toHaveCount(0);
   await expect(trigger).toBeFocused();
 });
+
+test("metadata homepage sesuai identitas bisnis", async ({ page }) => {
+  await expect(page).toHaveTitle(/Jasa Angkut Slamet.*Demak Semarang/);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    "content",
+    /0813-2762-3942/,
+  );
+  await expect(page.locator('meta[name="keywords"]')).toHaveCount(0);
+  await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute(
+    "content",
+    "id_ID",
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+});
+
+test("semua tautan anchor internal memiliki target", async ({ page }) => {
+  const missing = await page.evaluate(() =>
+    [
+      ...new Set(
+        [...document.querySelectorAll('a[href^="#"]')]
+          .map((a) => (a.getAttribute("href") || "").slice(1))
+          .filter((id) => id.length > 0),
+      ),
+    ].filter((id) => !document.getElementById(id)),
+  );
+  expect(missing).toEqual([]);
+});
+
+test("halaman privasi memiliki metadata unik dan breadcrumb terlihat", async ({
+  page,
+}) => {
+  await page.goto("/privasi.html");
+
+  await expect(page).toHaveTitle(/Kebijakan Privasi.*Jasa Angkut Slamet/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://jasa-angkut-slamet.vercel.app/privasi.html",
+  );
+  await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
+  await expect(
+    page.getByRole("navigation", { name: "Breadcrumb" }),
+  ).toContainText("Kebijakan Privasi");
+});
