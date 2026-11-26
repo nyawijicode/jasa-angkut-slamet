@@ -915,12 +915,29 @@ const NAV_LINKS = [
 ] as const;
 
 const PAGE_LINKS: Record<string, string> = {
-  beranda: "/#beranda",
-  layanan: "/layanan.html#layanan",
-  galeri: "/galeri.html#galeri",
-  "area-layanan": "/area-layanan.html#area-layanan",
-  faq: "/faq.html#faq",
-  pesan: "/hitung-tarif.html#pesan",
+  beranda: "/",
+  layanan: "/layanan",
+  galeri: "/galeri",
+  "area-layanan": "/area-layanan",
+  faq: "/faq",
+  pesan: "/hitung-tarif",
+};
+
+// Halaman khusus memakai path bersih; section tujuan ditentukan dari path,
+// bukan fragment `#...`, supaya alamat di browser tetap rapi.
+const SECTION_BY_PATH: Record<string, string> = {
+  "/hitung-tarif": "pesan",
+  "/layanan": "layanan",
+  "/galeri": "galeri",
+  "/area-layanan": "area-layanan",
+  "/faq": "faq",
+};
+
+const CLEAN_PATHS = new Set(["/", ...Object.keys(SECTION_BY_PATH), "/privasi"]);
+
+const normalizePath = (path: string) => {
+  const trimmed = path.replace(/\/+$/, "") || "/";
+  return trimmed.replace(/\.html$/, "");
 };
 
 const navHref = (id: string) => PAGE_LINKS[id] ?? `/#${id}`;
@@ -1028,7 +1045,7 @@ export default function Home() {
   }, []);
 
   const scrollToAnchor = useCallback(
-    (id: string) => {
+    (id: string, options?: { updateHash?: boolean }) => {
       const el = document.getElementById(id);
       if (!el) return;
 
@@ -1057,7 +1074,10 @@ export default function Home() {
         window.scrollTo(0, targetTop);
         document.documentElement.style.scrollBehavior = "";
         setActiveNav(id);
-        if (window.location.hash !== `#${id}`) {
+        if (
+          options?.updateHash !== false &&
+          window.location.hash !== `#${id}`
+        ) {
           window.history.replaceState(null, "", `#${id}`);
         }
       };
@@ -1104,11 +1124,24 @@ export default function Home() {
     [cancelNavScroll],
   );
 
-  // Halaman khusus memuat hash sebelum React selesai merender targetnya.
+  // Halaman khusus memuat target sebelum React selesai merender section.
+  // Fragment lama tetap didukung, lalu alamat dibersihkan ke path kanonik.
   useEffect(() => {
-    const id = window.location.hash.replace("#", "");
-    if (!ANCHOR_IDS.includes(id)) return;
-    const timer = window.setTimeout(() => scrollToAnchor(id), 0);
+    const cleanPath = normalizePath(window.location.pathname);
+    const hashId = window.location.hash.replace("#", "");
+    const id = ANCHOR_IDS.includes(hashId) ? hashId : SECTION_BY_PATH[cleanPath];
+    const shouldClean =
+      CLEAN_PATHS.has(cleanPath) &&
+      (window.location.pathname !== cleanPath || Boolean(window.location.hash));
+
+    if (!id) {
+      if (shouldClean) window.history.replaceState(null, "", cleanPath);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      scrollToAnchor(id, { updateHash: false });
+      if (shouldClean) window.history.replaceState(null, "", cleanPath);
+    }, 0);
     return () => window.clearTimeout(timer);
   }, [scrollToAnchor]);
 
@@ -4761,7 +4794,7 @@ export default function Home() {
                     </strong>
                     , termasuk Mranggen, Kebonbatur, Sayung, Ungaran, Ambarawa,
                     Bawen, dan Bandungan.{" "}
-                    <a href="/area-layanan.html#area-layanan">
+                    <a href="/area-layanan">
                       Lihat daftar lengkap area layanan
                     </a>
                     . Kami juga siap melayani pengiriman{" "}
@@ -4972,22 +5005,22 @@ export default function Home() {
               <h3 className="footer-col-title">Navigasi</h3>
               <ul className="footer-links-list">
                 <li>
-                  <a href="/#beranda">Beranda</a>
+                  <a href="/">Beranda</a>
                 </li>
                 <li>
-                  <a href="/layanan.html#layanan">Layanan Kami</a>
+                  <a href="/layanan">Layanan Kami</a>
                 </li>
                 <li>
-                  <a href="/hitung-tarif.html#pesan">Kalkulator Tarif</a>
+                  <a href="/hitung-tarif">Kalkulator Tarif</a>
                 </li>
                 <li>
-                  <a href="/galeri.html#galeri">Galeri Armada</a>
+                  <a href="/galeri">Galeri Armada</a>
                 </li>
                 <li>
-                  <a href="/area-layanan.html#area-layanan">Area Layanan</a>
+                  <a href="/area-layanan">Area Layanan</a>
                 </li>
                 <li>
-                  <a href="/faq.html#faq">Tanya Jawab (FAQ)</a>
+                  <a href="/faq">Tanya Jawab (FAQ)</a>
                 </li>
               </ul>
             </div>
@@ -4996,16 +5029,16 @@ export default function Home() {
               <h3 className="footer-col-title">Area Layanan</h3>
               <ul className="footer-links-list">
                 <li>
-                  <a href="/area-layanan.html#area-layanan">Kabupaten Demak (14 Kec.)</a>
+                  <a href="/area-layanan">Kabupaten Demak (14 Kec.)</a>
                 </li>
                 <li>
-                  <a href="/area-layanan.html#area-layanan">Kota Semarang (16 Kec.)</a>
+                  <a href="/area-layanan">Kota Semarang (16 Kec.)</a>
                 </li>
                 <li>
-                  <a href="/area-layanan.html#area-layanan">Kab. Semarang (19 Kec.)</a>
+                  <a href="/area-layanan">Kab. Semarang (19 Kec.)</a>
                 </li>
                 <li>
-                  <a href="/area-layanan.html#area-layanan">Ungaran &amp; Mranggen</a>
+                  <a href="/area-layanan">Ungaran &amp; Mranggen</a>
                 </li>
                 <li>
                   <a href="#hubungi">Kirim Antar Kota &amp; Provinsi</a>
@@ -5095,7 +5128,7 @@ export default function Home() {
               dilindungi.
             </span>
             <span>
-              <a className="footer-legal-link" href="/privasi.html">
+              <a className="footer-legal-link" href="/privasi">
                 Kebijakan Privasi &amp; Ketentuan Layanan
               </a>
             </span>

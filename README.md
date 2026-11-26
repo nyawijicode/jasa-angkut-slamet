@@ -153,7 +153,8 @@ jasa-angkut-slamet/
 ├── package.json            # Konfigurasi paket & dependensi
 ├── playwright.config.ts    # Konfigurasi Playwright (testDir, mobile Chrome, web server)
 ├── tsconfig.json           # Konfigurasi TypeScript
-└── vite.config.ts          # Konfigurasi Vite & Vitest
+├── vercel.json             # cleanUrls & trailingSlash untuk URL produksi
+└── vite.config.ts          # Konfigurasi Vite, Vitest, & clean URL lokal
 ```
 
 ---
@@ -229,7 +230,7 @@ dipertahankan untuk browser lama, sitemap gambar, dan pratinjau sosial.
 
 ## 🔐 Privasi, Analitik, dan CI
 
-- Halaman `/privasi.html` menjelaskan data pemesanan, layanan peta pihak ketiga,
+- Halaman `/privasi` menjelaskan data pemesanan, layanan peta pihak ketiga,
   analitik anonim, dan ketentuan pemesanan. Tautannya ada di footer dan sitemap.
 - Event analitik (`wizard_started`, `estimate_ready`, `wizard_completed`,
   `whatsapp_click`, `map_opened`) tidak pernah memuat nama, nomor HP, alamat,
@@ -248,15 +249,28 @@ Seluruh halaman memakai komponen React, stylesheet, gambar, dan tarif yang
 persis sama dengan homepage; yang berbeda hanya title, meta description,
 canonical, hreflang, dan metadata sosial.
 
-| URL | Section | Title |
+| URL | Section saat dibuka | Title |
 | --- | --- | --- |
-| `/` | `#beranda` | Jasa Angkut Slamet \| Jasa Angkut Barang & Pindahan Demak Semarang |
-| `/hitung-tarif.html` | `#pesan` | Hitung Tarif Angkut \| Jasa Angkut Slamet |
-| `/layanan.html` | `#layanan` | Layanan Angkut Barang & Pindahan \| Jasa Angkut Slamet |
-| `/galeri.html` | `#galeri` | Galeri Armada & Dokumentasi Angkut \| Jasa Angkut Slamet |
-| `/area-layanan.html` | `#area-layanan` | Area Layanan Demak, Semarang & Kabupaten Semarang \| Jasa Angkut Slamet |
-| `/faq.html` | `#faq` | FAQ Tarif & Pemesanan Angkut \| Jasa Angkut Slamet |
-| `/privasi.html` | — | Kebijakan Privasi & Ketentuan \| Jasa Angkut Slamet |
+| `/` | Beranda | Jasa Angkut Slamet \| Jasa Angkut Barang & Pindahan Demak Semarang |
+| `/hitung-tarif` | Kalkulator tarif | Hitung Tarif Angkut \| Jasa Angkut Slamet |
+| `/layanan` | Layanan | Layanan Angkut Barang & Pindahan \| Jasa Angkut Slamet |
+| `/galeri` | Galeri armada | Galeri Armada & Dokumentasi Angkut \| Jasa Angkut Slamet |
+| `/area-layanan` | Area layanan | Area Layanan Demak, Semarang & Kabupaten Semarang \| Jasa Angkut Slamet |
+| `/faq` | Tanya jawab | FAQ Tarif & Pemesanan Angkut \| Jasa Angkut Slamet |
+| `/privasi` | — | Kebijakan Privasi & Ketentuan \| Jasa Angkut Slamet |
+
+URL memakai path bersih tanpa `.html` dan tanpa fragment `#...`. Berkas HTML
+tetap bernama `layanan.html` dan sejenisnya; `vercel.json` mengaktifkan
+`cleanUrls`, sehingga Vercel melayani berkas itu di `/layanan` dan mengalihkan
+`/layanan.html` ke URL bersih. Plugin kecil di `vite.config.ts` melakukan hal
+yang sama saat `npm run dev` dan `npm run preview`, supaya pengujian lokal
+mencerminkan produksi.
+
+Fragment `#layanan` dahulu hanya dipakai browser untuk menggulir ke elemen
+ber-`id="layanan"`; fragment tidak dikirim ke server dan tidak membuat halaman
+baru di Google. Sekarang section tujuan ditentukan dari path, lalu alamat
+dibersihkan dengan `history.replaceState`, jadi bilah alamat tetap `/layanan`
+dan refresh tetap mendarat di section yang sama.
 
 Ketujuh URL tersebut tercantum di `/sitemap.xml` dan diperbolehkan oleh
 `robots.txt`. Karena isi section pada kelima halaman khusus identik dengan

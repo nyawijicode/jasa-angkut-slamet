@@ -13,37 +13,37 @@ const pageDefinitions = [
   {
     name: 'hitung-tarif.html',
     url: new URL('../hitung-tarif.html', import.meta.url),
-    path: '/hitung-tarif.html',
+    path: '/hitung-tarif',
     titleParts: ['Hitung Tarif', 'Jasa Angkut Slamet'],
   },
   {
     name: 'layanan.html',
     url: new URL('../layanan.html', import.meta.url),
-    path: '/layanan.html',
+    path: '/layanan',
     titleParts: ['Layanan', 'Jasa Angkut Slamet'],
   },
   {
     name: 'galeri.html',
     url: new URL('../galeri.html', import.meta.url),
-    path: '/galeri.html',
+    path: '/galeri',
     titleParts: ['Galeri', 'Jasa Angkut Slamet'],
   },
   {
     name: 'area-layanan.html',
     url: new URL('../area-layanan.html', import.meta.url),
-    path: '/area-layanan.html',
+    path: '/area-layanan',
     titleParts: ['Area Layanan', 'Jasa Angkut Slamet'],
   },
   {
     name: 'faq.html',
     url: new URL('../faq.html', import.meta.url),
-    path: '/faq.html',
+    path: '/faq',
     titleParts: ['FAQ', 'Jasa Angkut Slamet'],
   },
   {
     name: 'privasi.html',
     url: new URL('../public/privasi.html', import.meta.url),
-    path: '/privasi.html',
+    path: '/privasi',
     titleParts: ['Kebijakan Privasi', 'Jasa Angkut Slamet'],
   },
 ];
@@ -51,6 +51,7 @@ const pageDefinitions = [
 const paths = {
   sitemap: new URL('../public/sitemap.xml', import.meta.url),
   robots: new URL('../public/robots.txt', import.meta.url),
+  vercel: new URL('../vercel.json', import.meta.url),
 };
 
 const sources = {};
@@ -393,6 +394,19 @@ if (!/Sitemap:\s*https:\/\/jasa-angkut-slamet\.vercel\.app\/sitemap\.xml/i.test(
 }
 if (/Disallow:\s*\/\s*$/mi.test(sources.robots)) {
   problems.push('robots.txt tidak boleh memblokir seluruh situs.');
+}
+
+let vercelConfig = null;
+try {
+  vercelConfig = JSON.parse(sources.vercel);
+} catch (error) {
+  problems.push(`vercel.json bukan JSON valid: ${error.message}`);
+}
+if (vercelConfig?.cleanUrls !== true) {
+  problems.push('vercel.json harus mengaktifkan cleanUrls agar .html dilayani tanpa ekstensi.');
+}
+if (vercelConfig?.trailingSlash !== false) {
+  problems.push('vercel.json harus memakai trailingSlash: false agar URL tidak berakhir dengan /.');
 }
 
 const sitemapLocs = [

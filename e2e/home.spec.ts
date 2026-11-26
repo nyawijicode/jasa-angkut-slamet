@@ -120,7 +120,7 @@ test("halaman privasi terbuka dari footer tanpa overflow", async ({ page }) => {
   await expect(link).toBeVisible();
   await link.click();
 
-  await expect(page).toHaveURL(/\/privasi\.html$/);
+  await expect(page).toHaveURL(/\/privasi$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Kebijakan privasi",
   );
@@ -138,9 +138,9 @@ test("klik navigasi desktop langsung mendarat di halaman tujuan", async ({
   await page.waitForTimeout(400);
 
   const offset = await anchorViewportOffset(page, "galeri");
-  await page.locator('.header-nav a[href="/galeri.html#galeri"]').click();
+  await page.locator('.header-nav a[href="/galeri"]').click();
 
-  await expect(page).toHaveURL(/\/galeri\.html#galeri$/);
+  await expect(page).toHaveURL(/\/galeri$/);
   // Navigasi sekarang membuka halaman khusus; hash perlu diposisikan setelah
   // React merender section tujuan.
   await waitForAnchor(page, "galeri");
@@ -157,7 +157,7 @@ test("klik navigasi desktop langsung mendarat di halaman tujuan", async ({
     4,
   );
   await expect(
-    page.locator('.header-nav a[href="/galeri.html#galeri"]'),
+    page.locator('.header-nav a[href="/galeri"]'),
   ).toHaveClass(/is-active/);
 });
 
@@ -185,9 +185,9 @@ test("navigasi mobile langsung mendarat di section tujuan", async ({
 
   const offset = await anchorViewportOffset(page, "galeri");
 
-  await page.locator('.mobile-menu a[href="/galeri.html#galeri"]').click();
+  await page.locator('.mobile-menu a[href="/galeri"]').click();
 
-  await expect(page).toHaveURL(/\/galeri\.html#galeri$/);
+  await expect(page).toHaveURL(/\/galeri$/);
   await expect(page.locator("#mobile-menu")).toHaveCount(0);
   await waitForAnchor(page, "galeri");
   await expect
@@ -209,7 +209,7 @@ test("navigasi mobile langsung mendarat di section tujuan", async ({
   expect(open.header).toBe(closed.header);
 
   await expect(
-    page.locator('.header-nav a[href="/galeri.html#galeri"]'),
+    page.locator('.header-nav a[href="/galeri"]'),
   ).toHaveClass(/is-active/);
 });
 
@@ -288,12 +288,13 @@ test("semua tautan anchor internal memiliki target", async ({ page }) => {
 test("halaman privasi memiliki metadata unik dan breadcrumb terlihat", async ({
   page,
 }) => {
-  await page.goto("/privasi.html");
+  await page.goto("/privasi");
 
   await expect(page).toHaveTitle(/Kebijakan Privasi.*Jasa Angkut Slamet/);
+  await expect(page).toHaveURL(/\/privasi$/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    "https://jasa-angkut-slamet.vercel.app/privasi.html",
+    "https://jasa-angkut-slamet.vercel.app/privasi",
   );
   await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
   await expect(
@@ -303,26 +304,26 @@ test("halaman privasi memiliki metadata unik dan breadcrumb terlihat", async ({
 
 const dedicatedPages = [
   {
-    path: "/hitung-tarif.html",
+    path: "/hitung-tarif",
     title: /Hitung Tarif.*Jasa Angkut Slamet/,
     section: "pesan",
   },
   {
-    path: "/layanan.html",
+    path: "/layanan",
     title: /Layanan.*Jasa Angkut Slamet/,
     section: "layanan",
   },
   {
-    path: "/galeri.html",
+    path: "/galeri",
     title: /Galeri.*Jasa Angkut Slamet/,
     section: "galeri",
   },
   {
-    path: "/area-layanan.html",
+    path: "/area-layanan",
     title: /Area Layanan.*Jasa Angkut Slamet/,
     section: "area-layanan",
   },
-  { path: "/faq.html", title: /FAQ.*Jasa Angkut Slamet/, section: "faq" },
+  { path: "/faq", title: /FAQ.*Jasa Angkut Slamet/, section: "faq" },
 ];
 
 test("halaman khusus memiliki metadata unik dan section tujuan", async ({
@@ -338,6 +339,9 @@ test("halaman khusus memiliki metadata unik dan section tujuan", async ({
   for (const entry of dedicatedPages) {
     await page.goto(entry.path);
 
+    const current = new URL(page.url());
+    expect(current.pathname).toBe(entry.path);
+    expect(current.hash).toBe("");
     await expect(page).toHaveTitle(entry.title);
     const canonical = await page
       .locator('link[rel="canonical"]')
@@ -379,11 +383,11 @@ test("navigasi desktop dan mobile memakai tautan HTML yang dapat dirayapi", asyn
   page,
 }) => {
   const expectedHrefs = [
-    "/#beranda",
-    "/layanan.html#layanan",
-    "/galeri.html#galeri",
-    "/area-layanan.html#area-layanan",
-    "/faq.html#faq",
+    "/",
+    "/layanan",
+    "/galeri",
+    "/area-layanan",
+    "/faq",
   ];
 
   const desktopHrefs = await page
