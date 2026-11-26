@@ -41,6 +41,13 @@ const pageDefinitions = [
     titleParts: ['FAQ', 'Jasa Angkut Slamet'],
   },
   {
+    name: 'kontak.html',
+    url: new URL('../kontak.html', import.meta.url),
+    path: '/kontak',
+    titleParts: ['Kontak', 'Jasa Angkut Slamet'],
+    descriptionParts: ['0813-2762-3942', '06.00'],
+  },
+  {
     name: 'privasi.html',
     url: new URL('../public/privasi.html', import.meta.url),
     path: '/privasi',

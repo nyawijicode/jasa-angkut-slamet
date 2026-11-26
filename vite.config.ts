@@ -11,6 +11,7 @@ const htmlEntries = [
   'galeri.html',
   'area-layanan.html',
   'faq.html',
+  'kontak.html',
 ]
 
 const cleanPaths = new Set([

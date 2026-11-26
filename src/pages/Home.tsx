@@ -921,6 +921,7 @@ const PAGE_LINKS: Record<string, string> = {
   "area-layanan": "/area-layanan",
   faq: "/faq",
   pesan: "/hitung-tarif",
+  kontak: "/kontak",
 };
 
 // Halaman khusus memakai path bersih; section tujuan ditentukan dari path,
@@ -931,6 +932,7 @@ const SECTION_BY_PATH: Record<string, string> = {
   "/galeri": "galeri",
   "/area-layanan": "area-layanan",
   "/faq": "faq",
+  "/kontak": "hubungi",
 };
 
 const CLEAN_PATHS = new Set(["/", ...Object.keys(SECTION_BY_PATH), "/privasi"]);
@@ -1045,7 +1047,7 @@ export default function Home() {
   }, []);
 
   const scrollToAnchor = useCallback(
-    (id: string, options?: { updateHash?: boolean }) => {
+    (id: string) => {
       const el = document.getElementById(id);
       if (!el) return;
 
@@ -1074,12 +1076,6 @@ export default function Home() {
         window.scrollTo(0, targetTop);
         document.documentElement.style.scrollBehavior = "";
         setActiveNav(id);
-        if (
-          options?.updateHash !== false &&
-          window.location.hash !== `#${id}`
-        ) {
-          window.history.replaceState(null, "", `#${id}`);
-        }
       };
 
       const reduceMotion = window.matchMedia(
@@ -1134,12 +1130,18 @@ export default function Home() {
       CLEAN_PATHS.has(cleanPath) &&
       (window.location.pathname !== cleanPath || Boolean(window.location.hash));
 
+    // Kalkulator tarif adalah modal di dalam section #pesan. Path /hitung-tarif
+    // serta bookmark lama #pesan tetap membuka alur yang sama.
+    if (cleanPath === "/hitung-tarif" || hashId === "pesan") {
+      setBookingOpen(true);
+    }
+
     if (!id) {
       if (shouldClean) window.history.replaceState(null, "", cleanPath);
       return;
     }
     const timer = window.setTimeout(() => {
-      scrollToAnchor(id, { updateHash: false });
+      scrollToAnchor(id);
       if (shouldClean) window.history.replaceState(null, "", cleanPath);
     }, 0);
     return () => window.clearTimeout(timer);
@@ -1170,9 +1172,6 @@ export default function Home() {
       event.preventDefault();
       setMenuOpen(false);
       setActiveNav(id);
-      if (window.location.hash !== `#${id}`) {
-        window.history.pushState(null, "", `#${id}`);
-      }
       scrollToAnchor(id);
     }
 
@@ -1240,9 +1239,6 @@ export default function Home() {
     function syncSection() {
       const current = detectSection();
       setActiveNav((prev) => (prev === current ? prev : current));
-      if (window.location.hash !== `#${current}`) {
-        window.history.replaceState(null, "", `#${current}`);
-      }
     }
 
     function onScroll() {
@@ -1410,37 +1406,6 @@ export default function Home() {
       document.body.style.overflow = previousOverflow;
     };
   }, [bookingOpen]);
-
-  useEffect(() => {
-    if (window.location.hash === "#pesan") {
-      setBookingOpen(true);
-    }
-    const onHashChange = () => {
-      if (window.location.hash === "#pesan") setBookingOpen(true);
-    };
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-
-  useEffect(() => {
-    const onClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const anchor = target?.closest<HTMLAnchorElement>("a");
-      if (!anchor) return;
-      if (anchor.getAttribute("href") !== "#pesan") return;
-      event.preventDefault();
-      setBookingOpen(true);
-      if (window.location.hash !== "#pesan") {
-        history.replaceState(
-          null,
-          "",
-          `${window.location.pathname}${window.location.search}#pesan`,
-        );
-      }
-    };
-    document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
-  }, []);
 
   useEffect(() => {
     if (!galleryOpen) return;
@@ -2046,13 +2011,6 @@ export default function Home() {
 
   function closeBooking() {
     setBookingOpen(false);
-    if (window.location.hash === "#pesan") {
-      history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}${window.location.search}`,
-      );
-    }
   }
 
   function scrollToTop() {
@@ -2183,7 +2141,7 @@ export default function Home() {
 
   return (
     <div className={showMobileBar ? "site-shell has-mobile-bar" : "site-shell"}>
-      <a className="skip-link" href="#pesan">
+      <a className="skip-link" href="/hitung-tarif">
         Langsung ke form pesanan
       </a>
 
@@ -4189,7 +4147,7 @@ export default function Home() {
                   Perabot, kasur, lemari, dan barang perabotan diangkut rapi
                   dengan terpal serta tali tambang kuat.
                 </p>
-                <a className="service-link" href="#pesan">
+                <a className="service-link" href="/hitung-tarif">
                   Hitung tarif pindahan
                   <IconArrowRight size={16} />
                 </a>
@@ -4207,7 +4165,7 @@ export default function Home() {
                   Pindahan kos praktis dan hemat untuk mahasiswa/karyawan. Rute
                   fleksibel dengan tenaga sopir siap bantu angkat.
                 </p>
-                <a className="service-link" href="#pesan">
+                <a className="service-link" href="/hitung-tarif">
                   Hitung tarif kos
                   <IconArrowRight size={16} />
                 </a>
@@ -4225,7 +4183,7 @@ export default function Home() {
                   Stok toko, etalase, bahan baku, suplai berkala antar cabang di
                   Demak, Semarang, dan sekitarnya tepat waktu.
                 </p>
-                <a className="service-link" href="#pesan">
+                <a className="service-link" href="/hitung-tarif">
                   Hitung tarif dagangan
                   <IconArrowRight size={16} />
                 </a>
@@ -4243,7 +4201,7 @@ export default function Home() {
                   Perlengkapan pameran, genset, material bangunan, hingga mesin
                   produksi ringan dengan daya angkut hingga 1.5 ton.
                 </p>
-                <a className="service-link" href="#pesan">
+                <a className="service-link" href="/hitung-tarif">
                   Hitung tarif kargo
                   <IconArrowRight size={16} />
                 </a>
@@ -5022,6 +4980,9 @@ export default function Home() {
                 <li>
                   <a href="/faq">Tanya Jawab (FAQ)</a>
                 </li>
+                <li>
+                  <a href="/kontak">Kontak</a>
+                </li>
               </ul>
             </div>
 
@@ -5041,7 +5002,7 @@ export default function Home() {
                   <a href="/area-layanan">Ungaran &amp; Mranggen</a>
                 </li>
                 <li>
-                  <a href="#hubungi">Kirim Antar Kota &amp; Provinsi</a>
+                  <a href="/kontak">Kirim Antar Kota &amp; Provinsi</a>
                 </li>
               </ul>
             </div>
@@ -5158,7 +5119,7 @@ export default function Home() {
           </a>
           <a
             className="fab fab-order"
-            href="#pesan"
+            href="/hitung-tarif"
             aria-label="Pesan angkut sekarang"
             title="Pesan angkut"
           >
@@ -5218,7 +5179,7 @@ export default function Home() {
                 <IconArrowRight size={16} />
               </a>
             ) : (
-              <a className="btn btn-primary mobile-bar-cta" href="#pesan">
+              <a className="btn btn-primary mobile-bar-cta" href="/hitung-tarif">
                 Hitung tarif
                 <IconArrowRight size={16} />
               </a>

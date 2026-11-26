@@ -324,6 +324,11 @@ const dedicatedPages = [
     section: "area-layanan",
   },
   { path: "/faq", title: /FAQ.*Jasa Angkut Slamet/, section: "faq" },
+  {
+    path: "/kontak",
+    title: /Kontak.*Jasa Angkut Slamet/,
+    section: "hubungi",
+  },
 ];
 
 test("halaman khusus memiliki metadata unik dan section tujuan", async ({
@@ -377,6 +382,34 @@ test("halaman khusus memiliki metadata unik dan section tujuan", async ({
 
   expect(canonicals.size).toBe(dedicatedPages.length);
   expect(descriptions.size).toBe(dedicatedPages.length);
+});
+
+test("scroll dan klik CTA tidak menambahkan fragment ke URL", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+
+  for (const path of ["/galeri", "/area-layanan", "/faq", "/layanan"]) {
+    await page.goto(path);
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight),
+    );
+    await page.waitForTimeout(250);
+    const current = new URL(page.url());
+    expect(current.pathname).toBe(path);
+    expect(current.hash).toBe("");
+  }
+
+  await page.goto("/hitung-tarif");
+  await expect(page.locator(".booking-modal")).toBeVisible();
+  expect(new URL(page.url()).hash).toBe("");
+
+  await page.goto("/");
+  const contactLink = page.locator('.footer-nav-col a[href="/kontak"]');
+  await expect(contactLink).toHaveCount(1);
+  await contactLink.click();
+  await expect(page).toHaveURL(/\/kontak$/);
+  expect(new URL(page.url()).hash).toBe("");
 });
 
 test("navigasi desktop dan mobile memakai tautan HTML yang dapat dirayapi", async ({

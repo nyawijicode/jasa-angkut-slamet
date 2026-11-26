@@ -150,6 +150,7 @@ jasa-angkut-slamet/
 ├── galeri.html             # Halaman khusus galeri armada
 ├── area-layanan.html       # Halaman khusus area layanan
 ├── faq.html                # Halaman khusus tanya jawab
+├── kontak.html             # Halaman khusus kontak
 ├── package.json            # Konfigurasi paket & dependensi
 ├── playwright.config.ts    # Konfigurasi Playwright (testDir, mobile Chrome, web server)
 ├── tsconfig.json           # Konfigurasi TypeScript
@@ -257,6 +258,7 @@ canonical, hreflang, dan metadata sosial.
 | `/galeri` | Galeri armada | Galeri Armada & Dokumentasi Angkut \| Jasa Angkut Slamet |
 | `/area-layanan` | Area layanan | Area Layanan Demak, Semarang & Kabupaten Semarang \| Jasa Angkut Slamet |
 | `/faq` | Tanya jawab | FAQ Tarif & Pemesanan Angkut \| Jasa Angkut Slamet |
+| `/kontak` | Hubungi kami | Kontak Jasa Angkut Slamet \| WhatsApp & Alamat Demak Semarang |
 | `/privasi` | — | Kebijakan Privasi & Ketentuan \| Jasa Angkut Slamet |
 
 URL memakai path bersih tanpa `.html` dan tanpa fragment `#...`. Berkas HTML
@@ -269,11 +271,16 @@ mencerminkan produksi.
 Fragment `#layanan` dahulu hanya dipakai browser untuk menggulir ke elemen
 ber-`id="layanan"`; fragment tidak dikirim ke server dan tidak membuat halaman
 baru di Google. Sekarang section tujuan ditentukan dari path, lalu alamat
-dibersihkan dengan `history.replaceState`, jadi bilah alamat tetap `/layanan`
-dan refresh tetap mendarat di section yang sama.
+dibersihkan dengan `history.replaceState`. Scroll-spy juga tidak lagi menulis
+hash ke URL, jadi `/layanan` tidak berubah menjadi `/layanan#kontak` saat
+digulir ke bawah.
 
-Ketujuh URL tersebut tercantum di `/sitemap.xml` dan diperbolehkan oleh
-`robots.txt`. Karena isi section pada kelima halaman khusus identik dengan
+`/hitung-tarif` langsung membuka kalkulator tarif. `/kontak` mendarat di
+section "Hubungi Kami" yang berisi WhatsApp, telepon, alamat garasi, dan peta.
+Tautan kontak tersedia di footer tanpa mengganti label menu utama.
+
+Kedelapan URL tersebut tercantum di `/sitemap.xml` dan diperbolehkan oleh
+`robots.txt`. Karena isi section pada keenam halaman khusus identik dengan
 homepage, Google dapat memilih salah satu versi sebagai halaman utama saat
 mengindeks. Google juga yang menentukan apakah sitelinks ditampilkan; tautan
 dari navigasi dan sitemap hanya membuat struktur situs mudah dipahami, bukan

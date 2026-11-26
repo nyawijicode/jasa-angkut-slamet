@@ -1449,6 +1449,7 @@ p {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  min-width: 44px;
   gap: 6px;
   color: #a3bfb2;
   font-size: 0.8125rem;
