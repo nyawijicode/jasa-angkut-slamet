@@ -914,6 +914,17 @@ const NAV_LINKS = [
   { id: "faq", label: "FAQ", shortLabel: "FAQ" },
 ] as const;
 
+const PAGE_LINKS: Record<string, string> = {
+  beranda: "/#beranda",
+  layanan: "/layanan.html#layanan",
+  galeri: "/galeri.html#galeri",
+  "area-layanan": "/area-layanan.html#area-layanan",
+  faq: "/faq.html#faq",
+  pesan: "/hitung-tarif.html#pesan",
+};
+
+const navHref = (id: string) => PAGE_LINKS[id] ?? `/#${id}`;
+
 function getNavActiveKey(currentId: string): string {
   if (currentId === "pesan") return "beranda";
   if (currentId === "cara-pesan" || currentId === "kenapa") return "layanan";
@@ -1092,6 +1103,14 @@ export default function Home() {
     },
     [cancelNavScroll],
   );
+
+  // Halaman khusus memuat hash sebelum React selesai merender targetnya.
+  useEffect(() => {
+    const id = window.location.hash.replace("#", "");
+    if (!ANCHOR_IDS.includes(id)) return;
+    const timer = window.setTimeout(() => scrollToAnchor(id), 0);
+    return () => window.clearTimeout(timer);
+  }, [scrollToAnchor]);
 
   // Semua tautan anchor memakai animasi yang sama, termasuk tautan footer/CTA.
   useEffect(() => {
@@ -2168,7 +2187,7 @@ export default function Home() {
         <div className="container header-inner">
           <a
             className="brand"
-            href="#beranda"
+            href="/"
             aria-label="Jasa Angkut Slamet — beranda"
           >
             <span className="brand-mark">
@@ -2187,7 +2206,7 @@ export default function Home() {
               <a
                 key={link.id}
                 className={`nav-link${getNavActiveKey(activeNav) === link.id ? " is-active" : ""}`}
-                href={`#${link.id}`}
+                href={navHref(link.id)}
                 onClick={() => setActiveNav(link.id)}
                 aria-current={
                   getNavActiveKey(activeNav) === link.id ? "true" : undefined
@@ -2256,7 +2275,7 @@ export default function Home() {
               <a
                 key={link.id}
                 className={`mobile-menu-link${getNavActiveKey(activeNav) === link.id ? " is-active" : ""}`}
-                href={`#${link.id}`}
+                href={navHref(link.id)}
                 onClick={() => {
                   setActiveNav(link.id);
                   setMenuOpen(false);
@@ -4742,7 +4761,7 @@ export default function Home() {
                     </strong>
                     , termasuk Mranggen, Kebonbatur, Sayung, Ungaran, Ambarawa,
                     Bawen, dan Bandungan.{" "}
-                    <a href="#area-layanan">
+                    <a href="/area-layanan.html#area-layanan">
                       Lihat daftar lengkap area layanan
                     </a>
                     . Kami juga siap melayani pengiriman{" "}
@@ -4919,7 +4938,7 @@ export default function Home() {
             <div className="footer-brand-col">
               <a
                 className="brand"
-                href="#beranda"
+                href="/"
                 aria-label="Jasa Angkut Slamet — beranda"
               >
                 <span className="brand-mark">
@@ -4953,22 +4972,22 @@ export default function Home() {
               <h3 className="footer-col-title">Navigasi</h3>
               <ul className="footer-links-list">
                 <li>
-                  <a href="#beranda">Beranda</a>
+                  <a href="/#beranda">Beranda</a>
                 </li>
                 <li>
-                  <a href="#layanan">Layanan Kami</a>
+                  <a href="/layanan.html#layanan">Layanan Kami</a>
                 </li>
                 <li>
-                  <a href="#pesan">Kalkulator Tarif</a>
+                  <a href="/hitung-tarif.html#pesan">Kalkulator Tarif</a>
                 </li>
                 <li>
-                  <a href="#galeri">Galeri Armada</a>
+                  <a href="/galeri.html#galeri">Galeri Armada</a>
                 </li>
                 <li>
-                  <a href="#area-layanan">Area Layanan</a>
+                  <a href="/area-layanan.html#area-layanan">Area Layanan</a>
                 </li>
                 <li>
-                  <a href="#faq">Tanya Jawab (FAQ)</a>
+                  <a href="/faq.html#faq">Tanya Jawab (FAQ)</a>
                 </li>
               </ul>
             </div>
@@ -4977,16 +4996,16 @@ export default function Home() {
               <h3 className="footer-col-title">Area Layanan</h3>
               <ul className="footer-links-list">
                 <li>
-                  <a href="#area-layanan">Kabupaten Demak (14 Kec.)</a>
+                  <a href="/area-layanan.html#area-layanan">Kabupaten Demak (14 Kec.)</a>
                 </li>
                 <li>
-                  <a href="#area-layanan">Kota Semarang (16 Kec.)</a>
+                  <a href="/area-layanan.html#area-layanan">Kota Semarang (16 Kec.)</a>
                 </li>
                 <li>
-                  <a href="#area-layanan">Kab. Semarang (19 Kec.)</a>
+                  <a href="/area-layanan.html#area-layanan">Kab. Semarang (19 Kec.)</a>
                 </li>
                 <li>
-                  <a href="#area-layanan">Ungaran &amp; Mranggen</a>
+                  <a href="/area-layanan.html#area-layanan">Ungaran &amp; Mranggen</a>
                 </li>
                 <li>
                   <a href="#hubungi">Kirim Antar Kota &amp; Provinsi</a>

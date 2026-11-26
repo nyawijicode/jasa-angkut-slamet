@@ -1,13 +1,62 @@
 import { access, readFile } from 'node:fs/promises';
 
+const BASE = 'https://jasa-angkut-slamet.vercel.app';
+
+const pageDefinitions = [
+  {
+    name: 'index.html',
+    url: new URL('../index.html', import.meta.url),
+    path: '/',
+    titleParts: ['Jasa Angkut Slamet', 'Demak', 'Semarang'],
+    descriptionParts: ['0813-2762-3942', '06.00'],
+  },
+  {
+    name: 'hitung-tarif.html',
+    url: new URL('../hitung-tarif.html', import.meta.url),
+    path: '/hitung-tarif.html',
+    titleParts: ['Hitung Tarif', 'Jasa Angkut Slamet'],
+  },
+  {
+    name: 'layanan.html',
+    url: new URL('../layanan.html', import.meta.url),
+    path: '/layanan.html',
+    titleParts: ['Layanan', 'Jasa Angkut Slamet'],
+  },
+  {
+    name: 'galeri.html',
+    url: new URL('../galeri.html', import.meta.url),
+    path: '/galeri.html',
+    titleParts: ['Galeri', 'Jasa Angkut Slamet'],
+  },
+  {
+    name: 'area-layanan.html',
+    url: new URL('../area-layanan.html', import.meta.url),
+    path: '/area-layanan.html',
+    titleParts: ['Area Layanan', 'Jasa Angkut Slamet'],
+  },
+  {
+    name: 'faq.html',
+    url: new URL('../faq.html', import.meta.url),
+    path: '/faq.html',
+    titleParts: ['FAQ', 'Jasa Angkut Slamet'],
+  },
+  {
+    name: 'privasi.html',
+    url: new URL('../public/privasi.html', import.meta.url),
+    path: '/privasi.html',
+    titleParts: ['Kebijakan Privasi', 'Jasa Angkut Slamet'],
+  },
+];
+
 const paths = {
-  index: new URL('../index.html', import.meta.url),
-  privacy: new URL('../public/privasi.html', import.meta.url),
   sitemap: new URL('../public/sitemap.xml', import.meta.url),
   robots: new URL('../public/robots.txt', import.meta.url),
 };
 
 const sources = {};
+for (const page of pageDefinitions) {
+  sources[page.name] = await readFile(page.url, 'utf8');
+}
 for (const [name, path] of Object.entries(paths)) {
   sources[name] = await readFile(path, 'utf8');
 }
@@ -21,13 +70,17 @@ const extractBlocks = (html) =>
     ),
   ].map((match) => match[1]);
 
-const blocks = [
-  ...extractBlocks(sources.index),
-  ...extractBlocks(sources.privacy),
-];
+const blocks = pageDefinitions.flatMap((page) =>
+  extractBlocks(sources[page.name]),
+);
 
 if (blocks.length === 0) {
-  problems.push('Tidak ada blok JSON-LD pada index.html maupun privasi.html.');
+  problems.push('Tidak ada blok JSON-LD pada halaman mana pun.');
+}
+for (const page of pageDefinitions) {
+  if (extractBlocks(sources[page.name]).length === 0) {
+    problems.push(`${page.name}: tidak memuat blok JSON-LD.`);
+  }
 }
 
 const documents = blocks.map((block, index) => {
@@ -66,6 +119,32 @@ const requiredTypes = [
 for (const type of requiredTypes) {
   if (!flatTypes.includes(type)) {
     problems.push(`Structured data "${type}" tidak ditemukan.`);
+  }
+}
+
+// Kelima halaman khusus memuat section yang sama dengan homepage, jadi schema
+// yang terlihat tidak boleh hilang dari salah satu halaman.
+const homepageTypes = new Set(extractBlocks(sources['index.html']).flatMap((block) => {
+  const document = JSON.parse(block);
+  return Array.isArray(document?.['@type'])
+    ? document['@type']
+    : document?.['@type']
+      ? [document['@type']]
+      : [];
+}));
+for (const page of pageDefinitions.slice(1, -1)) {
+  const pageTypes = new Set(
+    extractBlocks(sources[page.name]).map((block) => {
+      const document = JSON.parse(block);
+      return Array.isArray(document?.['@type'])
+        ? document['@type'][0]
+        : document?.['@type'];
+    }),
+  );
+  for (const type of homepageTypes) {
+    if (!pageTypes.has(type)) {
+      problems.push(`${page.name}: schema ${type} tidak ditemukan.`);
+    }
   }
 }
 
@@ -124,10 +203,29 @@ const metaContent = (html, selector) => {
   return match?.[1]?.replace(/&amp;/g, '&')?.trim() ?? null;
 };
 
-for (const [name, source] of [
-  ['index.html', sources.index],
-  ['privasi.html', sources.privacy],
-]) {
+const seen = {
+  title: new Map(),
+  description: new Map(),
+  canonical: new Map(),
+  ogTitle: new Map(),
+  ogDescription: new Map(),
+  twitterTitle: new Map(),
+  twitterDescription: new Map(),
+};
+
+const recordUnique = (field, name, value) => {
+  if (!value) return;
+  const previous = seen[field].get(value);
+  if (previous) {
+    problems.push(`${name}: ${field} sama dengan ${previous} (${value}).`);
+  } else {
+    seen[field].set(value, name);
+  }
+};
+
+for (const page of pageDefinitions) {
+  const source = sources[page.name];
+  const expectedUrl = `${BASE}${page.path}`;
   const title = metaContent(source, /<title>([\s\S]*?)<\/title>/i);
   const description = metaContent(
     source,
@@ -141,42 +239,47 @@ for (const [name, source] of [
     source,
     /<meta\s+name="robots"\s+content="([^"]*)"/i,
   );
+  const hreflangId = metaContent(
+    source,
+    /<link\s+rel="alternate"\s+hreflang="id"\s+href="([^"]+)"/i,
+  );
+  const hreflangDefault = metaContent(
+    source,
+    /<link\s+rel="alternate"\s+hreflang="x-default"\s+href="([^"]+)"/i,
+  );
 
   if (!title || !title.includes('Jasa Angkut Slamet')) {
-    problems.push(`${name}: title harus menyebut "Jasa Angkut Slamet".`);
+    problems.push(`${page.name}: title harus menyebut "Jasa Angkut Slamet".`);
+  }
+  for (const part of page.titleParts) {
+    if (!title?.includes(part)) {
+      problems.push(`${page.name}: title harus memuat "${part}".`);
+    }
   }
   if (!description || description.length < 70) {
-    problems.push(`${name}: meta description kurang informatif.`);
+    problems.push(`${page.name}: meta description kurang informatif.`);
   }
-  if (name === 'index.html') {
-    if (!title.includes('Demak') || !title.includes('Semarang')) {
-      problems.push('index.html: title harus memuat area layanan Demak dan Semarang.');
-    }
-    if (!description.includes('0813-2762-3942')) {
-      problems.push('index.html: meta description harus memuat nomor WhatsApp.');
-    }
-    if (!description.includes('06.00')) {
-      problems.push('index.html: meta description harus memuat jam operasional.');
+  for (const part of page.descriptionParts ?? []) {
+    if (!description?.includes(part)) {
+      problems.push(`${page.name}: meta description harus memuat "${part}".`);
     }
   }
-  if (!canonical?.startsWith('https://jasa-angkut-slamet.vercel.app/')) {
-    problems.push(`${name}: canonical harus berupa URL HTTPS absolut.`);
+  if (canonical !== expectedUrl) {
+    problems.push(`${page.name}: canonical harus ${expectedUrl}, ditemukan ${canonical}.`);
+  }
+  if (hreflangId !== expectedUrl || hreflangDefault !== expectedUrl) {
+    problems.push(`${page.name}: hreflang id dan x-default harus sama dengan canonical.`);
   }
   if (!/index,\s*follow/i.test(robots ?? '')) {
-    problems.push(`${name}: robots harus mengizinkan index,follow.`);
+    problems.push(`${page.name}: robots harus mengizinkan index,follow.`);
   }
   if (/<meta\s+name="keywords"/i.test(source)) {
-    problems.push(`${name}: meta keywords tidak dipakai oleh Google dan harus dihapus.`);
+    problems.push(`${page.name}: meta keywords tidak dipakai oleh Google dan harus dihapus.`);
   }
   if (/\[GUNAKAN URL GAMBAR ASLI|example\.com|placeholder/i.test(source)) {
-    problems.push(`${name}: masih ada placeholder URL/teks.`);
+    problems.push(`${page.name}: masih ada placeholder URL/teks.`);
   }
-}
 
-for (const [name, source] of [
-  ['index.html', sources.index],
-  ['privasi.html', sources.privacy],
-]) {
   const requiredMeta = [
     ['og:type', /<meta\s+property="og:type"/i],
     ['og:site_name', /<meta\s+property="og:site_name"/i],
@@ -185,31 +288,57 @@ for (const [name, source] of [
     ['og:url', /<meta\s+property="og:url"/i],
     ['og:locale', /<meta\s+property="og:locale"\s+content="id_ID"/i],
     ['og:image', /<meta\s+property="og:image"/i],
-    ['twitter:card', /<meta\s+name="twitter:card"/i],
+    ['twitter:card', /<meta\s+name="twitter:card"\s+content="summary_large_image"/i],
+    ['twitter:url', /<meta\s+name="twitter:url"/i],
     ['twitter:title', /<meta\s+name="twitter:title"/i],
     ['twitter:description', /<meta\s+name="twitter:description"/i],
     ['twitter:image', /<meta\s+name="twitter:image"/i],
   ];
   for (const [label, pattern] of requiredMeta) {
-    if (!pattern.test(source)) problems.push(`${name}: ${label} wajib diisi.`);
+    if (!pattern.test(source)) problems.push(`${page.name}: ${label} wajib diisi.`);
   }
-  if (name === 'index.html') {
-    if (!/<meta\s+name="twitter:card"\s+content="summary_large_image"/i.test(source)) {
-      problems.push('index.html: twitter:card harus summary_large_image.');
-    }
-  }
+
+  const ogUrl = metaContent(source, /<meta\s+property="og:url"\s+content="([^"]+)"/i);
+  const twitterUrl = metaContent(source, /<meta\s+name="twitter:url"\s+content="([^"]+)"/i);
+  if (ogUrl !== expectedUrl) problems.push(`${page.name}: og:url harus ${expectedUrl}.`);
+  if (twitterUrl !== expectedUrl) problems.push(`${page.name}: twitter:url harus ${expectedUrl}.`);
+
+  recordUnique('title', page.name, title);
+  recordUnique('description', page.name, description);
+  recordUnique('canonical', page.name, canonical);
+  recordUnique(
+    'ogTitle',
+    page.name,
+    metaContent(source, /<meta\s+property="og:title"\s+content="([^"]*)"/i),
+  );
+  recordUnique(
+    'ogDescription',
+    page.name,
+    metaContent(source, /<meta\s+property="og:description"\s+content="([^"]*)"/i),
+  );
+  recordUnique(
+    'twitterTitle',
+    page.name,
+    metaContent(source, /<meta\s+name="twitter:title"\s+content="([^"]*)"/i),
+  );
+  recordUnique(
+    'twitterDescription',
+    page.name,
+    metaContent(source, /<meta\s+name="twitter:description"\s+content="([^"]*)"/i),
+  );
+
   for (const image of [
     metaContent(source, /<meta\s+property="og:image"\s+content="([^"]+)"/i),
     metaContent(source, /<meta\s+name="twitter:image"\s+content="([^"]+)"/i),
   ]) {
-    if (!image?.startsWith('https://jasa-angkut-slamet.vercel.app/')) {
-      problems.push(`${name}: og:image/twitter:image harus memakai URL aset resmi.`);
+    if (!image?.startsWith(`${BASE}/`)) {
+      problems.push(`${page.name}: og:image/twitter:image harus memakai URL aset resmi.`);
       continue;
     }
     try {
       await access(new URL(`../public${new URL(image).pathname}`, import.meta.url));
     } catch {
-      problems.push(`${name}: gambar sosial tidak ditemukan di public: ${image}`);
+      problems.push(`${page.name}: gambar sosial tidak ditemukan di public: ${image}`);
     }
   }
 }
@@ -254,7 +383,7 @@ if (breadcrumb) {
   if (!Array.isArray(items) || items.length < 2) {
     problems.push('BreadcrumbList wajib memuat minimal dua level.');
   }
-  if (!/<nav class="breadcrumb" aria-label="Breadcrumb">/.test(sources.privacy)) {
+  if (!/<nav class="breadcrumb" aria-label="Breadcrumb">/.test(sources['privasi.html'])) {
     problems.push('BreadcrumbList harus memiliki breadcrumb yang terlihat di privasi.html.');
   }
 }
@@ -272,15 +401,23 @@ const sitemapLocs = [
 if (sitemapLocs.length === 0) {
   problems.push('sitemap.xml tidak memuat URL.');
 }
+if (new Set(sitemapLocs).size !== sitemapLocs.length) {
+  problems.push('sitemap.xml memuat URL ganda.');
+}
 for (const loc of sitemapLocs) {
-  if (!loc.startsWith('https://jasa-angkut-slamet.vercel.app/')) {
+  if (!loc.startsWith(`${BASE}/`)) {
     problems.push(`sitemap.xml memuat URL non-kanonik: ${loc}`);
   }
 }
-for (const canonicalPath of ['/', '/privasi.html']) {
-  const url = `https://jasa-angkut-slamet.vercel.app${canonicalPath}`;
+for (const page of pageDefinitions) {
+  const url = `${BASE}${page.path}`;
   if (!sitemapLocs.includes(url)) {
     problems.push(`sitemap.xml belum memuat canonical ${url}`);
+  }
+}
+for (const loc of sitemapLocs) {
+  if (!seen.canonical.has(loc)) {
+    problems.push(`sitemap.xml memuat URL tanpa canonical yang cocok: ${loc}`);
   }
 }
 
@@ -290,6 +427,6 @@ if (problems.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    `Validasi SEO OK: ${blocks.length} blok (${flatTypes.join(', ')}), metadata, sitemap, dan robots.`,
+    `Validasi SEO OK: ${pageDefinitions.length} halaman, ${blocks.length} blok JSON-LD (${flatTypes.join(', ')}), metadata unik, sitemap, dan robots.`,
   );
 }

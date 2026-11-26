@@ -13,6 +13,10 @@ async function anchorTop(page: Page, id: string) {
   );
 }
 
+async function waitForAnchor(page: Page, id: string) {
+  await page.locator(`#${id}`).waitFor({ state: "attached" });
+}
+
 async function anchorViewportOffset(page: Page, id: string) {
   return page.evaluate((anchorId) => {
     const el = document.getElementById(anchorId)!;
@@ -127,30 +131,34 @@ test("halaman privasi terbuka dari footer tanpa overflow", async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("klik navigasi desktop langsung mendarat di section tujuan", async ({
+test("klik navigasi desktop langsung mendarat di halaman tujuan", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.waitForTimeout(400);
 
   const offset = await anchorViewportOffset(page, "galeri");
-  await page.locator('.header-nav a[href="#galeri"]').click();
+  await page.locator('.header-nav a[href="/galeri.html#galeri"]').click();
 
-  // A -> D langsung mendarat: section tujuan sudah menempel di bawah header,
-  // bukan masih di tengah perjalanan melewati section lain.
-  expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
-    8,
-  );
-  await expect(page).toHaveURL(/#galeri$/);
+  await expect(page).toHaveURL(/\/galeri\.html#galeri$/);
+  // Navigasi sekarang membuka halaman khusus; hash perlu diposisikan setelah
+  // React merender section tujuan.
+  await waitForAnchor(page, "galeri");
+  await expect
+    .poll(
+      async () => Math.abs((await anchorTop(page, "galeri")) - offset),
+      { timeout: 5000 },
+    )
+    .toBeLessThanOrEqual(8);
 
   await page.waitForTimeout(600);
   // Setelah layout stabil, section tujuan tetap menempel di bawah header.
   expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
     4,
   );
-  await expect(page.locator('.header-nav a[href="#galeri"]')).toHaveClass(
-    /is-active/,
-  );
+  await expect(
+    page.locator('.header-nav a[href="/galeri.html#galeri"]'),
+  ).toHaveClass(/is-active/);
 });
 
 test("navigasi mobile langsung mendarat di section tujuan", async ({
@@ -177,26 +185,32 @@ test("navigasi mobile langsung mendarat di section tujuan", async ({
 
   const offset = await anchorViewportOffset(page, "galeri");
 
-  await page.locator('.mobile-menu a[href="#galeri"]').click();
+  await page.locator('.mobile-menu a[href="/galeri.html#galeri"]').click();
 
-  // Langsung mendarat di tujuan, tidak mampir ke section lain di antaranya.
-  expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
-    8,
-  );
+  await expect(page).toHaveURL(/\/galeri\.html#galeri$/);
+  await expect(page.locator("#mobile-menu")).toHaveCount(0);
+  await waitForAnchor(page, "galeri");
+  await expect
+    .poll(
+      async () => Math.abs((await anchorTop(page, "galeri")) - offset),
+      { timeout: 5000 },
+    )
+    .toBeLessThanOrEqual(8);
 
-  await expect(page).toHaveURL(/#galeri$/);
   await page.waitForTimeout(600);
   expect(Math.abs((await anchorTop(page, "galeri")) - offset)).toBeLessThanOrEqual(
     4,
   );
 
+  // Halaman khusus memakai komponen dan stylesheet yang sama, sehingga tinggi
+  // dokumen dan header tidak berubah.
   const closed = await measure();
   expect(open.doc).toBe(closed.doc);
   expect(open.header).toBe(closed.header);
 
-  await expect(page.locator('.header-nav a[href="#galeri"]')).toHaveClass(
-    /is-active/,
-  );
+  await expect(
+    page.locator('.header-nav a[href="/galeri.html#galeri"]'),
+  ).toHaveClass(/is-active/);
 });
 
 test("modal peta responsif di 320px dengan toggle 3D", async ({ page }) => {
@@ -285,4 +299,106 @@ test("halaman privasi memiliki metadata unik dan breadcrumb terlihat", async ({
   await expect(
     page.getByRole("navigation", { name: "Breadcrumb" }),
   ).toContainText("Kebijakan Privasi");
+});
+
+const dedicatedPages = [
+  {
+    path: "/hitung-tarif.html",
+    title: /Hitung Tarif.*Jasa Angkut Slamet/,
+    section: "pesan",
+  },
+  {
+    path: "/layanan.html",
+    title: /Layanan.*Jasa Angkut Slamet/,
+    section: "layanan",
+  },
+  {
+    path: "/galeri.html",
+    title: /Galeri.*Jasa Angkut Slamet/,
+    section: "galeri",
+  },
+  {
+    path: "/area-layanan.html",
+    title: /Area Layanan.*Jasa Angkut Slamet/,
+    section: "area-layanan",
+  },
+  { path: "/faq.html", title: /FAQ.*Jasa Angkut Slamet/, section: "faq" },
+];
+
+test("halaman khusus memiliki metadata unik dan section tujuan", async ({
+  page,
+}) => {
+  // Header desktop memuat navigasi yang dapat dirayapi; pada viewport mobile
+  // navigasi digantikan menu overlay dan sembunyi dari aksesibilitas.
+  await page.setViewportSize({ width: 1280, height: 800 });
+
+  const canonicals = new Set<string>();
+  const descriptions = new Set<string>();
+
+  for (const entry of dedicatedPages) {
+    await page.goto(entry.path);
+
+    await expect(page).toHaveTitle(entry.title);
+    const canonical = await page
+      .locator('link[rel="canonical"]')
+      .getAttribute("href");
+    expect(canonical).toBe(
+      `https://jasa-angkut-slamet.vercel.app${entry.path}`,
+    );
+    canonicals.add(canonical!);
+
+    const description = await page
+      .locator('meta[name="description"]')
+      .getAttribute("content");
+    expect(description!.length).toBeGreaterThan(70);
+    descriptions.add(description!);
+
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+      "content",
+      canonical!,
+    );
+    await expect(page.locator('meta[name="twitter:url"]')).toHaveAttribute(
+      "content",
+      canonical!,
+    );
+    await expect(
+      page.locator('link[rel="alternate"][hreflang="id"]'),
+    ).toHaveAttribute("href", canonical!);
+    await expect(page.locator('meta[name="keywords"]')).toHaveCount(0);
+    await expect(page.locator(`#${entry.section}`)).toHaveCount(1);
+    await expect(
+      page.getByRole("navigation", { name: "Navigasi utama" }),
+    ).toBeVisible();
+  }
+
+  expect(canonicals.size).toBe(dedicatedPages.length);
+  expect(descriptions.size).toBe(dedicatedPages.length);
+});
+
+test("navigasi desktop dan mobile memakai tautan HTML yang dapat dirayapi", async ({
+  page,
+}) => {
+  const expectedHrefs = [
+    "/#beranda",
+    "/layanan.html#layanan",
+    "/galeri.html#galeri",
+    "/area-layanan.html#area-layanan",
+    "/faq.html#faq",
+  ];
+
+  const desktopHrefs = await page
+    .locator(".header-nav a[href]")
+    .evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("href")),
+    );
+  expect(desktopHrefs).toEqual(expectedHrefs);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator(".nav-burger").click();
+  const mobileHrefs = await page
+    .locator('#mobile-menu a.mobile-menu-link[href^="/"]')
+    .evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("href")),
+    );
+  expect(mobileHrefs).toEqual(expectedHrefs);
 });

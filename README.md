@@ -98,7 +98,7 @@ Melayani area **Mranggen**, **Demak**, **Kebonbatur**, **Semarang**, serta rute 
 | `npm run e2e`          | E2E Chromium mobile + desktop (memakai Chrome lokal)                              |
 | `npm run e2e:all`      | E2E semua project, termasuk WebKit mobile Safari                                  |
 | `npm run images`       | Membuat varian WebP dan AVIF dari JPG galeri (butuh `sharp`)                      |
-| `npm run validate:seo` | Memvalidasi JSON-LD, FAQ, galeri, dan tarif di `index.html`                       |
+| `npm run validate:seo` | Memvalidasi JSON-LD, metadata unik, canonical, sitemap, dan robots di 7 halaman  |
 | `npm run perf`         | Mengukur LCP/CLS build produksi di desktop dan mobile                             |
 | `npm run lint`         | Menjalankan linter ESLint dan type-checking TypeScript                            |
 | `npm run check`        | Rangkaian lengkap: lint, unit test, validasi SEO, dan build                       |
@@ -114,7 +114,10 @@ jasa-angkut-slamet/
 ├── e2e/
 │   └── home.spec.ts        # Smoke test Playwright (copy, overflow, tap target, modal)
 ├── public/                 # Asset statis publik (gambar teroptimasi, ikon, manifest)
-│   └── fonts/              # Font Manrope & Inter (self-hosted, latin + latin-ext)
+│   ├── fonts/              # Font Manrope & Inter (self-hosted, latin + latin-ext)
+│   ├── privasi.html        # Halaman kebijakan privasi
+│   ├── robots.txt          # Arahkan crawler ke sitemap XML
+│   └── sitemap.xml         # Daftar 7 canonical URL yang boleh diindeks
 ├── src/
 │   ├── components/
 │   │   └── MapCanvas.tsx   # Peta MapLibre, rute, dan marker
@@ -141,7 +144,12 @@ jasa-angkut-slamet/
 │   ├── App.tsx             # Root component
 │   └── main.tsx            # Entry point aplikasi
 ├── .gitignore              # Daftar berkas/folder yang diabaikan Git
-├── index.html              # Template HTML utama
+├── index.html              # Template HTML homepage
+├── hitung-tarif.html       # Halaman khusus kalkulator tarif
+├── layanan.html            # Halaman khusus layanan
+├── galeri.html             # Halaman khusus galeri armada
+├── area-layanan.html       # Halaman khusus area layanan
+├── faq.html                # Halaman khusus tanya jawab
 ├── package.json            # Konfigurasi paket & dependensi
 ├── playwright.config.ts    # Konfigurasi Playwright (testDir, mobile Chrome, web server)
 ├── tsconfig.json           # Konfigurasi TypeScript
@@ -162,9 +170,10 @@ npm test
 **E2E (Playwright)** menjalankan alur nyata di Chromium mobile dan desktop:
 tampilan 320px tanpa overflow, target sentuh 44px, menu mobile, modal galeri,
 pencarian alamat dengan keyboard, status kosong/gagal pencarian, pesan lokasi
-inline, serta wizard lengkap sampai tautan WhatsApp. Peta, OSRM, dan Nominatim
-distub pada level network agar tes tetap cepat dan tidak bergantung layanan
-pihak ketiga.
+inline, wizard lengkap sampai tautan WhatsApp, metadata unik tiap halaman
+khusus, serta navigasi desktop/mobile yang mendarat tepat di section tujuan.
+Peta, OSRM, dan Nominatim distub pada level network agar tes tetap cepat dan
+tidak bergantung layanan pihak ketiga.
 
 ```bash
 npm run e2e        # Chromium mobile + desktop, memakai Chrome lokal
@@ -190,7 +199,9 @@ angka produksi tetap perlu dicek dengan Lighthouse/Web Vitals setelah deploy.
 **Validasi structured data** memastikan semua blok JSON-LD valid, tipe yang
 dibutuhkan ada, FAQ memiliki jawaban, galeri memiliki dimensi gambar, dan
 `priceRange` memakai tarif nyata (Rp 6.500/km + setoran Rp 50.000), bukan angka
-karangan:
+karangan. Validator juga memeriksa title, description, canonical, hreflang,
+Open Graph, Twitter Card, dan `robots` pada ketujuh halaman, memastikan tidak
+ada metadata ganda, serta mencocokkan sitemap dengan canonical yang ada:
 
 ```bash
 npm run validate:seo
@@ -226,6 +237,33 @@ dipertahankan untuk browser lama, sitemap gambar, dan pratinjau sosial.
   Untuk mengaktifkan pengiriman, set `VITE_ANALYTICS_ENDPOINT` saat build.
 - CI di `.github/workflows/ci.yml` menjalankan lint, unit test, validasi JSON-LD,
   build, lalu E2E Chromium + WebKit pada setiap push/PR ke `main`.
+
+---
+
+## 🔗 Halaman Khusus dan Sitemap
+
+Menu utama tetap memakai label yang sama, tetapi sekarang mengarah ke URL
+tersendiri supaya crawler melihat halaman yang benar-benar dapat dirayapi.
+Seluruh halaman memakai komponen React, stylesheet, gambar, dan tarif yang
+persis sama dengan homepage; yang berbeda hanya title, meta description,
+canonical, hreflang, dan metadata sosial.
+
+| URL | Section | Title |
+| --- | --- | --- |
+| `/` | `#beranda` | Jasa Angkut Slamet \| Jasa Angkut Barang & Pindahan Demak Semarang |
+| `/hitung-tarif.html` | `#pesan` | Hitung Tarif Angkut \| Jasa Angkut Slamet |
+| `/layanan.html` | `#layanan` | Layanan Angkut Barang & Pindahan \| Jasa Angkut Slamet |
+| `/galeri.html` | `#galeri` | Galeri Armada & Dokumentasi Angkut \| Jasa Angkut Slamet |
+| `/area-layanan.html` | `#area-layanan` | Area Layanan Demak, Semarang & Kabupaten Semarang \| Jasa Angkut Slamet |
+| `/faq.html` | `#faq` | FAQ Tarif & Pemesanan Angkut \| Jasa Angkut Slamet |
+| `/privasi.html` | — | Kebijakan Privasi & Ketentuan \| Jasa Angkut Slamet |
+
+Ketujuh URL tersebut tercantum di `/sitemap.xml` dan diperbolehkan oleh
+`robots.txt`. Karena isi section pada kelima halaman khusus identik dengan
+homepage, Google dapat memilih salah satu versi sebagai halaman utama saat
+mengindeks. Google juga yang menentukan apakah sitelinks ditampilkan; tautan
+dari navigasi dan sitemap hanya membuat struktur situs mudah dipahami, bukan
+perintah untuk memaksa sitelinks.
 
 ---
 
